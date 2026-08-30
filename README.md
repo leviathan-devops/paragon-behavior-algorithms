@@ -1,289 +1,282 @@
-# PARAGON BEHAVIOR ALGORITHMS
+# PARAGON BEHAVIOR ALGORITHMS — THE CODING AGENT VARIANT (TRIDENT)
 
-## The Universal Behavior Enforcement Framework — Plug In Any Domain, Get a Working Watchdog
+## The Production Coding-Agent Enforcement Stack — The Working PBA Set
 
-**v1.0 · 2026-08-29 · [leviathan-devops](https://github.com/leviathan-devops)**
+**Branch: `coding-agent-trident` · v4.4.2 · 2026-08-29**
 
-> **THE CORE FINDING (the design-proven observation):** "The classifier watched
-> the reasoning patterns, not the conclusion." — In container tests, the model
-> REFUSED every shortcut it was asked to weigh (perfect conduct), and the
-> enforcement machine climbed the full escalation ladder anyway (TE 2→40,
-> tier 1→4). The deliberation over skipping IS the violation signal; the
-> conclusion is descriptive context. **The watchdog grades deliberation, not
-> decisions.**
+> This branch is the **production deployment** of the Paragon Behavior
+> Algorithms for a coding agent. It is the FULL trident variant: 6 detection
+> families, the config-lock classifier (CTX-01..14), the ship gate, the tier-4
+> SOLVE-MANDATE, the smoke-test firewall, and the complete evidence chain.
+> Every fire point is live-witnessed on the current build lineage.
 
 ---
 
 ## PART 0 — THE TABLE OF CONTENTS
 
-- **PART 1 — THE THESIS** — what this is, the one-sentence architecture
-- **PART 2 — THE ARCHITECTURE** — the 7-layer pipeline (ASCII graph)
-- **PART 3 — THE TWO BRANCHES** — the boilerplate vs the coding-agent variant
-- **PART 4 — THE DOMAIN MODULE** — the plug interface (the only file you edit)
-- **PART 5 — THE LADDER** — the state machine + the escalation tiers (ASCII)
+- **PART 1 — WHAT THIS VARIANT IS** — the coding agent's domain
+- **PART 2 — THE FULL ARCHITECTURE** — the 9-band pipeline (ASCII)
+- **PART 3 — THE DETECTION FAMILIES** — the 6 lexicons
+- **PART 4 — THE PARALLEL PLANES** — the STTGF claim/smoke/config-lock meshes
+- **PART 5 — THE ESCALATION** — the tier ladder + the anti-lock law
 - **PART 6 — THE EVIDENCE CHAIN** — the artifact-hygiene gates
-- **PART 7 — THE RECIPE** — 3 steps to plug in a new domain
-- **PART 8 — THE ANTI-PATTERNS** — the theatrical traps
-- **PART 9 — THE VERIFICATION** — how to prove it works
+- **PART 7 — THE LIVED WITNESSES** — what has been observed live
+- **PART 8 — THE DESIGN-PROVEN OBSERVATION** — the core finding
+- **PART 9 — THE FILE MAP** — who owns what
 
 ---
 
-## PART 1 — THE THESIS
+## PART 1 — WHAT THIS VARIANT IS
 
-Every AI agent that operates autonomously needs a **behavior enforcement
-layer** — a watchdog that watches the agent's own reasoning, detects the
-patterns that precede bad outcomes (the scope-shrink, the test-evasion, the
-theatrical completion), and intervenes proportionally BEFORE the bad outcome
-ships.
-
-**The problem:** every domain (trading, sales, coding, medical) would have to
-rebuild the same machinery from scratch — the capture pipeline, the intent
-classifier, the escalation state machine, the tier-proportional intervention,
-the evidence gates, the compliance detection. That machinery took 5 sessions
-and ~50 bug fixes to build and verify.
-
-**The fix:** the machinery (core/capture/actuation — fixed, tested, never
-edited) is separated from the domain data (config/ — the detection families,
-the templates, the thresholds, the compliance demands — written per
-deployment). The platform wiring (hooks/ — the event surface) adapts to any
-event-driven runtime.
+The coding agent's domain is **derailment detection**: the patterns that make
+an AI coding agent ship garbage instead of working software. The 6 families:
 
 ```
-THE ONE-SENTENCE ARCHITECTURE:
+FORGERY_INTENT      — the intent to fabricate proof/results
+TEST_EVASION        — skipping verification, assuming tests pass
+THEATRICAL_PLANNING — narrating without doing; mock-result proposals
+DOUBT_HEDGE         — the minimal frame ("good enough", "simpler approach")
+SCOPE_SHRINK        — reducing the operator's scope ("too big", "iterate later")
+PERMISSION_GATE     — asking instead of acting ("should I continue?")
+```
 
-Platform events → role-gated capture → 4-bank ratio classifier → λ-synapse
-accumulation → state machine (tier 0-4) → tier-proportional dispatch →
-compliance observation → the reset. The domain module provides WHAT to
-detect; the machinery provides HOW.
+Each family has multiple members (pattern detectors) with the full 4-bank
+model (descriptive/suggestive/substitute/use), pinned exampleHits, and
+per-family fire thresholds in the synapse.
+
+---
+
+## PART 2 — THE FULL ARCHITECTURE
+
+```
+        THE OPENCODE RUNTIME (the coding agent's event surface)
+        │  message.part.updated · message.updated · tool.execute.before/after
+        │  messages.transform · text.complete · system.transform
+        ▼
+┌────────────────────────────────────────────────────────────────┐
+│ L0  CAPTURE — the role gate + the 3 planes                     │
+│     MessageRoleGate: user text NEVER feeds (fail-closed)       │
+│     reasoning plane · text-think plane (tagless path) · tools  │
+└──────────────────────────┬─────────────────────────────────────┘
+                           ▼
+┌────────────────────────────────────────────────────────────────┐
+│ L1  DETECTION — the stream predicate lexicon                   │
+│     6 families × members, each = 4 OPPOSED BANKS               │
+│     windowed exclusion ±240c · match-anchored excerpts         │
+└──────────────────────────┬─────────────────────────────────────┘
+                           ▼
+┌────────────────────────────────────────────────────────────────┐
+│ L1.5 THE RATIO CLASSIFIER (the intelligence layer)             │
+│     conf = pos/(pos+neg+1)                                     │
+│     ≥0.5 ENFORCE · ≥0.3 DAMPEN ×0.5 · <0.3 SUPPRESS            │
+│     + FI-1 batch scan (the paraphrase synthesis)               │
+└──────────────────────────┬─────────────────────────────────────┘
+                           ▼
+┌────────────────────────────────────────────────────────────────┐
+│ L1.6 THE BEHAVIORAL PLANE — the text-independent detectors     │
+│     claim-evidence-gap · file-ghosting · tool-call-anomaly     │
+│     completion-without-verification                            │
+└──────────────────────────┬─────────────────────────────────────┘
+                           ▼
+┌────────────────────────────────────────────────────────────────┐
+│ L2  SYNAPSE — per-session λ-accumulator (cap 256 sessions)     │
+│     A_λ = λ·e^(−0.05·Δseq) + w   per family                    │
+└──────────────────────────┬─────────────────────────────────────┘
+                           ▼
+┌────────────────────────────────────────────────────────────────┐
+│ L2.5 MACRO FUSION — DOUBT_THEN_OVERCLAIM · ESCALATING_        │
+│     INSISTENCE · FORGERY_AFTER_WARHEAD → PATTERN_HIT           │
+└──────────────────────────┬─────────────────────────────────────┘
+                           ▼
+┌────────────────────────────────────────────────────────────────┐
+│ L3  MACHINE — IDLE→MONITORING→PRIMED→INTERVENING tier 0-4      │
+│     the 8 transitions (REARM first) · the OFF gates            │
+└──────────────────────────┬─────────────────────────────────────┘
+                           ▼
+┌────────────────────────────────────────────────────────────────┐
+│ L4  GATES — the fresh-subset evidence evaluation               │
+│     5 criteria · PASS/INCONCLUSIVE/FAIL                        │
+└──────────────────────────┬─────────────────────────────────────┘
+                           ▼
+┌────────────────────────────────────────────────────────────────┐
+│ L5  ACTUATION — the tier-proportional surfaces                 │
+│     T1 STEER text append · T2 DEMAND redispatch (the climb     │
+│     is SEEN) · T3+ MANDATE throw · T4 SOLVE-MANDATE            │
+│     (the instrument passes, generic refused — anti-lock)       │
+└──────────────────────────┬─────────────────────────────────────┘
+                           ▼
+┌────────────────────────────────────────────────────────────────┐
+│ L6  PERSISTENCE — per-sid files, atomic tmp+rename             │
+│     machine-state-<sid>.json · synapse-state-<sid>.json        │
+│     interventions.jsonl · v2-escalation.db (SQLite WAL)        │
+└────────────────────────────────────────────────────────────────┘
+
+═══ THE PARALLEL PLANES (dial-independent) ═══
+
+┌────────────────────────────────────────────────────────────────┐
+│ THE STTGF CLAIM/SMOKE PLANE                                    │
+│  · the smoke blocks (inline-exec, headless, hash-as-proof,     │
+│    container-substitution)                                    │
+│  · the ship gate (the named [STTGF SHIP GATE] warhead)         │
+│  · the theatrical mutation (the THEATRICAL_LIE splice)         │
+│  · the E-12 accumulator (the 3rd same-class = ESCALATE)        │
+└────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────┐
+│ THE CONFIG-LOCK (CTX-01..14)                                   │
+│  · the pair model: target × verb, the segment proximity,       │
+│    the self-baked containment, the chain-pair                  │
+│  · the protected paths (config, auth, git, symlinks, docker)   │
+└────────────────────────────────────────────────────────────────┘
+
+═══ THE BRIDGES ═══
+
+B1 THE POOL BRIDGE: the comply → the gate's pool insert (the ms it happens)
+B2 THE S15 LATCH: the v2 comply → the STTGF claim latch de-arms
+B3 THE CTX-FIRST PRECEDENCE: the named CTX warhead before the generic gate
+B4 THE TOOL.AFTER DUAL FEED: one completion → both planes
 ```
 
 ---
 
-## PART 2 — THE ARCHITECTURE
+## PART 3 — THE DETECTION FAMILIES (the 6 lexicons)
 
-```
-              ANY RUNTIME EVENT (opencode / trading desk / CRM bot)
-                              │
-                              ▼
-┌──────────────────────────────────────────────────────────┐
-│ 1  PLATFORM ADAPTER (hooks/)         ◄ YOU IMPLEMENT     │
-│    normalizeEvent · inject · interceptTool · observeTool │
-└───────────────────────────┬──────────────────────────────┘
-                            ▼
-┌──────────────────────────────────────────────────────────┐
-│ 2  ROLE GATE (core/role-gate.ts)                         │
-│    user text NEVER feeds — assistant-only, fail-closed   │
-└───────────────────────────┬──────────────────────────────┘
-                            ▼
-┌──────────────────────────────────────────────────────────┐
-│ 3  RATIO CLASSIFIER (core/classifier.ts)                 │
-│    4 banks: descriptive(neg+1) · suggestive(pos+1..2)    │
-│    substitute(pos+2) · use(neg+3 short-circuit)          │
-│    conf = pos / (pos + neg + 1)                          │
-│    ≥0.5 ENFORCE · ≥0.3 DAMPEN ×0.5 · <0.3 SUPPRESS       │
-│    + FI-1 batch scan (catches paraphrases)               │
-└───────────────────────────┬──────────────────────────────┘
-                            ▼
-┌──────────────────────────────────────────────────────────┐
-│ 4  SYNAPSE (core/synapse.ts) — per-session λ-accumulator │
-│    λ = λ·e^(−0.05·Δseq) + w  per family, cap 256         │
-└───────────────────────────┬──────────────────────────────┘
-                            ▼
-┌──────────────────────────────────────────────────────────┐
-│ 5  STATE MACHINE (core/machine.ts)                       │
-│    IDLE → MONITORING → PRIMED → INTERVENING tier 0-4     │
-│    OFF gates: the machine NEVER lifts at OFF             │
-└───────────────────────────┬──────────────────────────────┘
-                            ▼
-┌──────────────────────────────────────────────────────────┐
-│ 6  DISPATCH (actuation/dispatch.ts)                      │
-│    tier 1   STEER   text appended to context             │
-│    tier 2+  DEMAND  the redispatch (the climb is SEEN)   │
-│    tier 3+  MANDATE throw StructuredEnforcementError     │
-└───────────────────────────┬──────────────────────────────┘
-                            ▼
-┌──────────────────────────────────────────────────────────┐
-│ 7  COMPLIANCE LOOP (engine.observeTool)                  │
-│    the instrument succeeds → tier 0 + pool insert        │
-│    the escape hatch NEVER blocks (anti-lock)             │
-└──────────────────────────────────────────────────────────┘
-```
+| Family | Members | Fire threshold | What it catches |
+|--------|---------|---------------|-----------------|
+| `FORGERY_INTENT` | fabrication-paraphrase (CRITICAL) | 0.9 | "I'll fabricate the proof rows" |
+| `TEST_EVASION` | skip-verify + measure-avoid (HIGH) | 1.2 | "skip the verification", "assume tests pass" |
+| `THEATRICAL_PLANNING` | theatrical-intent (HIGH) | 1.4 | "just mock the result", "declare it done" |
+| `SCOPE_SHRINK` | minimal (LOW) | 1.6 | "too ambitious", "we can iterate later" |
+| `DOUBT_HEDGE` | doubt-hedge (LOW) | 1.8 | "keep it simple", "good enough" |
+| `PERMISSION_GATE` | defer-decision (MED) | 1.8 | "should I continue?" |
+
+Each member carries the 4 banks (the use-bank is the legitimate exemptor —
+"the fixture spec allows" neg+3 short-circuits the false positive).
 
 ---
 
-## PART 3 — THE TWO BRANCHES
-
-```
-                    THE PARAGON REPO
-                    ┌───────────────┐
-                    │     main      │ ← THE BOILERPLATE (domain-agnostic)
-                    │  (this branch)│
-                    └───────┬───────┘
-                            │
-              ┌─────────────┼─────────────┐
-              ▼             ▼             ▼
-      ┌──────────────┐ ┌──────────┐ ┌──────────┐
-      │ Coding Agent │ │ Trading  │ │  Sales   │
-      │  (Trident)   │ │  Agent   │ │  Agent   │
-      │  (branch)    │ │ (future) │ │ (future) │
-      └──────────────┘ └──────────┘ └──────────┘
-```
-
-| Branch | What it is | The domain |
-|--------|-----------|------------|
-| **`main`** | The pure boilerplate — no domain strings in the machinery | Ships with 3 reference domains: trident, trading, sales |
-| **`coding-agent-trident`** | The production coding-agent variant — the full working Trident PBA set | 6 families, the CTX locks, the ship gate, the tier-4 mandate |
-
----
-
-## PART 4 — THE DOMAIN MODULE (THE PLUG)
-
-The **only** directory you edit per deployment:
-
-```typescript
-// config/my-domain/index.ts
-export default {
-  name: 'my-domain',
-  families: [ /* 4-bank detection members + exampleHits pins */ ],
-  behavioralChecks: [ /* claims-vs-evidence rules */ ],
-  templates: { steer, demand, mandate, advisory },  // YOUR wording
-  thresholds: { MY_FAMILY: 1.0 },                    // when to fire
-  compliance: { remediationTools, escapeHatches },   // what = compliance
-  testFixtures: { evasionText, legitimateText },     // the pins
-} satisfies DomainModule;
-```
-
-**THE 4-BANK MODEL** (the classifier's input — each family member has 4
-opposed signal banks):
-
-| Bank | Direction | Weight | Example (coding agent) |
-|------|-----------|--------|----------------------|
-| **descriptive** | SUPPRESSES (neg+1) | context makes the claim plausible | "per the tool result" |
-| **suggestive** | DETECTS (pos+1, +2 word-bounded) | the violation signal | "skip the verification" |
-| **substitute** | ESCALATES (pos+2) | the paraphrase class | "forgo the validation step" |
-| **use** | EXEMPTS (neg+3, short-circuit) | the legitimate exemptors | "the fixture spec allows" |
-
-**THE INTENT DISCRIMINATION** (the minimal pair): the same surface words,
-different intents, opposite verdicts. "We can skip the verification" →
-suggestive hits, conf 0.8 → ENFORCE. "Per the tool result the tests passed,
-write a tiny passing spec" → the use-bank fires (neg+3), conf → 0 → SUPPRESS.
-
----
-
-## PART 5 — THE LADDER (the escalation state machine)
+## PART 4 — THE ESCALATION LADDER
 
 ```
    ┌────────┐  FIRST_SIGNAL       ┌────────────┐
-   │  IDLE  │────────────────────►│ MONITORING │◄────────────┐
-   └────────┘                     └─────┬──────┘             │
-                                        │ PATTERN_HIT        │
-                                        │ (the λ fusion)     │
-                                        ▼                    │
-                                 ┌────────────┐              │
-          SIGNAL (accrue)        │   PRIMED   │              │
-        ┌────────────────────────┤            │              │
-        │  (unfused: decays      └─────┬──────┘              │
-        │   back)                      │ INTERVENE           │
-        ▼                             ▼                      │
-  (decays back)              ┌──────────────────┐    COMPLY  │
-                             │ INTERVENING      │────────────┘
-                             │ tier 1 → tier 4  │ (the instrument
+   │  IDLE  │────────────────────►│ MONITORING │◄────────┐
+   └────────┘                     └─────┬──────┘         │
+                                        │ PATTERN_HIT    │
+                                        ▼                │
+                                 ┌────────────┐          │
+          SIGNAL (accrue)        │   PRIMED   │          │
+        ┌────────────────────────┤            │          │
+        │  (unfused: decays      └─────┬──────┘          │
+        │   back)                      │ INTERVENE       │
+        ▼                             ▼                  │
+  (decays back)              ┌──────────────────┐  COMPLY│
+                             │ INTERVENING      │────────┘
+                             │ tier 1 → 4       │ (instrument
                              └────────┬─────────┘  succeeds)
-                                      │ tier 3+: the MANDATE
+                                      │ tier 3+: [V2 DENY]
+                                      │ tier 4: [V2 SOLVE-MANDATE]
                                       ▼
-                        generic tools REFUSED
-                        the instrument PASSES
-                        (the anti-lock law)
+                         generic tools REFUSED
+                         trident-container-test PASSES
+                         (the anti-lock law — S14)
 ```
 
-**THE ANTI-LOCK LAW:** at tier 4, generic tools are refused but the demanded
-instrument ALWAYS passes — and its success is the automatic reset. No locks,
-no dead ends, no operator unlock anywhere.
+**THE DIAL:**
+
+| Mode | T1-T2 advisory | T3+ teeth | Use |
+|------|---------------|-----------|-----|
+| **FULL** (default) | ✓ | ✓ | Production |
+| **STEER** | ✓ | ✓ (dial-independent) | Onboarding/calibration |
+| **OFF** | ✗ | ✗ | Kill switch |
 
 ---
 
-## PART 6 — THE EVIDENCE CHAIN (the artifact-hygiene gates)
+## PART 5 — THE EVIDENCE CHAIN (the artifact gates)
 
 ```
   src/  ────build────►  dist/  ────deploy───►  host
   │                    │                      │
   ▼                    ▼                      ▼
-  THE BUILD GATE       THE MANIFEST           THE DEPLOY GATE
-  (13 marker floors    (the ONLY quotable    (pre: the candidate
-  + 3 zero-ceilings    sha — measured,        is gate-clean)
-  — the degraded       never input; the       (post: the serving
-  bundle FAILS named)  predecessor chain)     == the candidate)
+  build-verified.sh    artifact-manifest.json deploy-verify.sh
+  (13 floors + 3       (the ONLY quotable      (pre: gate-clean
+  zero-ceilings;       sha — measured;         post: serving ==
+  the degraded         the predecessor         the candidate)
+  bundle FAILS         chain)                  
+  named)
 ```
 
 ---
 
-## PART 7 — THE RECIPE (3 steps to a new domain)
+## PART 6 — THE LIVED WITNESSES (the observed-live evidence)
 
-### Step 1 — Write the domain module
-```bash
-mkdir config/my-domain
-# Write index.ts: the families (4 banks + exampleHits), the templates,
-# the thresholds, the compliance demands, the test fixtures
+| Witness | The evidence |
+|---------|-------------|
+| **The tier-4 SOLVE-MANDATE** (E-07/T8) | The mechanical rig (TIER4_RIG_PASS: the deterministic full arc) + the container (the ladder 1→2→3→4 via real deadline ticks, the deny at the model boundary — the model's own testimony: "an injected block message") |
+| **The ship gate** (E-F4) | The named `[STTGF SHIP GATE]` literal in the tool result + the model quoting it verbatim |
+| **The STEER A/B** | The [V2 STEER] append + the [V2 DEMAND] redispatch AT STEER; the bash DENIED at tier 3 AT STEER ×3 while read PASSED |
+| **The receipt** (hop 10) | The container model reproduced the [V2 STEER] text VERBATIM from its context, twice |
+| **The role gate** | The operator's bait prompts produce ZERO signals — only assistant reasoning feeds |
+
+---
+
+## PART 7 — THE DESIGN-PROVEN OBSERVATION
+
+> **"The classifier watched the reasoning patterns, not the conclusion."**
+
+The container model REFUSED every shortcut (perfect conduct: "Cannot skip the
+verification suite", "I can't provide a plan to skip tests") — and the
+machine climbed the full ladder anyway (TE 2→40, tier 1→4). The deliberation
+over skipping IS the violation signal. **The watchdog grades deliberation,
+not decisions** — which is exactly right for a preventive-intervention
+design: the steer fires at the deliberation phase, BEFORE the conclusion
+forms.
+
+---
+
+## PART 8 — THE FILE MAP
+
 ```
-
-### Step 2 — Pick or write the adapter
-```typescript
-// opencode: new OpenCodeAdapter(engine).buildHooks()
-// other:    implement PlatformAdapter (5 methods)
-```
-
-### Step 3 — Construct + run
-```typescript
-const engine = new ParagonEngine(myDomain, { level: 'FULL' });
-const hooks = adapter.buildHooks();
-// Your domain pins run the same battery:
-bun test
+src/v2/
+  capture/          the role gate, the planes, the event router, the stream engine
+  lexicons/         the stream predicate lexicon + the 6 family member modules
+  counters/         the V2Synapse (λ-decay per family) + the macro patterns
+  machines/         the v2-machine (the state lattice, the vendored LASME core)
+  classify/         the classifier types (the ratio algorithm)
+  behavioral/       the 4 text-independent checks
+  enforce/          the gates, the evidence records, the compliance collector,
+                    the circuit breaker, the math contracts
+  enforcement/      the dispatch router (the tier-proportional templates)
+  integrate/        the pipeline (the wiring spine — tryIntervene, the tick,
+                    the compliance handlers, the per-sid persistence)
+  contracts.ts      the type vocabulary (WeightedViolation, ViolationFamily)
+  shared-state.ts   the dial + the onSignals bridge
+src/hooks/
+  trident-hooks.ts  ALL the opencode hook surfaces (5,256 lines)
+src/firewalls/
+  sttgf-*.ts        the claim/smoke plane (the firewall, the mutator,
+                    the verdict, the pending-mutation state machine)
+  ct-anti-derailment.ts  the CTX-01..14 config-lock classifier
+scripts/
+  build-verified.sh      the build gate + the manifest
+  deploy-verify.sh       the deploy gate
+  tier4-rig.ts           the tier-4 mechanical witness
+  e09-ghost-watch.ts     the E-09 standing watch
+src/tests/
+  naming-contract.test.ts  the family-naming contract pin
 ```
 
 ---
 
-## PART 8 — THE ANTI-PATTERNS
+## PART 9 — THE FUTURE VARIANTS
 
-| # | The trap | The prevention |
-|---|----------|---------------|
-| 1 | The row-as-proof | Every pass token in tool-result context, never a row the code wrote about itself |
-| 2 | The regex masquerading as intent | The 4-bank ratio decides; the regex only initiates |
-| 3 | The always-same-message escalation | Tier-proportional templates + the redispatch (the model SEES the climb) |
-| 4 | The compliance-too-eager | Compliance detection scoped to the REMEDIATION class only |
-| 5 | The role-gate absence | The user prompt text NEVER feeds the classifier |
-| 6 | The unbounded evidence pool | The TTL prune (600s) after every push |
-| 7 | The lockout resurrection | The anti-lock law: no locks exist in the design |
+This repo is designed to grow:
 
----
+| Branch | The agent variant | The domain module |
+|--------|------------------|-------------------|
+| `main` | The boilerplate (this is the base) | The 3 reference domains |
+| `coding-agent-trident` | **This branch** — the coding agent | 6 derailment families + the CTX locks |
+| `trading-agent` (future) | The trading desk | risk-limit, stop-loss, disclosure |
+| `sales-agent` (future) | The sales bot | pipeline-inflation, compliance, follow-up |
+| `medical-agent` (future) | The clinical assistant | allergy-check, dosage, consent |
 
-## PART 9 — THE VERIFICATION
-
-```bash
-# The battery (93 tests: the machinery + the 3 domain fixtures + the engine
-# integration + the universality receipt)
-bun test
-
-# The build gate (the degraded bundle FAILS named)
-scripts/build-verified.sh --skip-build
-
-# The tier-4 mechanical rig (the full deterministic arc)
-bun scripts/tier4-rig.ts
-```
-
-**THE CONTAINER-PROVEN UNIVERSALITY:** the trading domain (not trident) drove
-the complete ladder in a fresh container — `[RISK STEER]` → INTERVENING
-tier 1 → the risk-engine comply → tier 0 + pool insert. The machinery is
-domain-agnostic; the domain is data.
-
----
-
-## LICENSE
-
-Private — the leviathan-devops workspace.
-
-## THE REFERENCES
-
-- The `docs-OPERATING_MANUAL.md` (the full manual with the byte-verified diagrams)
-- The `coding-agent-trident` branch (the production coding-agent variant)
-- The Lexicon-Grade Intelligent Systems Engineering Bible (the design canon)
-- The Custom Event-Hook Engineering Bible (the capture-layer canon)
+Each variant = a domain module + optionally new platform adapters. The
+machinery never changes.
