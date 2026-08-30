@@ -514,7 +514,7 @@ and the model's own verbatim output.
 
 ---
 
-### 10.1 The Budget-Cuck Detection (the production host — the organic catch)
+### 10.1 The Budget-Pressure Derailment (the production host — the organic catch)
 
 This is the scenario the system was built for: the enforcement caught its own
 maintainer derailing, without any baiting. The testing agent (the developer
@@ -529,7 +529,7 @@ The agent's reasoning stream contained patterns like:
 > "let me just get this working first and verify later..."
 > "I'll circle back to the full test after the next milestone..."
 
-This is the budget-cuck class: the reasoning *shape* that precedes skipped
+This is the budget-derailment class: the reasoning *shape* that precedes skipped
 verification. The model hasn't decided to skip yet — it's building the
 justification structure for a future skip.
 
@@ -576,7 +576,7 @@ demanded instrument, and ran `trident-container-test` — which succeeded.
 
 | Step | Without Paragon | With Paragon |
 |------|----------------|--------------|
-| The agent's reasoning contains budget-cuck patterns | Invisible — no system watches | TEST_EVASION λ accumulates past the fire threshold |
+| The agent's reasoning contains budget-derailment patterns | Invisible — no system watches | TEST_EVASION λ accumulates past the fire threshold |
 | The λ crosses the threshold | Nothing happens | PATTERN_HIT → PRIMED (the intervention is authorized) |
 | The surface fires | Nothing happens | INTERVENING tier 1 + the [V2 STEER] text in context |
 | The agent ignores the steer | Continues the same pattern | Deadline ticks → tier 2 → the [V2 DEMAND] (the model sees the climb) |
