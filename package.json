@@ -1,0 +1,23 @@
+{
+  "name": "paragon-v2-behavior-algorithms",
+  "version": "1.0.0",
+  "description": "The universal behavior enforcement boilerplate — plug in any domain's detection families, behavioral checks, templates, and compliance demands.",
+  "type": "module",
+  "main": "index.ts",
+  "types": "index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./core": "./core/index.ts",
+    "./capture": "./capture/index.ts",
+    "./actuation": "./actuation/index.ts",
+    "./config": "./config/index.ts",
+    "./hooks": "./hooks/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
