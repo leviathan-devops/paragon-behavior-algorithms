@@ -214,6 +214,9 @@ const ADVISORY = (patternId: string, summary: string): string =>
 
 const tridentDomain: DomainModule = {
   name: 'trident',
+  brandPrefix: 'TRIDENT',
+  instrumentName: 'trident-container-test',
+  instrumentTier3: 'trident-problem-solving',
   families: FAMILIES,
   behavioralChecks: [checkClaimEvidenceGap, checkCompletionWithoutVerification],
   templates: { steer: STEER, demand: DEMAND, mandate: MANDATE, advisory: ADVISORY },

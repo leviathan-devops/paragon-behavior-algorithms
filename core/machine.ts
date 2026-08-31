@@ -128,9 +128,12 @@ const TRANSITIONS: TransitionDef[] = [
       const verb = verbForSurface(r.level, surfaceOfEvent(e));
       if (verb === null) return r;
       const nextSeq = r.seq + 1;
+      // THE SKIP-TIER (the escalation memory): the repeat offender starts higher
+      const esc = r.escalationCount ?? 0;
+      const startTier = esc >= 3 ? 3 : esc >= 2 ? 2 : 1;
       return withTriad({
         ...r,
-        tier: 1 as const,
+        tier: Math.max(1, startTier) as BehaviorRecord['tier'],
         lastComplianceVerified: false,
         complianceDeadlineSeq: nextSeq + ESCALATION_DEADLINE_WINDOW,
         directives: [...r.directives, { seq: nextSeq, verb, patternOrMember:
@@ -139,17 +142,24 @@ const TRANSITIONS: TransitionDef[] = [
       }, e);
     },
   },
-  // ── 6. COMPLY (the reset) ──
+  // ── 6. COMPLY (the reset — the compliance quality tracks the instrument) ──
   {
     id: 'comply', event: 'COMPLIANCE_VERIFIED', from: ['INTERVENING'], to: 'MONITORING',
     guard: () => ({ allowed: true }),
-    apply: (r, e) => withTriad({
-      ...r,
-      tier: 0 as const,
-      denialCount: 0,
-      lastComplianceVerified: true,
-      complianceDeadlineSeq: null,
-    }, e),
+    apply: (r, e) => {
+      const instrument = typeof e.payload['instrument'] === 'string' ? e.payload['instrument'] : 'unknown';
+      const isGenuine = instrument === 'trident-problem-solving';
+      const esc = Math.max(0, (r.escalationCount ?? 0) - (isGenuine ? 1 : 0));
+      const probation = isGenuine ? null : r.seq + 1 + Math.floor(ESCALATION_DEADLINE_WINDOW / 2);
+      return withTriad({
+        ...r,
+        tier: 0 as const,
+        denialCount: 0,
+        escalationCount: esc,
+        lastComplianceVerified: true,
+        complianceDeadlineSeq: probation,
+      }, e);
+    },
   },
   // ── 7. ESCALATE (the tier climb) ──
   {
@@ -167,13 +177,25 @@ const TRANSITIONS: TransitionDef[] = [
       }
       return { allowed: true };
     },
-    apply: (r, e) => withTriad({
-      ...r,
-      tier: Math.min(4, r.tier + 1) as BehaviorRecord['tier'],
-      denialCount: r.tier >= 3 ? r.denialCount + 1 : r.denialCount,
-      lastComplianceVerified: false,
-      complianceDeadlineSeq: r.seq + 1 + ESCALATION_DEADLINE_WINDOW,
-    }, e),
+    apply: (r, e) => {
+      const nextTier = Math.min(4, r.tier + 1) as BehaviorRecord['tier'];
+      const nextDenial = r.tier >= 3 ? r.denialCount + 1 : r.denialCount;
+      const nextEsc = nextTier >= 2 ? (r.escalationCount ?? 0) + 1 : (r.escalationCount ?? 0);
+      // THE REPEAT-OFFENDER DEADLINE COMPRESSION:
+      // first escalation (esc <= 1): the full window (5)
+      // second (esc == 2): half (2)
+      // third+ (esc >= 3): the minimum (0)
+      const esc = nextEsc;
+      const window = esc <= 1 ? ESCALATION_DEADLINE_WINDOW : esc === 2 ? 2 : 0;
+      return withTriad({
+        ...r,
+        tier: nextTier,
+        denialCount: nextDenial,
+        escalationCount: nextEsc,
+        lastComplianceVerified: false,
+        complianceDeadlineSeq: r.seq + 1 + window,
+      }, e);
+    },
   },
   // ── 8. COOL (the refractory exit) ──
   {
@@ -219,6 +241,7 @@ export function createInitialRecord(sessionID: string, level: DialLevel): Behavi
     directives: [],
     tier: 0,
     denialCount: 0,
+    escalationCount: 0,
     lastComplianceVerified: null,
     complianceDeadlineSeq: null,
     seq: 0,

@@ -80,6 +80,9 @@ export function checkPromiseCompliance(st: BehavioralState): WeightedViolation |
 
 const salesDomain: DomainModule = {
   name: 'sales',
+  brandPrefix: 'SALES',
+  instrumentName: 'crm-lookup',
+  instrumentTier3: 'crm-lookup',
   families: [CLAIM_FABRICATION, COMPLIANCE_BREACH, FOLLOWUP_EVASION],
   behavioralChecks: [checkPipelineIntegrity, checkPromiseCompliance],
   templates: {

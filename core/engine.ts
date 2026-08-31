@@ -27,7 +27,7 @@ import type { DomainModule, WeightedViolation, BehavioralState,
                BehaviorRecord, EvidenceRecord, GateResult,
                StructuredEnforcementError as SEE } from './types.js';
 import { StructuredEnforcementError } from './types.js';
-import { dispatchDirective, throwMandate,
+import { dispatchDirective, throwMandate, composeAdaptive,
          shouldRedispatch, markDispatched } from '../actuation/dispatch.js';
 
 // ═══ THE SESSION STATE (per-sid — no cross-session bleed) ═══
@@ -325,12 +325,13 @@ export class ParagonEngine {
       void this.collector.recordOffense(
         { family: s.lastPrimedFamily ?? 'signals', excerpt: 'intervene' }, this.seq);
 
-      // The dispatch: the attach is SYNCHRONOUS (the delivery is the load-bearing
-      // act; the gate eval rides as observability — the non-blocking design)
+      // The dispatch: adaptive-primary, domain-fallback
       const family = s.lastPrimedFamily ?? 'signals';
-      const directiveText = s.record.tier >= 2
-        ? this.domain.templates.demand(family, `engine:${this.seq}`)
-        : this.domain.templates.steer(family, `engine:${this.seq}`);
+      const anchor = `engine:${this.seq}`;
+      const adaptive = composeAdaptive(this.domain, family, s.record.tier, anchor, { family, excerpt: family } as unknown as never);
+      const directiveText = adaptive ?? (s.record.tier >= 2
+        ? this.domain.templates.demand(family, anchor)
+        : this.domain.templates.steer(family, anchor));
       attach(directiveText);
       markDispatched(sessionID, s.record.tier);
       void this.collector.recordDispatch({ verb: 'STEER_INJECT', tier: s.record.tier }, this.seq);
@@ -343,19 +344,24 @@ export class ParagonEngine {
       return directiveText;
     }
 
-    // The tier≥3 teeth (the DENY — dial-independent)
+    // The tier≥3 teeth (the DENY — dial-independent) — adaptive via family hint
     if (s.record.tier >= 3 && surface === 'tool-before') {
-      const err = throwMandate(this.domain, s.record.tier);
+      const familyHint = s.lastPrimedFamily ?? this.domain.families[0]?.id.split('.')[0] ?? 'TEST_EVASION';
+      const err = throwMandate(this.domain, s.record.tier, familyHint, {
+        count: (s.record.counters as Record<string, number> | undefined)?.[familyHint] ?? 1,
+      });
       attach(err.message);
       this.emit('deny-throw', { tier: s.record.tier, seq: this.seq });
       return err.message;
     }
 
-    // The escalation redispatch (the DEMAND append on the climb)
+    // The escalation redispatch (the DEMAND append on the climb) — adaptive-primary
     if (s.pendingRedispatch && s.record.state === 'INTERVENING' && surface === 'messages.transform') {
       s.pendingRedispatch = false;
       const family = s.lastPrimedFamily ?? 'signals';
-      const directiveText = this.domain.templates.demand(family, `engine:${this.seq}`);
+      const anchor = `engine:${this.seq}`;
+      const adaptiveRe = composeAdaptive(this.domain, family, s.record.tier, anchor, { family, excerpt: family } as unknown as never);
+      const directiveText = adaptiveRe ?? this.domain.templates.demand(family, anchor);
       attach(directiveText);
       markDispatched(sessionID, s.record.tier);
       void this.collector.recordDispatch({ verb: 'STEER_INJECT', tier: s.record.tier }, this.seq);
@@ -444,12 +450,14 @@ export class ParagonEngine {
 
     // The circuit: when OPEN, only the hatches pass
     if (!this.circuit.allowRequest(toolName)) {
-      return throwMandate(this.domain, 4);
+      const fh = s.lastPrimedFamily ?? this.domain.families[0]?.id.split('.')[0] ?? 'TEST_EVASION';
+      return throwMandate(this.domain, 4, fh);
     }
 
     // The tier≥3 DENY
     if (s.record.tier >= 3) {
-      const err = throwMandate(this.domain, s.record.tier);
+      const fh2 = s.lastPrimedFamily ?? this.domain.families[0]?.id.split('.')[0] ?? 'TEST_EVASION';
+      const err = throwMandate(this.domain, s.record.tier, fh2);
       this.circuit.recordFailure();
       this.emit('tool-denied', { tool: toolName, tier: s.record.tier, seq: this.seq });
       return err;
