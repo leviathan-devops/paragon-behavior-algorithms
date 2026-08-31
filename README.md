@@ -2,7 +2,7 @@
 
 ## The Production Coding-Agent Enforcement Stack — Every Fire Point Live-Witnessed
 
-**Branch: `coding-agent-trident` · v4.4.2 · 2026-08-29 · dist d30a8b21a95cca14**
+**Branch: `main` · v4.4.2 · 2026-08-30 · the adaptive-primary dispatch with the escalation memory**
 
 > **THE DESIGN-PROVEN OBSERVATION** *(from the container test paragon-tier4-ct-20260829, dist d30a8b21, session ses_fb1b51febffeL1E9516FYihfgN)*:
 >
@@ -1015,8 +1015,91 @@ src/tests/
 ## THE REFERENCES
 
 - **The `main` branch** — the universal boilerplate (the domain-agnostic machinery)
+- **The `coding-agent-trident` branch** — the trident coding agent variant (the 24-template adaptive library + the escalation memory)
 - **The `docs-OPERATING_MANUAL.md`** on main (the full manual with the diagrams)
 - The Lexicon-Grade Intelligent Systems Engineering Bible (the design canon)
 - The Custom Event-Hook Engineering Bible (the capture-layer canon)
-- `context_management/WITNESS_LEDGER.md` — the proof-state table
-- `HARDENING_ARTIFACT_AND_WITNESS_L2_SPEC.md` — the hardening spec (1427L)
+- `templates/` — the evidence-chain templates (the marker baseline, the witness ledger, the deploy gate)
+- `docs/` — the ship docs, the specs, the host + the matrix results
+
+---
+
+## PART 16 — THE ADAPTIVE WARHEAD LIBRARY
+
+The static enforcement templates are replaced by a 3-layer adaptive system:
+
+```
+L1 META_LEXICON: the domain families → 6 MacroIntents
+L2 TEMPLATE_MAP: 24 behavior programs (6 macros × 4 tiers)
+L3 FILL SYSTEM: {count} {excerpt} {instrument} {anchor} — the live session state
+```
+
+The model receives a macro-specific behavioral correction with its own words
+quoted back — not a generic debug label. The `resolveWarheadWithLexicon`
+function supports per-domain lexicon merging for the family-name mapping.
+
+---
+
+## PART 17 — THE ESCALATION MEMORY
+
+The minimum-viable-compliance exploit (one battery run → full reset → 10 turns
+of evasion → repeat) is closed. The system remembers.
+
+```
+THE ESCALATE TRANSITION (the repeat-offender deadline compression):
+  first escalation:  deadline = seq + 1 + 5  (the full window)
+  second:            deadline = seq + 1 + 2  (half)
+  third+:            deadline = seq + 1 + 0  (the next tick escalates)
+
+THE COMPLY TRANSITION (the compliance quality):
+  the battery (the minimum viable) → the probation deadline (half the window)
+  the problem-solving (the real artifact) → the clean slate + the count -1
+
+THE INTERVENE TRANSITION (the skip-tier):
+  escalationCount >= 2 → start at tier 2 (the model already had the advisory)
+  escalationCount >= 3 → start at tier 3 (the model ignored both)
+```
+
+The S14 never-lock law holds at every rung: the instrument always passes, the
+comply always resets, and the model is never deadlocked.
+
+---
+
+## PART 18 — THE D-MATRIX (the model-dependence measured)
+
+The family coverage depends on which LLM the enforcement watches. Measured:
+
+| Model | TE rate | SC rate | The tendency |
+|---|---|---|---|
+| Muse Spark 1.2 Free | 4-6/turn | ~0 natural | The refusal reframing funnels all bait toward the TE lane |
+| MiMo V2.5 Free | 5-8/turn | 2-12 under the restatement | The broad emitter — all six families accrue |
+
+**THE COVERAGE-BOUNDARY DOCTRINE:** a model that never emits a family's frames
+is a coverage boundary, not a defect. The enforcement cannot fire on frames the
+model doesn't produce. The member expansion teaches the detector to recognize
+what the model DOES produce. The thresholds never move to compensate.
+
+---
+
+## PART 19 — THE EVIDENCE-CHAIN TEMPLATES
+
+The adopter gets the gates out of the box:
+
+- `templates/marker-baseline.template.json` — the MEASURE-NOT-REMEMBER schema
+- `templates/witness-ledger.template.md` — the fire-point proof-state table
+- `templates/deploy-verify.template.sh` — the pre/post sha-equality gate
+
+THE LAW: measure the floors from YOUR bundle, never remember them. An invented
+marker fails the gate naming it — that is the gate working.
+
+---
+
+## PART 20 — THE UNIVERSALITY SUITE
+
+Per domain (trading/sales/trident): a fresh engine instance per family, the
+family's restatement frames from turn 1, the family-dominant dispatch asserted.
+The suite: 106 pass / 0 fail / 216 expect / 5 files.
+
+The artifact-first comply prescription: the tier-4 mandated instrument produces
+a REAL engineering artifact — the compliance IS the work; the tier reset is the
+byproduct. A prose-only "done" has ZERO effect.
