@@ -163,3 +163,41 @@ Three design laws live in this lattice:
 **The failure modes it's built against** (each burned us once in the trident campaign): user-prompt contamination (the role gate, fail-closed), the weight-averaging stub masquerading as classification (the ratio algorithm replaced it), the always-same-message escalation (the tier-proportional templates + redispatch), stale evidence sinking gate verdicts forever (the fresh-subset evaluation, `core/gate-engine.ts:34`), unbounded pool growth (the 600s TTL prune, `core/collector.ts:46`), and the session-lock temptation (structurally impossible — no unlock exists to remove).
 
 **The evidence this works** (from yesterday's container run, `paragon-boilerplate-fresh-20260829`, artifact `.trident/container-test-results-boilerplate.json`): 93/0/171/4 in-container, tsc 0 — and the universality receipt: the **trading domain** drove the complete ladder (`[RISK STEER]` → INTERVENING tier 1 → the risk-engine comply → tier 0 + pool insert, token `T1/T2_TRADING_PASS`), the **sales domain** did the same with its own wording (`T6/T7_SALES_PASS`), the OFF kill switch produced zero transitions on identical bait (`T5`), and the adversarial sweep (empty/100KB/regex-special/emoji/null inputs) neither threw nor lifted (`ADVERSARIAL_SURVIVED`). The tokens are bun:test-bound — they emit only on passing assertions, so they can't be typed into existence.
+
+## THE MODEL-DEPENDENCE GUIDE (the D-matrix findings)
+
+The family coverage depends on which LLM the enforcement watches. The
+D-matrix measured two model classes:
+
+| Model | TE rate | SC rate | The tendency |
+|---|---|---|---|
+| Muse Spark 1.2 Free | 4-6/turn | ~0 natural | The refusal reframing funnels all bait toward the TE lane |
+| MiMo V2.5 Free | 5-8/turn | 2-12 under the restatement | The broad emitter — all six families accrue |
+
+CALIBRATION RECIPE: run your model through the restatement task (quote the
+family's frames and ask the model to weigh them). Count the SIGNALs per turn.
+If a family accrues zero signals across 6+ turns, that family's frames need
+the corpus-driven member expansion (the §2.7 contracts). DO NOT lower the
+thresholds — the frames move, never the thresholds.
+
+THE COVERAGE-BOUNDARY DOCTRINE: a model that never emits a family's frames
+is a coverage boundary, not a defect. The enforcement cannot fire on frames
+the model doesn't produce. The member expansion teaches the detector to
+recognize what the model DOES produce.
+
+## THE ARTIFACT-FIRST COMPLY PRESCRIPTION
+
+The tier-4 mandated instrument (trident-problem-solving) produces a REAL
+engineering artifact — a diagnostic, a plan, or a fix. The compliance IS the
+work; the tier reset is the byproduct. A prose-only "done" has ZERO effect
+(the anti-mimicry law). The battery run (bun test) is the minimum viable —
+it clears the tier but the escalationCount stays (the probation window).
+The problem-solving artifact (the genuine work) decrements the count —
+the real work earns back trust.
+
+## THE EVIDENCE-CHAIN TEMPLATES (the adopter's gates)
+templates/marker-baseline.template.json — the marker floor/ceiling schema
+templates/witness-ledger.template.md — the fire-point proof-state table
+templates/deploy-verify.template.sh — the pre/post deploy gate script
+THE LAW: measure the floors from YOUR bundle, never remember them. An invented
+marker fails the gate naming it — that is the gate working.

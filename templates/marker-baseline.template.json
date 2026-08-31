@@ -1,0 +1,12 @@
+{
+  "_README": "MEASURE, never remember — every floor from grep -c on YOUR bundle. An invented marker fails the gate naming it. That is the gate working.",
+  "version": 1,
+  "updated": "<ISO-8601>",
+  "source_of_truth": "<the build description>",
+  "min_markers": {
+    "<measured-marker>": "<measured-floor>"
+  },
+  "max_markers": {
+    "<forbidden-string>": 0
+  }
+}

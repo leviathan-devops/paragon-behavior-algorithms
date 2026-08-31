@@ -9,6 +9,7 @@ import { ParagonEngine } from '../core/engine.js';
 import type { BehaviorRecord, EvidenceRecord } from '../core/types.js';
 import tradingDomain from '../config/trading/index.js';
 import salesDomain from '../config/sales/index.js';
+import { dispatchDirective } from '../actuation/dispatch.js';
 
 function drive(engine: ParagonEngine, sid: string, text: string, maxTurns = 10): string {
   let appended = '';
@@ -32,7 +33,7 @@ describe('T1: the trading domain drives the full ladder', () => {
     expect(rec.state).toBe('INTERVENING');
     expect(rec.tier).toBe(1);
     expect(appended).toContain('[RISK STEER]');
-    expect(appended).toContain('risk mandate');
+    expect(appended).toContain('verification work');
     console.log('T1_TRADING_LADDER_PASS');
 
     // The compliance: the risk-engine instrument resets
@@ -98,5 +99,54 @@ describe('T6: the sales domain drives the ladder', () => {
     engine.observeTool(sid, 'crm-lookup', {}, 0);
     expect(engine.getRecord(sid).tier).toBe(0);
     console.log('T7_SALES_COMPLY_PASS');
+  });
+});
+describe('T8: adaptive-primary with domain instrument and fallback', () => {
+  test('trading-family tier-2 dispatch contains the trading instrument', () => {
+    let attached = '';
+    const directive: unknown = {
+      verb: 'STEER_INJECT',
+      trigger: { family: 'RISK_LIMIT', excerpt: 'exceed the position limit', memberId: 'RISK_LIMIT.position-oversize' },
+      level: 'FULL',
+      tier: 2,
+      triad: { pattern: { memberId: 'RISK_LIMIT', familySeverity: 'HIGH' }, state: { from: 'PRIMED', to: 'INTERVENING' }, evidence: { file: 'engine', line: 1 }, seq: 1, observedAt: Date.now() },
+    };
+    dispatchDirective(directive as never, { kind: 'messages', attach: (t: string) => { attached = t; } }, tradingDomain, () => {});
+    expect(attached).toContain('[RISK DEMAND]');
+    expect(attached).toContain('risk-engine');
+    expect(attached).toContain('(engine:1)');
+    console.log('T8_TRADING_TIER2_INSTRUMENT_PASS');
+  });
+  test('unknown family falls back to domain templates', () => {
+    let attached = '';
+    const directive: unknown = {
+      verb: 'STEER_INJECT',
+      trigger: { family: 'UNKNOWN_FAMILY', excerpt: 'unknown stuff', memberId: 'UNKNOWN' },
+      level: 'FULL',
+      tier: 1,
+      triad: { pattern: { memberId: 'UNKNOWN', familySeverity: 'LOW' }, state: { from: 'PRIMED', to: 'INTERVENING' }, evidence: { file: 'engine', line: 2 }, seq: 2, observedAt: Date.now() },
+    };
+    dispatchDirective(directive as never, { kind: 'messages', attach: (t: string) => { attached = t; } }, tradingDomain, () => {});
+    expect(attached).toContain('[RISK STEER]');
+    expect(attached).toContain('risk mandate');
+    expect(attached).not.toContain('unidentified pattern');
+    console.log('T9_UNKNOWN_FALLBACK_PASS');
+  });
+  test('adversarial: empty family falls back without throw', () => {
+    let attached = '';
+    const directive: unknown = {
+      verb: 'STEER_INJECT',
+      trigger: { family: '', excerpt: '' },
+      level: 'FULL',
+      tier: 1,
+      triad: { pattern: { memberId: '', familySeverity: 'LOW' }, state: { from: 'IDLE', to: 'PRIMED' }, evidence: { file: 'engine', line: 3 }, seq: 3, observedAt: Date.now() },
+    };
+    let threw = false;
+    try {
+      dispatchDirective(directive as never, { kind: 'messages', attach: (t: string) => { attached = t; } }, tradingDomain, () => { throw new Error('feed fail'); });
+    } catch { threw = true; }
+    expect(threw).toBe(false);
+    expect(attached.length).toBeGreaterThan(0);
+    console.log('T10_ADVERSARIAL_EMPTY_PASS');
   });
 });

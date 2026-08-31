@@ -110,6 +110,7 @@ export interface BehaviorRecord {
   directives: Array<{ seq: number; verb: string; patternOrMember: string }>;
   tier: 0 | 1 | 2 | 3 | 4;
   denialCount: number;
+  escalationCount: number;
   lastComplianceVerified: boolean | null;
   complianceDeadlineSeq: number | null;
   seq: number;
@@ -191,6 +192,9 @@ export interface DirectiveSurface {
 // ═══ THE DOMAIN MODULE (THE PLUG — the aggregate interface) ═══
 export interface DomainModule {
   name: string;
+  brandPrefix: string;
+  instrumentName: string;
+  instrumentTier3: string;
   families: readonly PatternFamilyMember[];
   behavioralChecks: ((st: BehavioralState) => WeightedViolation | null)[];
   templates: {
@@ -210,6 +214,7 @@ export interface DomainModule {
     evasionText: string;
     legitimateText: string;
   };
+  lexicon?: Record<string, string>;
 }
 
 export interface MacroPatternDefinition {

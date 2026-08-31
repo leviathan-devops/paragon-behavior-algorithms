@@ -82,6 +82,9 @@ export function checkStopLossPresence(st: BehavioralState): WeightedViolation | 
 
 const tradingDomain: DomainModule = {
   name: 'trading',
+  brandPrefix: 'RISK',
+  instrumentName: 'risk-engine',
+  instrumentTier3: 'risk-engine',
   families: [RISK_LIMIT, STOP_LOSS, DISCLOSURE],
   behavioralChecks: [checkRiskLimitEntry, checkStopLossPresence],
   templates: {

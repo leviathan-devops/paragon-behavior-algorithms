@@ -6,3 +6,4 @@ export {
   markDispatched,
   resetDispatchTracker,
 } from './dispatch.js';
+export * from './warhead-templates.js';
