@@ -1,0 +1,61 @@
+{
+  "runId": "audit-1788021020243",
+  "verdicts": [
+    {
+      "findingIndex": 0,
+      "layer": "R24-mpse-contract",
+      "adjudication": "TRUE_DEFECT",
+      "file": "src/audit-engine/math/firewall.ts",
+      "line": 43,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/KNOWLEDGE_LIBRARY/Codename:PARAGON/PARAGON_L2_BUILD_SPEC.md",
+      "specLine": 662,
+      "specQuote": "readonly preconditions: readonly MathExpr[];   // role: REJECT  — fail ⇒ refuse the input",
+      "codeQuote": "const result = Function(`\"use strict\"; return (${expr});`)() as number;",
+      "divergence": "Firewall evaluates raw expression via Function constructor with only regex allowlist, without invoking checkContract preconditions REJECT gate. Invalid domain bindings bypass REJECT and proceed to eval, violating the REJECT/THROW/DIE/ESCALATE ladder. File imports only InvariantDeath, never checkContract.",
+      "confidence": 0.92,
+      "derailmentMode": "D5"
+    },
+    {
+      "findingIndex": 1,
+      "layer": "R24-mpse-contract",
+      "adjudication": "TRUE_DEFECT",
+      "file": "src/audit-engine/math/oracle.ts",
+      "line": 27,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/KNOWLEDGE_LIBRARY/Codename:PARAGON/PARAGON_L2_BUILD_SPEC.md",
+      "specLine": 688,
+      "specQuote": "OracleDeclaration with canonical demo oracle f(T) = N × (1 + P) = 8 × 3 = 24 with abort If |all_setups| ≠ 24 → ABORT",
+      "codeQuote": "if (store.has(decl.exprId)) throw new Error(`ORACLE_CONFLICT: duplicate exprId ${decl.exprId}`);",
+      "divergence": "Spec declares validated oracle registry with demo oracle f(T)=24 content-hashed, but production code never registers this oracle outside tests (UNIMPLEMENTED_ORACLE_TODO at oracle.ts:16). Registry exists but declared contract has no implementing call site in src/ — TRACE_GAP; runtime discharge for canonical case is unimplemented.",
+      "confidence": 0.86,
+      "derailmentMode": "D1"
+    },
+    {
+      "findingIndex": 2,
+      "layer": "R24-mpse-contract",
+      "adjudication": "TRUE_DEFECT",
+      "file": "src/audit-engine/math/contract.ts",
+      "line": 110,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/KNOWLEDGE_LIBRARY/Codename:PARAGON/PARAGON_L2_BUILD_SPEC.md",
+      "specLine": 669,
+      "specQuote": "readonly temporal?: readonly MathExpr[];       // role: ESCALATE— route to sentinel, never point-eval",
+      "codeQuote": "if (role === 'ESCALATE' && !checked.ok && (checked as { code: string }).code === 'TEMPORAL_NOT_EVALUABLE') { throw new SupervisionEscalation(contract.id, expr); }",
+      "divergence": "Temporal contract path correctly escalates only for TEMPORAL_NOT_EVALUABLE, but other temporal failures (UNBOUND_SYMBOL, DEPTH_EXCEEDED, DOMAIN_UNBOUNDED, TYPE_MISMATCH, DIV_BY_ZERO) and successful point-eval fall through to UNVERIFIED/VALID without SupervisionEscalation, violating 'never point-eval' for ESCALATE. Partial violation — primary demo path conformant, edge cases not.",
+      "confidence": 0.78,
+      "derailmentMode": "D8"
+    },
+    {
+      "findingIndex": 3,
+      "layer": "R24-mpse-contract",
+      "adjudication": "TRUE_DEFECT",
+      "file": "src/hydra/pipeline.ts",
+      "line": 145,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 292,
+      "specQuote": "trace contract.checkContract() call chains + find function implementations matching spec declarations",
+      "codeQuote": "throw new Error('AETHER_MIGRATION: buildAndRunSubagent removed — the primary path uses runMetaLayer from aether-meta.ts');",
+      "divergence": "MPSE contract-checker mandates tracing checkContract() call chains, but pipeline dispatch unconditionally throws AETHER_MIGRATION and bypasses any contract verification. Contracted guard chain is dead — no caller enforces MathContract before subagent mutation; live path in aether-meta.ts is untraced via pipeline.",
+      "confidence": 0.88,
+      "derailmentMode": "D5"
+    }
+  ]
+}

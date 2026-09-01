@@ -1,0 +1,1 @@
+REPAIR: your findings/report.md did not parse: GRAMMAR_VIOLATION: block "Deprecated interpret() actor creation — should be createActor() per XState v5 actor topology law" malformed field 'file' — expected "<path>:<line>" got "src/warheads/xstate-fsm/index.ts" — rewrite findings/report.md in the markdown finding grammar: ## FINDING: blocks with - predicate/- file/- evidence/- spec

@@ -1,0 +1,86 @@
+{
+  "id": "GOD_LOOP_SCORE",
+  "description": "SCORE phase — progressive scoring from pre/post findings (findingWeight, confidence floor 0.30, suppressed x0.1), CycleTracker classify/lifecycle, stall detection. Blocks DECIDE without computed progressive score. Stall counter stalledSince tracked. Checkpoint milestone may save.",
+  "toolMatchers": [
+    {
+      "toolName": "bash",
+      "argPatterns": {
+        "command": [
+          "*score*",
+          "*weight*",
+          "*finding*weight*"
+        ]
+      }
+    },
+    {
+      "toolName": "trident-poseidon",
+      "argPatterns": {
+        "command": [
+          "*DECIDE*",
+          "*PLAN*"
+        ]
+      }
+    },
+    {
+      "toolName": "bash",
+      "argPatterns": {
+        "command": [
+          "*skip*score*"
+        ]
+      }
+    }
+  ],
+  "banks": {
+    "descriptive": [
+      "*score*phase*",
+      "*progressive*score*",
+      "*finding*weight*",
+      "*cycle*tracker*"
+    ],
+    "suggestive": [
+      "*skip*score*",
+      "*fake*score*",
+      "*hardcode*score*"
+    ],
+    "substitute": [
+      "*skip*score*instead*",
+      "*hardcode*score*",
+      "*fake*score*"
+    ],
+    "use": [
+      "*compute*score*",
+      "*trident-poseidon*score*",
+      "*progressive*score*"
+    ]
+  },
+  "pbaContextBoost": {
+    "families": [
+      "GOD_LOOP_SCORE"
+    ],
+    "boostAmount": 0.2
+  },
+  "enforcement": {
+    "tier1": "[PTA:GOD_LOOP_SCORE:T1] DETECTED: Layer GOD_LOOP_SCORE violation — phase enforcement triggered — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_SCORE toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 1 because it violates the GOD_LOOP_SCORE contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier2": "[PTA:GOD_LOOP_SCORE:T2] DETECTED: Repeated GOD_LOOP_SCORE violation — escalated — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_SCORE toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 2 because it violates the GOD_LOOP_SCORE contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier3": "[PTA:GOD_LOOP_SCORE:T3] DETECTED: GOD_LOOP_SCORE at TEB — blocked until remediation — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_SCORE toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 3 because it violates the GOD_LOOP_SCORE contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier4": "[PTA GATE:GOD_LOOP_SCORE:T4] DETECTED: GOD_LOOP_SCORE at GATE — hard blocked; only violating toolMatchers gated, escape hatches and demanded tools always pass (R6) — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_SCORE toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 4 because it violates the GOD_LOOP_SCORE contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier"
+  },
+  "threshold": 0.48,
+  "severity": "MEDIUM",
+  "chainRules": [
+    {
+      "name": "god_loop_score-requires-context",
+      "description": "Requires prior phase completion before GOD_LOOP_SCORE",
+      "requires": [
+        {
+          "tool": "trident-poseidon",
+          "withinMs": 300000
+        }
+      ],
+      "violation": {
+        "layerId": "GOD_LOOP_SCORE",
+        "customMessage": "GOD_LOOP_SCORE: prior phase not completed"
+      }
+    }
+  ]
+}

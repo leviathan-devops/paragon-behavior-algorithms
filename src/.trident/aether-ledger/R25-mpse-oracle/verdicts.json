@@ -1,0 +1,97 @@
+{
+  "runId": "R25-mpse-oracle-20260831-001",
+  "layer": "R25-mpse-oracle",
+  "layerNumber": 25,
+  "anchorPredicate": "oracle",
+  "targetRoot": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src",
+  "generatedAt": "2026-08-31T00:00:00.000Z",
+  "candidatesIn": 3,
+  "verdicts": [
+    {
+      "findingIndex": 0,
+      "layer": "r-mpse",
+      "adjudication": "TRUE_DEFECT",
+      "verdict": "TRUE_DEFECT",
+      "predicate": "unguarded_threshold",
+      "subject": "OracleDeclaration.epsilon optional",
+      "object": "Contract",
+      "file": "src/audit-engine/math/oracle.ts",
+      "line": 8,
+      "codeQuote": "  readonly epsilon?: number;",
+      "evidence": "  readonly epsilon?: number;",
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_PLAN_A_CODE_AUDIT_TOOL_L2_SPEC.md",
+      "specLine": 118,
+      "specQuote": "OracleDeclaration{exprId, oracleValue, anchor, unit?, epsilon} — epsilon REQUIRED at registration (PARAGON oracle.ts:43's law)",
+      "implicatedSpecClause": "MASTER_CONTEXT/V443_PLAN_A_CODE_AUDIT_TOOL_L2_SPEC.md:§2.2.4 — the epsilon law (finite epsilon required)",
+      "divergence": "Spec declares epsilon as REQUIRED (non-optional) with finite >=0 per PARAGON oracle.ts:43 and MC-A-06 forall d present(d.epsilon). Code makes epsilon optional (?:) permitting register({exprId, oracleValue, anchor}) with no epsilon to type-check, defeating the compile-time brand gate and allowing laundering to 0 downstream.",
+      "severity": "HIGH",
+      "confidence": 0.98,
+      "graphRefs": [
+        "OracleDeclaration --declares--> epsilon? EXTRACTED @ src/audit-engine/math/oracle.ts:8",
+        "createOracleRegistry --registers--> OracleDeclaration EXTRACTED @ src/audit-engine/math/oracle.ts:25"
+      ],
+      "contractId": "MC-A-06",
+      "implementationStatus": "violated"
+    },
+    {
+      "findingIndex": 1,
+      "layer": "r-mpse",
+      "adjudication": "TRUE_DEFECT",
+      "verdict": "TRUE_DEFECT",
+      "predicate": "unguarded_threshold",
+      "subject": "register() defaults missing epsilon to 0",
+      "object": "Contract",
+      "file": "src/audit-engine/math/oracle.ts",
+      "line": 26,
+      "codeQuote": "      const eps = decl.epsilon ?? 0;",
+      "evidence": "      const eps = decl.epsilon ?? 0;",
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/KNOWLEDGE_LIBRARY/Codename:PARAGON/PARAGON_L2_BUILD_SPEC.md",
+      "specLine": 695,
+      "specQuote": "a non-integer float without the epsilon THROWS OracleEpsilonError (the hidden tolerance BANNED)",
+      "implicatedSpecClause": "PARAGON_L2_BUILD_SPEC.md:695 — OracleEpsilonError on missing epsilon; V443 §2.2.4 epsilon REQUIRED + MC-A-06 present(epsilon)",
+      "divergence": "Spec mandates throw OracleEpsilonError when epsilon missing for non-integer float; code does decl.epsilon ?? 0 then isFiniteEpsilon(eps) which passes for 0, permitting float oracleValue with zero tolerance (hidden tolerance not banned). The normalized { ...decl, epsilon: eps } stores 0 and contentHash serializes [k, oracleValue, 0] masking missing vs explicit-0; MC-A-06 boundary |eval−oracle| = tol+1e-12 → FirewallError never reached for missing case.",
+      "severity": "HIGH",
+      "confidence": 0.96,
+      "graphRefs": [
+        "createOracleRegistry.register --checks--> isFiniteEpsilon EXTRACTED @ src/audit-engine/math/oracle.ts:27",
+        "createOracleRegistry.register --writes--> store.set EXTRACTED @ src/audit-engine/math/oracle.ts:30"
+      ],
+      "contractId": "MC-A-06",
+      "implementationStatus": "violated"
+    },
+    {
+      "findingIndex": 2,
+      "layer": "r-mpse",
+      "adjudication": "TRUE_DEFECT",
+      "verdict": "TRUE_DEFECT",
+      "predicate": "contradicts_oracle",
+      "subject": "verifyAndDischarge theatrical bypass || true + void discharged",
+      "object": "Contract",
+      "file": "src/audit-engine/math/oracle.ts",
+      "line": 71,
+      "codeQuote": "      })() || true) : false;",
+      "evidence": "      })() || true) : false;\n      void discharged;\n      return { discharged: ok, epsilonEnforced: isFiniteEpsilon(store.get(exprId)?.epsilon ?? 0) }",
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_PLAN_A_CODE_AUDIT_TOOL_L2_SPEC.md",
+      "specLine": 120,
+      "specQuote": "the comparison |evaluated − oracle| ≤ epsilon everywhere (KB-01:357-360)",
+      "implicatedSpecClause": "V443 §2.2.4 |evaluated−oracle|≤epsilon everywhere; PARAGON oracle.ts:75 discharge integer-equality; KB-01:357-360",
+      "divergence": "verifyAndDischarge at 59-77 computes discharged via ((Math.abs<=eps) || true) making discharged collateral true whenever isFiniteEpsilon passes (false || true => true), then void discharged discards it and epsilonEnforced via ??0 reports true for laundered 0. Contradicts spec's |eval−oracle|≤epsilon everywhere; latent bypass survives any refactor that reuses discharged. Correct is Math.abs<=epsilon without || true and epsilonEnforced = isFiniteEpsilon(store.get(exprId)?.epsilon) with presence check.",
+      "severity": "HIGH",
+      "confidence": 0.95,
+      "graphRefs": [
+        "verifyAndDischarge --evaluates--> Math.abs(evaluated - ov) EXTRACTED @ src/audit-engine/math/oracle.ts:69",
+        "verifyAndDischarge --returns--> epsilonEnforced EXTRACTED @ src/audit-engine/math/oracle.ts:76"
+      ],
+      "contractId": "MC-A-06",
+      "implementationStatus": "violated"
+    }
+  ],
+  "counts": {
+    "candidatesIn": 3,
+    "trueDefect": 3,
+    "redHerring": 0,
+    "unclear": 0,
+    "unclassifiedEmitted": 0
+  },
+  "summary": "R25 ORACLE HUNTER — 3 TRUE_DEFECT (3 HIGH, 0 MEDIUM) — all epsilon REQUIRED violations at oracle.ts:8 (interface optional), :26 (register ??0 laundering), :71 (verifyAndDischarge || true + void). No RED_HERRING. Firewall passThroughFirewall at firewall.ts:54 (diff>tol) and contract stage dispatch at contract.ts:94-119 are conformant controls. Fix: epsilon?: → epsilon: at :8; ??0 at :26/:46/:62/:68/:73/:76 → presence-checked throw; remove || true at :71 and void discharged at :75."
+}

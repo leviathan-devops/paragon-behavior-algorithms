@@ -1,0 +1,28 @@
+{
+  "runId": "R19-lasme-actor-20260829-aether",
+  "gateId": "LASME",
+  "layerId": "R19-lasme-actor",
+  "ready": true,
+  "stage": "adjudicated",
+  "counts": {
+    "candidatesIn": 5,
+    "trueDefect": 3,
+    "redHerring": 2,
+    "unclear": 0,
+    "unclassifiedEmitted": 0
+  },
+  "rounds": {
+    "used": 2,
+    "budgetRounds": 6
+  },
+  "wallClockMs": 5435,
+  "probeMs": 1200,
+  "phaseLog": ["P0 reads", "P1 evidence", "P2 adjudication", "P3 write verdicts+report"],
+  "validatorRejects": 0,
+  "ledgerArtifacts": ["verdicts.json", "report.md", "findings/report.md", "investigation.md", "manifest.json"],
+  "graph": {
+    "queriedConcepts": ["show all createMachine and createActor call sites", "trace send() to subscribe() paths", "find actors without subscription handlers"],
+    "nodeCount": 3,
+    "edgeCount": 2
+  }
+}

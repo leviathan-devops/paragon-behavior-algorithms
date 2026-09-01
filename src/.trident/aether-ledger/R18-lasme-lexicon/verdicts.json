@@ -1,0 +1,96 @@
+{
+  "runId": "audit-1787997122241",
+  "verdicts": [
+    {
+      "findingIndex": 0,
+      "layer": "R18-lasme-lexicon",
+      "adjudication": "TRUE_DEFECT",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/layers/r-lexicon.ts",
+      "line": 71,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md",
+      "specLine": 88,
+      "specQuote": "DEGENERATE LEXICONS — lexicons that exist but violate the ISE law: no typed members, no evidence-triad production, detection-only with no state machine behind the decision",
+      "codeQuote": "if (structurallyFunction) fields.add('matcher'); else fields.add('matcher');",
+      "divergence": "the spec declares degenerate lexicons violate ISE law because they have no typed members and detection-only with no state machine; the code at r-lexicon.ts:71 in hasPatternFamilyShape gating PatternFamily.matcher adds matcher in BOTH branches (if structurallyFunction and else) — the type guard is dead, any property named matcher passes as valid, allowing untyped string member to masquerade as Order-2+ matcher (node,ctx)=>MatchResult; the gap is degenerate lexicon accepted as well-formed — calibration shot 1 DTO exemption does not apply because this IS a PatternFamily shape check, not a DTO width.",
+      "confidence": 0.92
+    },
+    {
+      "findingIndex": 1,
+      "layer": "R18-lasme-lexicon",
+      "adjudication": "TRUE_DEFECT",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/layers/r-lexicon.ts",
+      "line": 88,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 142,
+      "specQuote": "PatternFamily interfaces, ISE lexicons, decision ladders ≥3, threshold literals without calibration",
+      "codeQuote": "if (memberName === 'exampleHits') { fields.add('exampleHits'); hasExampleHits = true; }",
+      "divergence": "the spec declares PatternFamily requires 8 typed members id/kind/matcher/triggerCondition/severity/messageTemplate/remediationHook/exampleHits (Lexicon Bible 1.2, V443 §2.3 r-lexicon); the code at r-lexicon.ts:88 in the class PatternFamily branch only checks exampleHits/triggerCondition/severity/messageTemplate/remediationHook/matcher and never checks id or kind — the required-field set is incomplete, so a class-shaped lexicon missing id/kind never fires SIDE-2, producing false-negative degenerate lexicon; the gap is registration-structural drift between interface branch (checks id/kind) and class branch (omits them).",
+      "confidence": 0.89
+    },
+    {
+      "findingIndex": 2,
+      "layer": "R18-lasme-lexicon",
+      "adjudication": "TRUE_DEFECT",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/evidence-gate.ts",
+      "line": 22,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md",
+      "specLine": 88,
+      "specQuote": "MISSING LEXICONS — decision surfaces that should be driven by a typed PatternFamily/lexicon but are regex towers, if/else ladders (>=3 branches), or scattered boolean chains instead",
+      "codeQuote": "switch (layer) {",
+      "divergence": "the spec declares missing lexicons are decision surfaces with >=3-branch logic that should be a typed PatternFamily but are if/else/switch towers (AETHER §2.2 Hunt Mandate a, V443 §2.3 DECISION_LADDER_DEPTH_THRESHOLD=3); the code at evidence-gate.ts:22 implements EvidenceGate.suppress/support as switch(layer) with 7 branches (R0,R5,R6,R2,R14,R15,R16) driving suppression truth for the audit pipeline, with no PatternFamily table, no matcher, no triad, no state machine — the gap is a 7-branch switch tower that should be a lexicon/table (as scoring.ts and FOUNDING_LEXICON_MAP do) but is a hand-rolled switch; calibration shot 2 (3+ branches = slop tower) fires.",
+      "confidence": 0.87
+    },
+    {
+      "findingIndex": 3,
+      "layer": "R18-lasme-lexicon",
+      "adjudication": "TRUE_DEFECT",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/evidence-gate.ts",
+      "line": 71,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 142,
+      "specQuote": "PatternFamily interfaces, ISE lexicons, decision ladders ≥3, threshold literals without calibration",
+      "codeQuote": "confidence = finding.confidence * 0.1;",
+      "divergence": "the spec declares threshold literals without calibration are a lexicon signal (V443 §2.3 r-lexicon) and ISE law requires a named constant + calib: comment; the code at evidence-gate.ts:71 gates confidence suppression with bare literal 0.1 (finding.confidence *0.1) in applyEvidenceFactor, and no const SUPPRESSED_FACTOR =0.1 // calib: ...; the gap is an uncalibrated threshold gating a decision (suppressed confidence) — the same scoring.ts HARDCODE BAN (every numeric threshold is a NAMED const with BECAUSE) is enforced in scoring.ts but violated here; §2.10 do-not-fire only when calib: present, absent here.",
+      "confidence": 0.9
+    },
+    {
+      "findingIndex": 4,
+      "layer": "R18-lasme-lexicon",
+      "adjudication": "TRUE_DEFECT",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/evidence-gate.ts",
+      "line": 73,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 142,
+      "specQuote": "PatternFamily interfaces, ISE lexicons, decision ladders ≥3, threshold literals without calibration",
+      "codeQuote": "confidence = Math.min(1.0, finding.confidence * 1.5);",
+      "divergence": "the spec declares threshold literals without calibration are a lexicon signal (V443 §2.3 r-lexicon) and ISE named-threshold law requires the gating literal to be a named constant + calib: comment; the code at evidence-gate.ts:73 amplifies confidence with bare literal 1.5 (finding.confidence *1.5) in the supported branch and duplicate at 76, with no const SUPPORTED_FACTOR =1.5 // calib: 1.5× amplification because ...; the gap is a second uncalibrated threshold for the same confidence decision — duplicated magic number, no hoisted constant, directly contradicting the calibrated pattern in scoring.ts (CALIBRATED_WEIGHT=1, ORACLE_WEIGHT=2 etc with BECAUSE).",
+      "confidence": 0.88
+    },
+    {
+      "findingIndex": 5,
+      "layer": "R18-lasme-lexicon",
+      "adjudication": "TRUE_DEFECT",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/layers/r-lexicon.ts",
+      "line": 205,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md",
+      "specLine": 88,
+      "specQuote": "Fire on what IS: every finding carries file + line + a verbatim quote from the source (or [INFERRED] + the graph edge that supports it). Do not fire on: test fixtures, interfaces with <=4 members, chains of depth <=2, thresholds carrying a calib: comment.",
+      "codeQuote": "const lineIdx = Math.max(0, countIfChainDepth(sf) > 0 ? 1 : 0);",
+      "divergence": "the spec declares lexicon hunter must emit file+line+verbatim quote anchored at the decision site (AETHER hunt mandate, FINDINGS-FILE CONTRACT) and lexicon drift is when patterns no longer match what code actually does; the code at r-lexicon.ts:205 computes lineIdx as 0 or 1 based on countIfChainDepth>0 and emits evidenceQuote lines[lineIdx] (always file line 1 or 2) and lineIdx+1 (always 1 or 2) for SIDE-1 missing-lexicon — the evidence is file header, not the if/else ladder site that triggered hasDecisionLogicShape; the gap is drift: the emitted file:line and quote do not match the decision that fired, violating evidence-triad provenance (provenance source line must be the node's line).",
+      "confidence": 0.85
+    },
+    {
+      "findingIndex": 6,
+      "layer": "R18-lasme-lexicon",
+      "adjudication": "TRUE_DEFECT",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/layers/r-lexicon.ts",
+      "line": 218,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md",
+      "specLine": 88,
+      "specQuote": "Fire on what IS: every finding carries file + line + a verbatim quote from the source (or [INFERRED] + the graph edge that supports it).",
+      "codeQuote": "const lineNum = sf.getLineAndCharacterOfPosition(sf.getStart()).line + 1;",
+      "divergence": "the spec declares lexicon drift when rules say X but matcher fires on Y and evidence must be the PatternFamily node line; the code at r-lexicon.ts:218 for SIDE-2 degenerate lexicon computes lineNum as sf.getLineAndCharacterOfPosition(sf.getStart()).line+1 — always file start line 1 — and evidenceQuote as `PatternFamily missing: ...` synthetic string, not the actual interface/class node's line or text; the gap is drift: SIDE-2 file:line never points to the PatternFamily declaration (should be node.name.getStart line) and evidence is synthesized, not verbatim; the emitted provenance is file-header, not the lexicon shape.",
+      "confidence": 0.84
+    }
+  ]
+}

@@ -1,0 +1,126 @@
+{
+  "runId": "audit-1788174665340",
+  "verdicts": [
+    {
+      "findingIndex": 0,
+      "layer": "R21-lasme-engine",
+      "adjudication": "TRUE_DEFECT",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/aether-auditor.ts",
+      "line": 145,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/aether-templates/hunters/lasme-engine.ts",
+      "specLine": 10,
+      "specQuote": "SILENT DEGRADE — degrade/fallback branches that swallow failures without logging, without propagating the error, or without a metric/observation (the failure vanishes);",
+      "codeQuote": "try { fs.writeFileSync(path.join(resolvedLedger, 'repair-prompt.md'), repairPrompt, 'utf-8'); } catch (ee) { void (ee as Error).message; }",
+      "divergence": "The repair loop writes repair-prompt.md which is consumed by the second AetherAgent run (demand: repairPrompt). Spec lasme-engine (b) + (d) requires every degrade/fallback to log+recover or propagate — never void. Code catches write failure, voids message, and proceeds to re-invoke the agent with the original brief as if the repair prompt were persisted. If the write fails, the second run receives the stale brief, the GRAMMAR_VIOLATION is not repaired, yet the outer run continues to RETRY_RUN_FAILED handling, never surfacing REPAIR_PROMPT_WRITE_FAILED. Failure vanishes; corrupted hunt is silent. Remediation: throw REPAIR_PROMPT_WRITE_FAILED with ledgerDir, path, and remedy, mirroring HUNTER_BRIEF_WRITE_FAILED pattern at aether-auditor.ts:76.",
+      "confidence": 0.93
+    },
+    {
+      "findingIndex": 1,
+      "layer": "R21-lasme-engine",
+      "adjudication": "TRUE_DEFECT",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/aether-auditor.ts",
+      "line": 146,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/aether-templates/hunters/lasme-engine.ts",
+      "specLine": 12,
+      "specQuote": "catch must log+recover or propagate, never empty",
+      "codeQuote": "try { fs.appendFileSync(path.join(resolvedLedger, 'repair-ledger.log'), repairPrompt + '\\n', 'utf-8'); } catch (ee) { void (ee as Error).message; }",
+      "divergence": "Second write in the repair branch appends to repair-ledger.log for audit trail. Same void-swallow pattern: catch voids message, no log, no metric, no propagate. Spec (d) unguarded side effects in critical paths requires observation. The ledger loss is silent; the outer catch for the second agent run still records firstGrammarError but not the ledger failure. Divergence is identical to finding 0 but for the append path — both must follow the HUNTER_BRIEF_WRITE_FAILED loud-fail discipline or an explicit named recovery (e.g., degrade to in-memory log + metric).",
+      "confidence": 0.92
+    },
+    {
+      "findingIndex": 2,
+      "layer": "R21-lasme-engine",
+      "adjudication": "TRUE_DEFECT",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/aether-tools.ts",
+      "line": 71,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/aether-templates/hunters/lasme-engine.ts",
+      "specLine": 12,
+      "specQuote": "UNGUARDED SIDE EFFECTS IN CRITICAL PATHS — catch must log+recover or propagate, never empty",
+      "codeQuote": "} catch (e) { void (e as Error).message; } } try { const text = fs.readFileSync(effectivePath, 'utf-8');",
+      "divergence": "makeCappedReadTool enforces READ_SCOPE_VIOLATION by resolving targetRoot + file to real paths via realResolve and checking isWithinRoot. The scope check is inside try; catch voids any exception (e.g., realpath failure, permission error) and falls through to fs.readFileSync without scope validation. Spec (d) requires error-path-first: a failed scope check must either rethrow, return READ_SCOPE_VIOLATION, or log + deny. Instead failure vanishes and the read proceeds unguarded, bypassing the confinement gate. This is the Lasme-engine SHOT 2 pattern (unguarded read + unconditional success) but via swallow. Graph: enforcePinned <- makeCappedReadTool <- AetherAgent (all reads lose confinement if scope check throws). Fix: catch must return {READ_SCOPE_VIOLATION} or throw READ_SCOPE_CHECK_FAILED with targetRoot, file, remedy.",
+      "confidence": 0.89
+    },
+    {
+      "findingIndex": 3,
+      "layer": "R21-lasme-engine",
+      "adjudication": "TRUE_DEFECT",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/aether-tools.ts",
+      "line": 107,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/aether-templates/hunters/lasme-engine.ts",
+      "specLine": 12,
+      "specQuote": "UNGUARDED SIDE EFFECTS IN CRITICAL PATHS — catch must log+recover or propagate, never empty",
+      "codeQuote": "} catch (e) { void (e as Error).message; } } const maxResults = Math.min(p.maxResults ?? cap, cap);",
+      "divergence": "makeCappedGrepTool mirrors the read tool's scope gate: resolves requested root via realResolve, checks isWithinRoot, returns READ_SCOPE_VIOLATION on violation. Catch around the gate voids and proceeds to execFile('rg', args) with the original requested root, bypassing confinement on scope-check failure (e.g., symlink loop, stat failure). Spec (a)(d) violation: side effect (process spawn + directory walk) without guard. Same remediation as read tool — catch must propagate or return violation, not void.",
+      "confidence": 0.88
+    },
+    {
+      "findingIndex": 4,
+      "layer": "R21-lasme-engine",
+      "adjudication": "TRUE_DEFECT",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/aether-meta.ts",
+      "line": 212,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 156,
+      "specQuote": "r-engine | writeFileSync/degrade paths, engine-level side effects without guards, container deploy surface",
+      "codeQuote": "try { fs.writeFileSync(perGatePath, JSON.stringify(settledEntries, null, 2), 'utf-8'); } catch (e) { void (e as Error).message; }",
+      "divergence": "runMetaLayer writes per-gate roster roster-lasme/mpse/sro.json which is the source of truth for doc stitching and for the compat roster.json merge. Code catches write failure and voids — no log, no throw, no metric. Caller (the orchestrator) proceeds to merge rosters as if the per-gate file were persisted; evidence loss is silent, yet the gate returns success. Spec r-engine requires engine-level side effects (FS writes in gate evaluation) to be guarded; this mirrors the lasme-engine SHOT 2 (write + unconditional success). Graph: writeRunnerTag <- runMetaLayer <- pipeline (roster loss breaks SRO provenance). Fix: throw ROSTER_WRITE_FAILED or return rejected MetaRunResult, mirroring HUNTER_BRIEF_WRITE_FAILED.",
+      "confidence": 0.86
+    },
+    {
+      "findingIndex": 5,
+      "layer": "R21-lasme-engine",
+      "adjudication": "TRUE_DEFECT",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/aether-meta.ts",
+      "line": 238,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 156,
+      "specQuote": "r-engine | writeFileSync/degrade paths, engine-level side effects without guards, container deploy surface",
+      "codeQuote": "} catch (ee) { void (ee as Error).message; } } const compatPath = path.join(root, 'roster.json');",
+      "divergence": "Inner catch for reading per-gate rosters swallows JSON parse/read failures and continues merging, dropping that gate's entries without observation. Outer catch for the compat roster.json merge also voids. Failure vanishes; the final roster.json may be missing an entire gate's hunters yet the run reports success. Violates shadow.verdict.completeness (manifest counts must reconcile) and engine (b) silent degrade. Remediation: log TAG_FAILED-style metric + propagate, or include missing gate in errors[].",
+      "confidence": 0.82
+    },
+    {
+      "findingIndex": 6,
+      "layer": "R21-lasme-engine",
+      "adjudication": "TRUE_DEFECT",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/aether-auditor.ts",
+      "line": 92,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/aether-templates/hunters/lasme-engine.ts",
+      "specLine": 10,
+      "specQuote": "SILENT DEGRADE — degrade/fallback branches that swallow failures without logging, without propagating the error, or without a metric/observation",
+      "codeQuote": "try { globalThis.__aetherLedgerSpy(agent.ledger); } catch (e) { void (e as Error).message; }",
+      "divergence": "Test spy hook __aetherLedgerSpy is invoked to capture the ledger for scripted tests; any exception (e.g., spy throws) is voided. While not a production file I/O, it is a degrade branch in the hunter's setup path: failure vanishes, run continues with unobserved ledger state, potentially masking a degraded test harness. Severity LOW because path is test-only, but still violates (d) empty-catch ban. Fix: either remove the catch (let it propagate) or log via tridentLog with LEDGER_SPY_FAILED.",
+      "confidence": 0.71
+    },
+    {
+      "findingIndex": 7,
+      "layer": "R21-lasme-engine",
+      "adjudication": "RED_HERRING",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/aether-tools.ts",
+      "line": 20,
+      "confidence": 0.96,
+      "legitimizingReason": "logViolation now throws VIOLATION_LOG_WRITE_FAILED with ledgerDir, attempted path, code, and remedy — satisfies error-path-first. Prior snapshot had void swallow; current code is FIXED. No divergence from spec (b)(d).",
+      "codeQuote": "catch (e) { throw new Error(`VIOLATION_LOG_WRITE_FAILED: ${(e as Error).message} — ledgerDir=${ledgerDir} attempted=${attempted} code=${code} remedy: ensure ledgerDir writable and evidence dir creatable`); }"
+    },
+    {
+      "findingIndex": 8,
+      "layer": "R21-lasme-engine",
+      "adjudication": "RED_HERRING",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/aether-auditor.ts",
+      "line": 76,
+      "confidence": 0.95,
+      "legitimizingReason": "brief.md write is guarded: try { fs.writeFileSync(briefPath, brief) } catch (e) { return {status:'rejected', error:'HUNTER_BRIEF_WRITE_FAILED: ...'} }. Named propagation matches spec SHOT 1 (guarded). Prior candidate claimed unguarded; fixed in wave-2.",
+      "codeQuote": "try { fs.writeFileSync(briefPath, brief, 'utf-8'); } catch (e) { return { layerId, status: 'rejected', error: 'HUNTER_BRIEF_WRITE_FAILED: ' + String((e as Error).message).slice(0,400) } }"
+    },
+    {
+      "findingIndex": 9,
+      "layer": "R21-lasme-engine",
+      "adjudication": "RED_HERRING",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/aether-tools.ts",
+      "line": 32,
+      "confidence": 0.94,
+      "legitimizingReason": "realResolve catch is intentional fallback-to-return: catch voids then returns best-effort path (join(realDir, basename) or resolved). Spec SHADOW INFERENCE explicitly exempts these as best-effort degradation, not silent loss. Same for resolveLedgerRoot:45 and resolveTargetRoot:18 (stat failure -> return cwd).",
+      "codeQuote": "try { return fs.realpathSync(resolved); } catch (_e) { void (_e as Error).message; try { const realDir = fs.realpathSync(dir); return path.join(realDir, path.basename(resolved)); } catch (_e2) { void (_e2 as Error).message; return resolved; } }"
+    }
+  ]
+}

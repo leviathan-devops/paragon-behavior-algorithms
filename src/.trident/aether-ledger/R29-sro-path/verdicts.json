@@ -1,0 +1,136 @@
+{
+  "runId": "R29-sro-path-20260829-aether",
+  "layer": "R29-sro-path",
+  "anchorPredicate": "impact-path",
+  "ledger": "src/.trident/aether-ledger/R29-sro-path",
+  "findingsFile": "findings/report.md",
+  "candidateCount": 5,
+  "verdicts": [
+    {
+      "findingIndex": 0,
+      "layer": "R29-sro-path",
+      "predicate": "impact-path.blast-radius",
+      "adjudication": "TRUE_DEFECT",
+      "severity": "HIGH",
+      "file": "src/hydra/instances/sro.ts",
+      "line": 323,
+      "specPath": "MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md",
+      "specLine": 85,
+      "specQuote": "ONE shared graph — every hunter queries it; extract ONCE, query N times via graphify with canonical file keys",
+      "codeQuote": "const startIds = fileToNodeIds.get(finding.file) ?? [];",
+      "divergence": "File-to-node lookup uses exact string Map.get without path normalization. Graph stores absolute source_file via path.resolve(targetRoot) (graph-mapper.ts:77); prior-gate findings use relative path. Lookup fails → empty blast radius assumed measured when graph has outgoing edges. Post-gate downstreamCount==impactPaths.length does not catch false-negative.",
+      "confidence": 0.88,
+      "derailmentMode": "D4",
+      "evidence": "src/hydra/instances/sro.ts:323 Map.get; src/hydra/graph-mapper.ts:34 source_file absolute; src/hydra/graph-mapper.ts:77 path.resolve(targetRoot); grep path.(resolve|relative) 0 hits in computeBlastRadius; findings/report.md:0 evidence quote",
+      "graphRefs": ["sro.ts:323 fileToNodeIds", "graph-mapper.ts:34 source_file absolute", "types.ts:LayerCandidate relative"]
+    },
+    {
+      "findingIndex": 1,
+      "layer": "R29-sro-path",
+      "predicate": "impact-path.blast-radius",
+      "adjudication": "TRUE_DEFECT",
+      "severity": "MEDIUM",
+      "file": "src/hydra/instances/sro.ts",
+      "line": 341,
+      "specPath": "MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md",
+      "specLine": 112,
+      "specQuote": "SRO hunters' [INPUT DATA] carries PRIOR-GATE slot with BOTH gates' findings filtered per predicate-intersection: static filterTags",
+      "codeQuote": "lasmeCandidates = raw.filter((c): c is Record<string, unknown> => typeof c === 'object' && c !== null).filter((c) => typeof c['file'] === 'string' && typeof c['line'] === 'number').map((c) => ({ file: c['file'] as string, line: c['line'] as number }));",
+      "divergence": "SRO synthesis ingests every LASME/MPSE finding regardless of filterTags. Hunter template declares 8-way filterTags (violates, shouldBe, implements, evaluates_to, contradicts_oracle, ungrounded_threshold, flagged_by, derived_from) for predicate-intersection input-data filtering, but sroSynthesize drops predicate field entirely and maps solely on file+line. Non-impact predicates (lexicon.table, actor.unsubscribed) are BFS-traced, polluting blastRadius and correlations.",
+      "confidence": 0.85,
+      "derailmentMode": "D4",
+      "evidence": "src/hydra/instances/sro.ts:341-358 no predicate check; src/hydra/aether-templates/hunters/sro-path.ts:filterTags 8 tags; grep predicate 0 hits in lasmeCandidates build; V443 §2.5 Every finding has blast-radius entry vs hunter filter contract",
+      "graphRefs": ["sro.ts:341 lasmeCandidates", "sro-path.ts:filterTags", "AETHER §2.3 predicate-intersection"]
+    },
+    {
+      "findingIndex": 2,
+      "layer": "R29-sro-path",
+      "predicate": "impact-path.classification",
+      "adjudication": "TRUE_DEFECT",
+      "severity": "HIGH",
+      "file": "src/hydra/instances/sro.ts",
+      "line": 393,
+      "specPath": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 342,
+      "specQuote": "downstream nodes that are god nodes, cross-community bridges, or entry points are CRITICAL; nodes within the same community are MEDIUM; leaf nodes are LOW",
+      "codeQuote": "const hasGraphImpact = (blastRadius.find((b) => b.findingId === finding.id)?.downstreamCount ?? 0) > 0;",
+      "divergence": "Severity derived solely from triple/flag-count (LASME+MPSE+SRO). Never reads graph.godNodes, graph.communities, or degree. God-node downstream flagged LASME-only → MEDIUM vs spec CRITICAL. Cross-community vs same-community leaf distinction missing. Grep godNodes 0 hits in sroSynthesize.",
+      "confidence": 0.92,
+      "derailmentMode": "D4",
+      "evidence": "src/hydra/instances/sro.ts:393 hasGraphImpact; src/hydra/graph-mapper.ts:58 godNodes top-5; grep godNodes 0 hits in sro.ts sroSynthesize; aether-templates/hunters/sro-path.ts:32 IMPACT CLASSIFICATION",
+      "graphRefs": ["sro.ts:sroSynthesize", "graph-mapper.ts:normalizeGraph godNodes", "types.ts:87 godNodes"]
+    },
+    {
+      "findingIndex": 3,
+      "layer": "R29-sro-path",
+      "predicate": "impact-path.blast-radius",
+      "adjudication": "TRUE_DEFECT",
+      "severity": "HIGH",
+      "file": "src/hydra/instances/sro.ts",
+      "line": 297,
+      "specPath": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 395,
+      "specQuote": "For each finding from LASME + MPSE, query the graph for impact paths — what does this finding affect downstream? blast-radius ≤5 hops",
+      "codeQuote": "const adj = new Map<string, Array<{ dst: string; relation: string }>>(); for (const e of edges) { const list = adj.get(e.src) ?? []; list.push({ dst: e.dst, relation: e.relation }); adj.set(e.src, list); }",
+      "divergence": "BFS follows only outgoing edges (src→dst). Graph stores imports as src:importer→dst:imported and calls as src:caller→dst:callee. A finding at imported/callee (engine.ts) has downstream dependents as incoming edges (callers/importers). Outgoing traversal yields upstream dependencies, not downstream impact. graph-mapper.ts:path() is undirected (both src→dst and dst→src) proving downstream requires reverse lookup. Result: leaf in forward direction reports 0 downstream even with 10 dependents.",
+      "confidence": 0.78,
+      "derailmentMode": "D2",
+      "evidence": "src/hydra/instances/sro.ts:297-326 adj src→dst only; src/hydra/graph-mapper.ts:143-155 undirected adj both ways; V443 §2.5 path from finding to all callers within 5 hops requires incoming traversal",
+      "graphRefs": ["sro.ts:297 directed adj", "graph-mapper.ts:150 undirected", "V443 §2.5 callers"]
+    },
+    {
+      "findingIndex": 4,
+      "layer": "R29-sro-path",
+      "predicate": "impact-path.blast-radius",
+      "adjudication": "TRUE_DEFECT",
+      "severity": "MEDIUM",
+      "file": "src/hydra/instances/sro.ts",
+      "line": 311,
+      "specPath": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 410,
+      "specQuote": "Every edge in the graph carries a confidence tag: EXTRACTED = explicit in source, INFERRED = graphify derived resolution. Prefer EXTRACTED, flag INFERRED with [INFERRED]. Verify each downstream node exists by reading its file",
+      "codeQuote": "impactPaths.push({ from: `${finding.file}:${finding.line}`, to: edge.dst, hops: newHops, edgeTypes: [...newPath] });",
+      "divergence": "Adjacency builder discards e.confidence; INFERRED edges counted as downstream impact without [INFERRED] flag or EXTRACTED-preferred filtering, and without downstream file-read verification. Hunt mandate requires read(320) verification of downstream file before emitting. graph-mapper preserves confidence but sro.ts drops it.",
+      "confidence": 0.84,
+      "derailmentMode": "D2",
+      "evidence": "src/hydra/instances/sro.ts:326 list.push without confidence; src/hydra/types.ts:37 confidence EXTRACTED|INFERRED; src/hydra/graph-mapper.ts:38 confidence preserved; grep readFile 0 hits in computeBlastRadius",
+      "graphRefs": ["sro.ts:326 adj without confidence", "types.ts:37 GraphifyEdge.confidence", "graph-mapper.ts:38 confidence"]
+    }
+  ],
+  "summary": {
+    "trueDefect": 5,
+    "redHerring": 0,
+    "unclear": 0,
+    "total": 5,
+    "bySeverity": {
+      "HIGH": 3,
+      "MEDIUM": 2,
+      "CRITICAL": 0
+    },
+    "byPredicate": {
+      "impact-path.classification": 1,
+      "impact-path.blast-radius": 4
+    }
+  },
+  "adjudicationMeta": {
+    "adjudicator": "R29-sro-path aether",
+    "specsRead": [
+      "V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md §2.5 SRO roster blast-radius ≤5 hops TRIPLE-CONFIRMED",
+      "AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md §1.3 meta-layer law §2.1-2.6 one-graph law",
+      "aether-templates/hunters/sro-path.ts R29 mandate BLAST-RADIUS PATHS + IMPACT CLASSIFICATION",
+      "V443 §2.10 GRAPH TOOLS USAGE LAW",
+      "graph-mapper.ts normalizeGraph + path undirected",
+      "types.ts GraphifyEdge confidence + GraphifyGraph godNodes"
+    ],
+    "filesRead": 7,
+    "toolsUsed": [
+      "read 320",
+      "grep 120",
+      "graphify:query/path/explain/subgraph (one-graph law)",
+      "graph_tag"
+    ],
+    "graphLaw": "one-graph law — every hunter queries same shared graph; prefer EXTRACTED, flag INFERRED",
+    "adjudicatedAt": "2026-08-29T00:00:00Z",
+    "validatorChecks": "V1 index-bound OK, V2 TRUE_DEFECT 5 legs OK, V3 RED_HERRING N/A, V4 UNCLEAR N/A, V5 confidence [0.55,1] OK, V6 file in-tree OK, V7 specPath in specs OK, V8 closed adjudication set OK"
+  }
+}

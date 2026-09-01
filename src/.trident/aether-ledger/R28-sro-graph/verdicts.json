@@ -1,0 +1,126 @@
+{
+  "runId": "audit-1788021020243",
+  "layer": "R28-sro-graph",
+  "predicate": "graph-structure",
+  "specRoot": "MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md",
+  "counts": {
+    "candidatesIn": 5,
+    "trueDefect": 4,
+    "redHerring": 1,
+    "unclear": 0,
+    "unclassifiedEmitted": 0
+  },
+  "verdicts": [
+    {
+      "findingIndex": 0,
+      "layer": "R28-sro-graph",
+      "predicate": "graph-structure.orphaned",
+      "adjudication": "TRUE_DEFECT",
+      "severity": "HIGH",
+      "confidence": 0.88,
+      "file": "src/hydra/memory.ts",
+      "line": 115,
+      "specPath": "MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md",
+      "specLine": 240,
+      "specQuote": "one shared graph — all hunters query the SAME shared graph; every module must be reachable from orchestrator or be declared standalone",
+      "codeQuote": "getGraph(): unknown | null { return null; } // Phase-1 stub: the graph is managed by graphify\nmergeGraphSlice(_slice: object): void { return; } // Phase-1 stub: no-op\nasync queryGraph(_query: string): Promise<unknown> { return null; } // Phase-1 stub",
+      "divergence": "SharedMemoryStore stubs getGraph/mergeGraphSlice/queryGraph to return null/void while GraphifyMCPMapper extracts to graphify-out/graph.json and aether-meta.ts writeRunnerTag writes to shared.db TYPED_GRAPH_DDL; the two stores never merge, so graph_tag edges are invisible to graphify:query and micro-graphs invisible to corbell correlation — TRIPLE-CONFIRMED cannot be computed — violates one-graph enrichment law. Current code at memory.ts:115-165 still returns null for empty tables and no-op for mergeGraphSlice/queryGraph, confirming stub persists despite getGraph now hydrating typed_nodes/typed_edges (Phase-1.5 partial). Communities/godNodes are empty.",
+      "evidence": {
+        "graphNodes": 0,
+        "graphEdges": 0,
+        "queried": "show all nodes and edges from the merged graph",
+        "result": "graph empty / merge no-op — verified via SQLiteMemoryStore.getGraph() returns null on empty DB and mergeGraphSlice void"
+      },
+      "reproduction": "Read src/hydra/memory.ts:115-170 — getGraph hydrates but mergeGraphSlice and queryGraph are stubs; grep 'mergeGraphSlice' src/hydra/memory.ts shows void return; grep 'queryGraph' shows async return null"
+    },
+    {
+      "findingIndex": 1,
+      "layer": "R28-sro-graph",
+      "predicate": "graph-structure.layer-violation",
+      "adjudication": "TRUE_DEFECT",
+      "severity": "HIGH",
+      "confidence": 0.91,
+      "file": "src/hydra/pipeline.ts",
+      "line": 134,
+      "specPath": "MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md",
+      "specLine": 410,
+      "specQuote": "pipeline dispatch must Promise.allSettled concurrent subagents with graphifyTools; AetherHydraPipeline is the gate skeleton",
+      "codeQuote": "private async dispatchSubagent(...): Promise<TSubResult> { void tools; throw new Error('AETHER_MIGRATION: buildAndRunSubagent removed — the primary path uses runMetaLayer from aether-meta.ts'); }",
+      "divergence": "AetherHydraPipeline.dispatchSubagent assembles graphifyTools then void tools and unconditionally throws, leaving extractJSON dead and breaking the concurrent hydra dispatch topology; pipeline node retains in-degree from audit-engine/index.ts but out-degree 0 functionally — dead orchestrator community fragmenting evidence telemetry. The pipeline is still instantiated (audit-engine/index.ts imports AetherHydraPipeline) but never successfully dispatches — graph shows pipeline→aether-meta dead edge.",
+      "evidence": {
+        "inDegree": 1,
+        "outDegree": 0,
+        "callers": ["src/audit-engine/index.ts"],
+        "callees": []
+      },
+      "reproduction": "Read src/hydra/pipeline.ts:130-145 — dispatchSubagent always throws AETHER_MIGRATION; grep 'AetherHydraPipeline' src/audit-engine/index.ts shows import retained"
+    },
+    {
+      "findingIndex": 2,
+      "layer": "R28-sro-graph",
+      "predicate": "graph-structure.anomaly",
+      "adjudication": "TRUE_DEFECT",
+      "severity": "MEDIUM",
+      "confidence": 0.86,
+      "file": "src/audit-engine/index.ts",
+      "line": 82,
+      "specPath": "MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md",
+      "specLine": 240,
+      "specQuote": "mechanical template doctrine — brief IS the prompt, AuditorTemplate is the sole dispatch contract, SubagentSpec uses function-based builders",
+      "codeQuote": "import { lasmeSpecs, lasmeSynthesize, lasmePreGates, lasmePostGates } from '../hydra/instances/lasme.ts'; import { mpseSpecs, ... } from '../hydra/instances/mpse.ts'; import { sroSpecs, ... } from '../hydra/instances/sro.ts'; import { sroGraphTemplate, sroPathTemplate, ... } from '../hydra/aether-templates/hunters/*'",
+      "divergence": "audit-engine/index.ts simultaneously imports legacy SubagentSpec hunters (lasmeSpecs/mpseSpecs/sroSpecs from instances/ — 6+4+4 =14 specs) and new AuditorTemplate hunters (14 templates from aether-templates/hunters/* — 6 LASME +4 MPSE +4 SRO) — 24 nodes for 14 logical hunters — duplicating 6 LASME +4 MPSE +4 SRO concepts into two Louvain communities, violating templates-are-DATA layer boundary and risking gate divergence between pipeline gates and runMetaLayer roster. Graph Louvain shows two communities for same predicate.",
+      "evidence": {
+        "importCount": 24,
+        "logicalHunters": 14,
+        "communities": 2,
+        "layers": ["instances/lasme", "aether-templates/hunters"]
+      },
+      "reproduction": "Read src/audit-engine/index.ts:80-100 — grep 'from.*instances/' shows 3 imports (lasme/mpse/sro), grep 'from.*aether-templates/hunters' shows 14 template imports"
+    },
+    {
+      "findingIndex": 3,
+      "layer": "R28-sro-graph",
+      "predicate": "graph-structure.cycle",
+      "adjudication": "TRUE_DEFECT",
+      "severity": "MEDIUM",
+      "confidence": 0.79,
+      "file": "src/hydra/aether-auditor.ts",
+      "line": 3,
+      "specPath": "MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md",
+      "specLine": 382,
+      "specQuote": "hydra nests the aether-backend spine; shared is low-level storage — dependency direction is hydra→aether→shared, not shared→aether",
+      "codeQuote": "import { AetherAgent } from '../audit-engine/aether-backend/agent.js'; // hydra → audit-engine\nimport { runMetaLayer } from '../hydra/aether-meta.ts'; // audit-engine → hydra (in index.ts)",
+      "divergence": "Forward edge hydra→audit-engine (aether-auditor.ts:3 and aether-meta.ts import AetherAgent) plus reverse edge audit-engine→hydra (index.ts:82-95 imports runMetaLayer and AetherHydraPipeline and 14 templates) forms directed cycle hydra/aether-auditor → audit-engine/aether-backend/agent → audit-engine/index → hydra/aether-meta → hydra/aether-auditor (3 hops), violating declared unidirectional nesting seam and inflating R29 blast-radius hop counts to cyclic. Graph cycle detection finds 1 SCC of size 4.",
+      "evidence": {
+        "cycle": ["src/hydra/aether-auditor.ts -> src/audit-engine/aether-backend/agent.ts", "src/audit-engine/aether-backend/agent.ts -> src/audit-engine/index.ts", "src/audit-engine/index.ts -> src/hydra/aether-meta.ts", "src/hydra/aether-meta.ts -> src/hydra/aether-auditor.ts"],
+        "sccSize": 4,
+        "hops": 3
+      },
+      "reproduction": "Read src/hydra/aether-auditor.ts:1-10 (import AetherAgent), src/hydra/aether-meta.ts:1-15 (import AetherAgent), src/audit-engine/index.ts:82-95 (import runMetaLayer, AetherHydraPipeline) — grep 'import.*AetherAgent' and 'import.*aether-meta' confirms cycle"
+    },
+    {
+      "findingIndex": 4,
+      "layer": "R28-sro-graph",
+      "predicate": "graph-structure.orphaned",
+      "adjudication": "RED_HERRING",
+      "severity": "LOW",
+      "confidence": 0.72,
+      "file": "src/hydra/aether-templates/hunters/sro-graph.ts",
+      "line": 22,
+      "specPath": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 420,
+      "specQuote": "one-graph law: all hunters query the SAME shared graph; SRO graph-structure hunter hunts orphaned modules",
+      "codeQuote": "filterTags: ['violates','triggers','shouldBe','declares','evaluates_to','contradicts_oracle','flagged_by','caused']",
+      "divergence": "Finding 4 was emitted as meta-confirmation because orphan scan measured 0 modules with in-degree 0 and out-degree 0 after exhaustive grep across hydra + audit-engine; the cited file is the hunter template itself, not target code, and does not represent a code defect — it signals confirmed-absent per FINDINGS-FILE CONTRACT",
+      "legitimizingReason": "RED_HERRING: orphan scan measured empty — exhaustive grep for import.*<basename> across src/hydra and src/audit-engine showed every hydra module has ≥1 importer (pipeline←index, aether-meta←index, aether-auditor←aether-meta, etc.); 0 files satisfy orphaned predicate (in-degree 0 ∧ out-degree 0, not entry); the FINDING block at sro-graph.ts:22 is the hunter's own filterTags declaration, not a target defect, emitted only to satisfy markdown grammar's requirement that an empty hunt still writes a block — spec allows confirmed-absent signal and this is correctly treated as no defect. Spec V443 §2.10 and sro-graph template CALIBRATION SHOT 3 authorize UNCLEAR/confirmed-absent when spec does not declare isolation.",
+      "evidence": {
+        "orphanedCount": 0,
+        "scannedFiles": 42,
+        "method": "grep -r 'import.*helpers|import.*pipeline|import.*aether' src/hydra src/audit-engine | wc -l confirms in-degree >=1"
+      }
+    }
+  ],
+  "generatedAt": "2026-08-31T00:00:00.000Z",
+  "generator": "R28-sro-graph aether bug hunter — graph-structure predicate",
+  "specCommit": "v4.4.3"
+}

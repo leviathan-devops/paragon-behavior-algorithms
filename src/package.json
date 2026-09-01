@@ -1,0 +1,26 @@
+{
+  "name": "trident-v4.4",
+  "version": "v4.4.0",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build:check": "tsc --noEmit",
+    "build": "npx esbuild index.ts --bundle --platform=node --format=esm --target=node22 --external:@opencode-ai/plugin --external:zod --outfile=../dist/index.js",
+    "test": "npx tsx ../tests/properties.ts"
+  },
+  "dependencies": {
+    "@opencode-ai/plugin": "^1.16.0",
+    "peggy": "^4.2.0",
+    "sql.js": "^1.14.1",
+    "typescript": "^6.0.3",
+    "wink-eng-lite-web-model": "^1.8.1",
+    "wink-nlp": "^2.4.0",
+    "xstate": "^5.32.1",
+    "zod": "^4.1.8"
+  },
+  "devDependencies": {
+    "@stryker-mutator/core": "^8.7.1",
+    "fast-check": "^3.23.2",
+    "tsx": "^4.22.4"
+  }
+}

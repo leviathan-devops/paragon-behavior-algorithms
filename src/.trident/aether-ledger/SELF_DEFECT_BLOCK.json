@@ -1,0 +1,224 @@
+{
+  "runId": "audit-1788202155494",
+  "defects": [
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/index.ts",
+      "line": 216,
+      "description": "Empty catch block swallows the error silently — catch { /* the existsSync/stat checks above already govern readability */ }",
+      "severity": "CRITICAL",
+      "hunter": "R2"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/index.ts",
+      "line": 532,
+      "description": "Empty catch block swallows the error silently — catch {}",
+      "severity": "CRITICAL",
+      "hunter": "R2"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/index.ts",
+      "line": 646,
+      "description": "Empty catch block swallows the error silently — catch {}",
+      "severity": "CRITICAL",
+      "hunter": "R2"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/index.ts",
+      "line": 685,
+      "description": "Empty catch block swallows the error silently — catch {}",
+      "severity": "CRITICAL",
+      "hunter": "R2"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/index.ts",
+      "line": 728,
+      "description": "Empty catch block swallows the error silently — catch {}",
+      "severity": "CRITICAL",
+      "hunter": "R2"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/index.ts",
+      "line": 745,
+      "description": "Empty catch block swallows the error silently — catch {}",
+      "severity": "CRITICAL",
+      "hunter": "R2"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/index.ts",
+      "line": 914,
+      "description": "Empty catch block swallows the error silently — catch {}",
+      "severity": "CRITICAL",
+      "hunter": "R2"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/index.ts",
+      "line": 926,
+      "description": "Empty catch block swallows the error silently — catch {}",
+      "severity": "CRITICAL",
+      "hunter": "R2"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/aether-backend/agent.ts",
+      "line": 311,
+      "description": "Empty catch block swallows the error silently — catch {}",
+      "severity": "CRITICAL",
+      "hunter": "R2"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/aether-backend/agent.ts",
+      "line": 320,
+      "description": "Empty catch block swallows the error silently — catch {}",
+      "severity": "CRITICAL",
+      "hunter": "R2"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/aether-backend/tools.ts",
+      "line": 76,
+      "description": "Empty catch block swallows the error silently — catch {}",
+      "severity": "CRITICAL",
+      "hunter": "R2"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/aether-backend/__tests__/meta-audit.test.ts",
+      "line": 48,
+      "description": "Empty catch block swallows the error silently — catch { /* cleanup best-effort */ }",
+      "severity": "CRITICAL",
+      "hunter": "R2"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/harness/pi-aether-agent.ts",
+      "line": 458,
+      "description": "Empty catch block swallows the error silently — catch { /* fall through */ }",
+      "severity": "CRITICAL",
+      "hunter": "R2"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/graph-mapper.ts",
+      "line": 139,
+      "description": "Empty catch block swallows the error silently — catch {\n      }",
+      "severity": "CRITICAL",
+      "hunter": "R2"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/graph-mapper.ts",
+      "line": 157,
+      "description": "Empty catch block swallows the error silently — catch {\n      }",
+      "severity": "CRITICAL",
+      "hunter": "R2"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/graph-mapper.ts",
+      "line": 202,
+      "description": "Empty catch block swallows the error silently — catch {\n      }",
+      "severity": "CRITICAL",
+      "hunter": "R2"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/graphify.ts",
+      "line": 69,
+      "description": "Empty catch block swallows the error silently — catch {\n      }",
+      "severity": "CRITICAL",
+      "hunter": "R2"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/memory.ts",
+      "line": 110,
+      "description": "Empty catch block swallows the error silently — catch {}",
+      "severity": "CRITICAL",
+      "hunter": "R2"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/__tests__/aether-tools.test.ts",
+      "line": 69,
+      "description": "Empty catch block swallows the error silently — catch {}",
+      "severity": "CRITICAL",
+      "hunter": "R2"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/aether-backend/runner.ts",
+      "line": 251,
+      "description": "Function returns a hardcoded success without doing the work — () => { try { return fs.existsSync(path.join(ledgerRoot, 'verdicts.json')); } catch (err: unknown) { void (err instanceo",
+      "severity": "HIGH",
+      "hunter": "R5"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/aether-backend/runner.ts",
+      "line": 326,
+      "description": "Function returns a hardcoded success without doing the work — () => { try { return fs.existsSync(outPath); } catch { return false; } }",
+      "severity": "HIGH",
+      "hunter": "R5"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/harness/pi-aether-agent.ts",
+      "line": 425,
+      "description": "Function returns a hardcoded success without doing the work — () => { try { return fs.readFileSync(opts.judgmentPath, 'utf-8').trim().length > 0; } catch { return false; } }",
+      "severity": "HIGH",
+      "hunter": "R5"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/harness/pi-aether-agent.ts",
+      "line": 437,
+      "description": "Function returns a hardcoded success without doing the work — () => {\n      try { return fs.readFileSync(opts.judgmentPath, 'utf-8').includes('### FINDING'); } catch { return false; ",
+      "severity": "HIGH",
+      "hunter": "R5"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/harness/pi-aether-agent.ts",
+      "line": 440,
+      "description": "Function returns a hardcoded success without doing the work — () => {\n      try { return fs.readFileSync(opts.judgmentPath, 'utf-8').trim().length > 0; } catch { return false; }\n    ",
+      "severity": "HIGH",
+      "hunter": "R5"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/__tests__/aether-report-reader.test.ts",
+      "line": 21,
+      "description": "Test asserts a constant against itself — it can never fail — () => {\n  test('fenced json parse path', async () => {\n    const obj = { candidates: [{ file: 'a.ts' }], summary: 'ok' }",
+      "severity": "HIGH",
+      "hunter": "R5"
+    },
+    {
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/__tests__/aether-report-reader.test.ts",
+      "line": 126,
+      "description": "Test asserts a constant against itself — it can never fail — async () => {\n    const abs = absRel(R23_REL);\n    if (!fs.existsSync(abs)) { expect(true).toBe(true); return; }\n    con",
+      "severity": "HIGH",
+      "hunter": "R5"
+    },
+    {
+      "file": "src/hydra/pipeline.ts",
+      "line": 144,
+      "description": "violates Adapter at src/hydra/pipeline.ts:144",
+      "severity": "HIGH",
+      "hunter": "R22-lasme-adapter"
+    },
+    {
+      "file": "src/hydra/aether-auditor.ts",
+      "line": 94,
+      "description": "violates Adapter at src/hydra/aether-auditor.ts:94",
+      "severity": "HIGH",
+      "hunter": "R22-lasme-adapter"
+    },
+    {
+      "file": "src/hydra/aether-meta.ts",
+      "line": 233,
+      "description": "wraps Adapter at src/hydra/aether-meta.ts:233",
+      "severity": "HIGH",
+      "hunter": "R22-lasme-adapter"
+    },
+    {
+      "file": "src/hydra/graph-mapper.ts",
+      "line": 54,
+      "description": "lexicon.threshold Contract at src/hydra/graph-mapper.ts:54",
+      "severity": "HIGH",
+      "hunter": "R18-lasme-lexicon"
+    },
+    {
+      "file": "src/hydra/graph-mapper.ts",
+      "line": 221,
+      "description": "lexicon.threshold Contract at src/hydra/graph-mapper.ts:221",
+      "severity": "HIGH",
+      "hunter": "R18-lasme-lexicon"
+    }
+  ],
+  "dispositionedAt": null,
+  "directive": "Fix these before the next audit run. Delete this file to acknowledge disposition (the fix or the explicit operator waive). Set dispositionedAt + directive before delete."
+}

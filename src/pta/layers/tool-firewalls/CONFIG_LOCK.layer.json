@@ -1,0 +1,69 @@
+{
+  "id": "CONFIG_LOCK",
+  "description": "Locks configuration and canon docs after initial creation; only orchestrator may modify frozen paths.",
+  "toolMatchers": [
+    {
+      "toolName": "write",
+      "argPatterns": {
+        "filePath": [
+          "*config*",
+          "*opencode.json*",
+          "*.trident/*"
+        ]
+      }
+    },
+    {
+      "toolName": "edit",
+      "argPatterns": {
+        "filePath": [
+          "*config*",
+          "*opencode.json*",
+          "*.trident/*"
+        ]
+      }
+    },
+    {
+      "toolName": "bash",
+      "argPatterns": {
+        "command": [
+          "*config*",
+          "*opencode.json*"
+        ]
+      }
+    }
+  ],
+  "banks": {
+    "descriptive": [
+      "*config*lock*",
+      "*frozen*path*",
+      "*canon*doc*"
+    ],
+    "suggestive": [
+      "*update*config*",
+      "*modify*setting*"
+    ],
+    "substitute": [
+      "*bypass*config*lock*",
+      "*force*config*"
+    ],
+    "use": [
+      "*orchestrator*only*",
+      "*canon*update*"
+    ]
+  },
+  "pbaContextBoost": {
+    "families": [
+      "CONFIG_TAMPER"
+    ],
+    "boostAmount": 0.2
+  },
+  "enforcement": {
+    "tier1": "[PTA:CONFIG_LOCK:T1] DETECTED: Config-lock protected path write detected \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched CONFIG_LOCK toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 1 because it violates the CONFIG_LOCK contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier2": "[PTA:CONFIG_LOCK:T2] DETECTED: Repeated config-lock violation \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched CONFIG_LOCK toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 2 because it violates the CONFIG_LOCK contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier3": "[PTA:CONFIG_LOCK:T3] DETECTED: Config-lock violation at TEB \u2014 blocked \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched CONFIG_LOCK toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 3 because it violates the CONFIG_LOCK contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier4": "[PTA GATE:CONFIG_LOCK:T4] DETECTED: Config-lock violation at GATE \u2014 hard blocked; only violating toolMatchers gated, escape hatches and demanded tools always pass (R6) \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched CONFIG_LOCK toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 4 because it violates the CONFIG_LOCK contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier"
+  },
+  "threshold": 0.6,
+  "severity": "CRITICAL",
+  "chainRules": []
+}

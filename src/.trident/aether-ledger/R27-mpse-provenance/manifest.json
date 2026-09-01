@@ -1,0 +1,57 @@
+{
+  "runId": "R27-mpse-provenance-20250829-001",
+  "ready": true,
+  "stage": "verifying",
+  "provider": "opencode-go/muse-spark-1.2-contributor",
+  "counts": {
+    "candidatesIn": 5,
+    "trueDefect": 3,
+    "redHerring": 1,
+    "unclear": 1,
+    "unclassifiedEmitted": 0
+  },
+  "rounds": {
+    "used": 3,
+    "budget": 5
+  },
+  "wallClockMs": 12847,
+  "probeMs": 42,
+  "phaseLog": [
+    {
+      "phase": "IDLE",
+      "enteredAt": 1756400000000,
+      "exitedAt": 1756400000042
+    },
+    {
+      "phase": "PROBING",
+      "enteredAt": 1756400000042,
+      "exitedAt": 1756400000100
+    },
+    {
+      "phase": "RECON",
+      "enteredAt": 1756400000100,
+      "exitedAt": 1756400000150
+    },
+    {
+      "phase": "EVIDENCING",
+      "enteredAt": 1756400000150,
+      "exitedAt": 1756400008000
+    },
+    {
+      "phase": "ADJUDICATING",
+      "enteredAt": 1756400008000,
+      "exitedAt": 1756400010000
+    },
+    {
+      "phase": "REPORTING",
+      "enteredAt": 1756400010000,
+      "exitedAt": 1756400012000
+    },
+    {
+      "phase": "VERIFYING",
+      "enteredAt": 1756400012000,
+      "exitedAt": 1756400012847
+    }
+  ],
+  "validatorRejects": 0
+}

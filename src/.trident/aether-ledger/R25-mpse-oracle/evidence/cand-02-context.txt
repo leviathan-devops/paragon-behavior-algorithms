@@ -1,0 +1,43 @@
+CANDIDATE 2 — TRUE_DEFECT — r-mpse oracle.ts:15 S1
+File: src/audit-engine/math/oracle.ts:15
+Layer: r-mpse (oracle predicate — unguarded_threshold / evaluates_to)
+Code Quote: const eps = decl.epsilon ?? 0;
+Code Window (±40L, verbatim):
+```
+src/audit-engine/math/oracle.ts:8-36
+export interface OracleDeclaration {
+  readonly exprId: string;
+  readonly oracleValue: number | boolean | readonly (string | number)[];
+  readonly anchor: ProvenanceAnchor;
+  readonly unit?: string;
+  readonly epsilon?: number; // <- OPTIONAL — should be REQUIRED
+}
+function isFiniteEpsilon(e: unknown): boolean { return typeof e === 'number' && Number.isFinite(e) && e >= 0; }
+export function createOracleRegistry(): OracleRegistry {
+  const store = new Map<string, OracleDeclaration>();
+  return {
+    register(decl: OracleDeclaration): void {
+      const eps = decl.epsilon ?? 0; // <- THE DEFECT — masks missing as 0
+      if (!isFiniteEpsilon(eps)) throw new Error(`ORACLE_EPSILON_REQUIRED: epsilon must be finite >=0 for ${decl.exprId}`);
+      if (store.has(decl.exprId)) throw new Error(`ORACLE_CONFLICT: duplicate exprId ${decl.exprId}`);
+      const normalized: OracleDeclaration = { ...decl, epsilon: eps };
+      store.set(decl.exprId, normalized);
+    },
+    ...
+    discharge(exprId, evaluated): boolean {
+      const decl = store.get(exprId);
+      const ov = decl.oracleValue;
+      const eps = decl.epsilon ?? 0; // also defaults
+      if (typeof ov === 'number' && typeof evaluated === 'number') return Math.abs(evaluated - ov) <= eps;
+    }
+```
+Spec Path: /home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/KNOWLEDGE_LIBRARY/Codename:PARAGON/PARAGON_L2_BUILD_SPEC.md
+Spec Line: 695
+Spec Quote: a non-integer float without the epsilon THROWS OracleEpsilonError (the hidden tolerance BANNED)
+Spec Context: SPEC-A §2.2.4 `OracleDeclaration{exprId, oracleValue, anchor, unit?, epsilon} — epsilon REQUIRED at registration (PARAGON oracle.ts:43's law)` + MC-A-06 `forall d ∈ oracleDeclarations: present(d.epsilon)` ∧ `|eval−oracle| = tol+1e-12 → FirewallError`
+Divergence: the spec declares a non-integer float without epsilon must THROW OracleEpsilonError; the code does `const eps = decl.epsilon ?? 0` and only checks isFiniteEpsilon(eps) (passes for 0), which permits a float oracleValue=0.1 with eps=0 (no throw), so the hidden zero-tolerance is not banned and the gap is a missing float-requires-epsilon guard.
+Proof: `isFiniteEpsilon(0)` is true, so ??0 makes `undefined → 0 → passes`, throw unreachable for missing case. `contentHash()` at :26 hashes [exprId, oracleValue, epsilon] with normalized 0 — forgotten vs explicit-0 collide (provenance D-5). Test at math.test.ts:56 registers without epsilon and expects success — false-green.
+Impact: uncalibrated oracles slip as exact-equality; unguarded_threshold detector in r-mpse.ts (hasEpsilonField at 138-145) can never fire because violation is laundered before incidence.
+Confidence: 0.95
+Derailment Mode: D1 (single-admissible-reading)
+Fix: `readonly epsilon: number;` (remove ?), `if (decl.epsilon===undefined) throw ORACLE_EPSILON_REQUIRED` before isFinite check, `store.set(decl.exprId, decl)` no normalization, discharge uses `decl.epsilon!`.

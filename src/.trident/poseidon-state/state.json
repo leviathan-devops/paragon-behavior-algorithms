@@ -1,0 +1,13 @@
+{
+  "enforcer-test-session": {
+    "active": false,
+    "activatedAt": 1787433302234,
+    "lastActivityAt": 1787433302235,
+    "cycles": 0,
+    "cyclesSinceImprovement": 0,
+    "currentScore": 0,
+    "highestScore": 0,
+    "targetPath": "/tmp/enf-vGsQA1",
+    "abortFlag": false
+  }
+}

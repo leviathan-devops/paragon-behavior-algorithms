@@ -1,0 +1,58 @@
+{
+  "runId": "audit-1788174665340",
+  "layer": "SRO-meta",
+  "predicate": "sro-orchestrator",
+  "adjudicatedAt": "2026-08-31T00:00:00.000Z",
+  "scope": "src/hydra/aether-tools.ts + src/hydra/aether-meta.ts + src/hydra/instances/sro.ts",
+  "summary": "3 findings adjudicated: 3 TRUE_DEFECT, 0 RED_HERRING, 0 UNCLEAR — all against current HEAD post-C2 runner fixes",
+  "verdicts": [
+    {
+      "findingIndex": 0,
+      "layer": "SRO-meta",
+      "adjudication": "TRUE_DEFECT",
+      "file": "src/hydra/aether-tools.ts",
+      "line": 67,
+      "predicate": "flagged_by",
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/AETHER_CLEANUP_OVERHAUL_PLAN.md",
+      "specLine": 62,
+      "specQuote": "Scope Pinning — reads confined to targetRoot via READ_SCOPE_VIOLATION; one-target law hunt ONLY inside targetRoot",
+      "codeQuote": "} catch (e) { void (e as Error).message; } // src/hydra/aether-tools.ts:67 inside makeCappedReadTool targetRoot check",
+      "evidence": "catch (e) { void (e as Error).message; } inside makeCappedReadTool targetRoot check silently swallows realResolve failure and falls through to fs.readFileSync without returning READ_SCOPE_VIOLATION",
+      "divergence": "C2-runner added isWithinRoot check but left fail-open on error; symlink loop or unreadable parent where realResolve throws bypasses confinement. Must fail-closed and return READ_SCOPE_VIOLATION with attempted path. Same pattern at grep 112-120.",
+      "confidence": 0.9,
+      "severity": "HIGH"
+    },
+    {
+      "findingIndex": 1,
+      "layer": "SRO-meta",
+      "adjudication": "TRUE_DEFECT",
+      "file": "src/hydra/aether-meta.ts",
+      "line": 235,
+      "predicate": "caused",
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/trident-tmp/c2-runner.md",
+      "specLine": 18,
+      "specQuote": "runner-side tagging deterministic via DELETE-before-INSERT idempotent by canonical_id layerId:file:line with per-hunter tagsWritten in roster; LOUD log and continue on per-tag failure",
+      "codeQuote": "DELETE FROM typed_nodes WHERE canonical_id = ?; DELETE FROM typed_nodes WHERE canonical_id = ?; DELETE FROM typed_edges WHERE src_canonical = ?; INSERT INTO typed_nodes ... without BEGIN TRANSACTION",
+      "evidence": "DELETE FROM typed_nodes WHERE canonical_id = ? then delete for codeNodeId then delete typed_edges followed by separate INSERT INTO typed_nodes without BEGIN TRANSACTION/COMMIT in writeRunnerTag",
+      "divergence": "DELETE-before-INSERT not atomic — crash between deletes leaves typed_graph partially empty, breaking SRO correlations and runner-side tagging counts. Need WAL + transaction wrapper for atomic idempotent tag write.",
+      "confidence": 0.85,
+      "severity": "MEDIUM"
+    },
+    {
+      "findingIndex": 2,
+      "layer": "SRO-meta",
+      "adjudication": "TRUE_DEFECT",
+      "file": "src/hydra/instances/sro.ts",
+      "line": 328,
+      "predicate": "derived_from",
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md",
+      "specLine": 56,
+      "specQuote": "ONE GRAPH LAW — extract ONCE, query N times with canonical file keys; graphify integration file keys canonical",
+      "codeQuote": "const id = v.file + \":\" + v.line; if (!allFindings.some((f) => f.id === id))",
+      "evidence": "const id = v.file + \":\" + v.line and if (!allFindings.some((f) => f.id === id)) uses raw file strings without path.resolve normalization before dedup",
+      "divergence": "fileToNodeIds built from absolute n.file (path.resolve) while lookup uses relative finding.file per template contract; no normalization on either side causes duplicate findingId for same file via relative vs absolute and inflates downstreamCount / false-empty blastRadius.",
+      "confidence": 0.8,
+      "severity": "MEDIUM"
+    }
+  ]
+}

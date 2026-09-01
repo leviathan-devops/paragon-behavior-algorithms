@@ -1,23 +1,31 @@
 {
-  "name": "paragon-v2-behavior-algorithms",
-  "version": "1.0.0",
-  "description": "The universal behavior enforcement boilerplate — plug in any domain's detection families, behavioral checks, templates, and compliance demands.",
+  "name": "trident-v4.4",
+  "version": "v4.4.3",
   "type": "module",
-  "main": "index.ts",
-  "types": "index.ts",
-  "exports": {
-    ".": "./index.ts",
-    "./core": "./core/index.ts",
-    "./capture": "./capture/index.ts",
-    "./actuation": "./actuation/index.ts",
-    "./config": "./config/index.ts",
-    "./hooks": "./hooks/index.ts"
-  },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "bun test"
+    "build:check": "bun build src/index.ts --outdir dist --target bun --format esm --bundle",
+    "build": "bun build src/index.ts --outdir dist --target bun --format esm --bundle",
+    "build:esbuild": "esbuild src/index.ts --bundle --platform=node --format=esm --target=node20 --outfile=dist/index.js --sourcemap --external:@opencode-ai/plugin --external:zod --external:xstate --external:@xstate/fsm --banner:js=\"import{createRequire as __cr}from'module';import{fileURLToPath as __ftp}from'url';import{dirname as __dn}from'path';const require=__cr(import.meta.url);const __filename=__ftp(import.meta.url);const __dirname=__dn(__filename);\"",
+    "build:bun": "bun build src/index.ts --outdir dist --target bun --format esm --bundle",
+    "test": "npx tsx ../tests/properties.ts"
+  },
+  "dependencies": {
+    "@earendil-works/pi-agent-core": "0.84.2",
+    "@earendil-works/pi-ai": "0.84.2",
+    "@opencode-ai/plugin": "^1.16.0",
+    "peggy": "^4.2.0",
+    "sql.js": "^1.14.1",
+    "typescript": "^6.0.3",
+    "wink-eng-lite-web-model": "^1.8.1",
+    "wink-nlp": "^2.4.0",
+    "xstate": "^5.32.1",
+    "zod": "4.1.8",
+    "@modelcontextprotocol/sdk": "^1.30.0"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@stryker-mutator/core": "^8.7.1",
+    "fast-check": "^3.23.2",
+    "tsx": "^4.22.4"
   }
 }

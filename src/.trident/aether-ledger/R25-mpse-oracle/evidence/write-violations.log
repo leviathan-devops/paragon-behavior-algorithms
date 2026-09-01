@@ -1,0 +1,8 @@
+# Write Violations Log — R25-mpse-oracle
+# §2.2.2 Write-Scope Law: every write_file/edit_file outside ledgerRoot is refused and logged here.
+# This run: 0 violations — all writes were scoped to /home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/.trident/aether-ledger/R25-mpse-oracle
+# (the codebase under audit is READ-ONLY evidence)
+# No out-of-scope writes were attempted; no violations to disclose in report §6.
+
+{"at":1788023447034,"code":"WRITE_SCOPE_VIOLATION","attempted":"/home/leviathan/OPENCODE_WORKSPACE/findings/report.md","ledgerRoot":"/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/.trident/aether-ledger/R25-mpse-oracle"}
+{"at":1788174952551,"code":"WRITE_SCOPE_VIOLATION","attempted":"/home/leviathan/OPENCODE_WORKSPACE/findings/report.md","ledgerRoot":"/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/.trident/aether-ledger/R25-mpse-oracle"}

@@ -1,0 +1,500 @@
+[
+  {
+    "layerId": "R18-lasme-lexicon",
+    "layerNumber": 18,
+    "anchorPredicate": "lexicon",
+    "ledgerDir": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/.trident/aether-ledger/R18-lasme-lexicon",
+    "reportPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/.trident/aether-ledger/R18-lasme-lexicon/findings/report.md",
+    "status": "fulfilled",
+    "fileBytes": 8285,
+    "fileMtime": 1788174933348.7295,
+    "findings": {
+      "candidates": [
+        {
+          "layer": "R18-lasme-lexicon",
+          "predicate": "lexicon.degenerate",
+          "subject": "degenerate lexicon — PatternFamily matcher accepts non-function shape as valid",
+          "object": "Contract",
+          "file": "src/audit-engine/layers/r-lexicon.ts",
+          "line": 71,
+          "evidence": "if (structurallyFunction) fields.add('matcher'); else fields.add('matcher');",
+          "implicatedSpecClause": "src/audit-engine/lexicons/audit-lexicons.ts:23 matcher must take (node, ctx) Order-2+ and decide on AST structure",
+          "severity": "HIGH",
+          "confidence": 0.92
+        },
+        {
+          "layer": "R18-lasme-lexicon",
+          "predicate": "lexicon.family",
+          "subject": "degenerate lexicon — class PatternFamily never checks id/kind, forces false SIDE-2",
+          "object": "Contract",
+          "file": "src/audit-engine/layers/r-lexicon.ts",
+          "line": 88,
+          "evidence": "if (memberName === 'exampleHits') { fields.add('exampleHits'); hasExampleHits = true; }",
+          "implicatedSpecClause": "src/audit-engine/layers/r-lexicon.ts:7 PATTERN_FAMILY_REQUIRED_FIELDS 8-field identity including id and kind",
+          "severity": "HIGH",
+          "confidence": 0.89
+        },
+        {
+          "layer": "R18-lasme-lexicon",
+          "predicate": "lexicon.missing",
+          "subject": "missing lexicon — 7-branch switch tower in EvidenceGate with no PatternFamily",
+          "object": "Contract",
+          "file": "src/audit-engine/evidence-gate.ts",
+          "line": 22,
+          "evidence": "switch (layer) {",
+          "implicatedSpecClause": "src/audit-engine/layers/r-lexicon.ts:6 DECISION_LADDER_DEPTH_THRESHOLD = 3; depth>=3 decision ladder minimum must be lexicon-driven (ISE SLOP-SIG-1)",
+          "severity": "HIGH",
+          "confidence": 0.87
+        },
+        {
+          "layer": "R18-lasme-lexicon",
+          "predicate": "lexicon.threshold",
+          "subject": "uncalibrated threshold — bare 0.1 literal gates confidence decision without named constant or calib",
+          "object": "Contract",
+          "file": "src/audit-engine/evidence-gate.ts",
+          "line": 71,
+          "evidence": "confidence = finding.confidence * 0.1;",
+          "implicatedSpecClause": "src/audit-engine/scoring.ts:15 HARDCODE BAN: every numeric threshold is a NAMED const with a BECAUSE comment",
+          "severity": "HIGH",
+          "confidence": 0.9
+        },
+        {
+          "layer": "R18-lasme-lexicon",
+          "predicate": "lexicon.threshold",
+          "subject": "uncalibrated threshold — bare 1.5 literal amplifies confidence without calibration",
+          "object": "Contract",
+          "file": "src/audit-engine/evidence-gate.ts",
+          "line": 73,
+          "evidence": "confidence = Math.min(1.0, finding.confidence * 1.5);",
+          "implicatedSpecClause": "src/audit-engine/scoring.ts:15 HARDCODE BAN: every numeric threshold is a NAMED const with a BECAUSE comment",
+          "severity": "MEDIUM",
+          "confidence": 0.88
+        },
+        {
+          "layer": "R18-lasme-lexicon",
+          "predicate": "lexicon.drift",
+          "subject": "lexicon drift — evidence quote always line 1-2, not the decision ladder site",
+          "object": "Contract",
+          "file": "src/audit-engine/layers/r-lexicon.ts",
+          "line": 205,
+          "evidence": "const lineIdx = Math.max(0, countIfChainDepth(sf) > 0 ? 1 : 0);",
+          "implicatedSpecClause": "src/hydra/aether-templates/hunters/lasme-lexicon.ts:18 Fire on what IS: every finding carries file+line+a verbatim quote from the source — evidence must match the decision site",
+          "severity": "MEDIUM",
+          "confidence": 0.85
+        },
+        {
+          "layer": "R18-lasme-lexicon",
+          "predicate": "lexicon.drift",
+          "subject": "lexicon drift — SIDE-2 PatternFamily finding always reports line 1, not declaration line",
+          "object": "Contract",
+          "file": "src/audit-engine/layers/r-lexicon.ts",
+          "line": 218,
+          "evidence": "const lineNum = sf.getLineAndCharacterOfPosition(sf.getStart()).line + 1;",
+          "implicatedSpecClause": "src/hydra/aether-templates/hunters/lasme-lexicon.ts:18 Fire on what IS: every finding carries file+line+a verbatim quote — declaration line must be the PatternFamily node, not file start",
+          "severity": "MEDIUM",
+          "confidence": 0.84
+        }
+      ],
+      "summary": "R18-lasme-lexicon — Lexicon Bug Hunter Report — 7 finding(s) extracted from markdown report"
+    },
+    "findingsCount": 7,
+    "tagsWritten": 7,
+    "durationMs": 1673
+  },
+  {
+    "layerId": "R19-lasme-actor",
+    "layerNumber": 19,
+    "anchorPredicate": "actor",
+    "ledgerDir": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/.trident/aether-ledger/R19-lasme-actor",
+    "reportPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/.trident/aether-ledger/R19-lasme-actor/findings/report.md",
+    "status": "fulfilled",
+    "fileBytes": 3354,
+    "fileMtime": 1788175288300.9172,
+    "findings": {
+      "candidates": [
+        {
+          "layer": "R19-lasme-actor",
+          "predicate": "violates",
+          "subject": "detector counts any subscribe callee as actor subscription — hides missing actor.subscribe",
+          "object": "Actor",
+          "file": "src/audit-engine/layers/r-actor.ts",
+          "line": 23,
+          "evidence": "subscribe: 'subscribeCount',",
+          "implicatedSpecClause": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md:195 Actor topology, createActor/createMachine/send/subscribe calls, missing subscriptions, message flow integrity",
+          "severity": "HIGH",
+          "confidence": 0.88
+        },
+        {
+          "layer": "R19-lasme-actor",
+          "predicate": "shouldBe",
+          "subject": "phantom topology-drift shouldBe fires on any class/send/subscribe without actor when spec declares actor — overly broad non-actor signals",
+          "object": "Actor",
+          "file": "src/audit-engine/layers/r-actor.ts",
+          "line": 184,
+          "evidence": "if (specInfo.declared && stats.createActorCount === 0 && (stats.classDecls > 0 || stats.sendCount > 0 || stats.subscribeCount > 0)) {",
+          "implicatedSpecClause": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md:195 Actor topology drift — spec declares actor must exist but code omits",
+          "severity": "MEDIUM",
+          "confidence": 0.85
+        },
+        {
+          "layer": "R19-lasme-actor",
+          "predicate": "violates",
+          "subject": "AuditFSM actor lifecycle uses interpret+start+send+getSnapshot polling with zero subscribe handlers — missing subscription violates actor message-flow integrity",
+          "object": "Actor",
+          "file": "src/warheads/xstate-fsm/index.ts",
+          "line": 133,
+          "evidence": "this.actor = interpret(auditMachine);",
+          "implicatedSpecClause": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md:195 Actor topology, missing subscriptions, message flow integrity",
+          "severity": "MEDIUM",
+          "confidence": 0.78
+        }
+      ],
+      "summary": "R19 LASME Actor Hunt — Findings Report — 3 finding(s) extracted from markdown report"
+    },
+    "findingsCount": 3,
+    "tagsWritten": 3,
+    "durationMs": 2154
+  },
+  {
+    "layerId": "R20-lasme-state-machine",
+    "layerNumber": 20,
+    "anchorPredicate": "state-machine",
+    "ledgerDir": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/.trident/aether-ledger/R20-lasme-state-machine",
+    "reportPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/.trident/aether-ledger/R20-lasme-state-machine/findings/report.md",
+    "status": "fulfilled",
+    "fileBytes": 14059,
+    "fileMtime": 1788175146635.426,
+    "findings": {
+      "candidates": [
+        {
+          "layer": "R20-lasme-state-machine",
+          "predicate": "state-machine.unreachable-state",
+          "subject": "unreachable final state `inconclusive` declared with zero incoming transitions",
+          "object": "Contract",
+          "file": "src/warheads/xstate-fsm/index.ts",
+          "line": 137,
+          "evidence": "\"inconclusive: { type: 'final' }\" — declared as final with no transition targeting it; scan of auditMachine states shows inbound edge count = 0 (idle→scanning, scanning→analyzing, analyzing→reporting, reporting→done, failed↔idle, but no edge → inconclusive)",
+          "implicatedSpecClause": "Shared Workspace Context/KNOWLEDGE_LIBRARY/LASME/02_STATE_MACHINES_AND_GATES.md:§1.2.1 StateMachineSchema validates \"no transition targets point to undefined states\" and §1.1 \"The state graph is fully enumerable and verifiable\" — every declared state must be reachable; V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md §2.3 r-state-machine \"missing terminal states / unreachable states\"",
+          "severity": "HIGH",
+          "confidence": 0.92
+        },
+        {
+          "layer": "R20-lasme-state-machine",
+          "predicate": "state-machine.topology-drift",
+          "subject": "state topology drift — spurious events START_ANALYSIS and START_REPORT sent but machine has no handler for them",
+          "object": "Contract",
+          "file": "src/warheads/xstate-fsm/index.ts",
+          "line": 182,
+          "evidence": "\"this.send({ type: 'START_ANALYSIS', mode: 'full' });\" and \"this.send({ type: 'START_REPORT', format: 'markdown' });\" inside AuditFSM.runFullCycle() — machine states define on: START_SCAN, SCAN_COMPLETE, ANALYSIS_COMPLETE, REPORT_COMPLETE, FAIL, RESET only; START_ANALYSIS and START_REPORT have zero transitions, so the wrapper's event sequence diverges from the machine's declared topology (XState will ignore these events, remaining in analyzing/reporting instead of transitioning)",
+          "implicatedSpecClause": "Shared Workspace Context/KNOWLEDGE_LIBRARY/LASME/02_STATE_MACHINES_AND_GATES.md:§1.1 \"Only valid events are processed in the current state\" + \"The FSM interpreter ensures transitions execute atomically\" — sending an event with no handler is dead topology; V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md §2.3 r-state-machine \"STATE TOPOLOGY DRIFT — the spec declares specific states/transitions but the code's createMachine config omits them, renames them, or adds undeclared states without spec coverage\"",
+          "severity": "MEDIUM",
+          "confidence": 0.88
+        }
+      ],
+      "summary": "2 findings — 1 HIGH (unreachable terminal), 1 MEDIUM (topology drift). 7 baseline candidates triaged: 6 mitigated/red-herring after surgical fixes (terminal wiring in orchestrator-machine-v2 + auditMachine, orphan stub documentation, flag delegation comments, topology alignment in orchestrator), 1 baseline missing-terminal fully fixed. 2 new true defects remain in `src/warheads/xstate-fsm/index.ts`: (1) `inconclusive` final state is dead code — added to satisfy \"add DONE or INCONCLUSIVE finals\" but never wired, violating the enumerable-verifiable graph law; fix is to wire a transition to `inconclusive` (e.g., `analy"
+    },
+    "findingsCount": 2,
+    "tagsWritten": 2,
+    "durationMs": 3325
+  },
+  {
+    "layerId": "R21-lasme-engine",
+    "layerNumber": 21,
+    "anchorPredicate": "engine",
+    "ledgerDir": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/.trident/aether-ledger/R21-lasme-engine",
+    "reportPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/.trident/aether-ledger/R21-lasme-engine/findings/report.md",
+    "status": "fulfilled",
+    "fileBytes": 16280,
+    "fileMtime": 1788175069419.0881,
+    "findings": {
+      "candidates": [
+        {
+          "layer": "R21-lasme-engine",
+          "predicate": "engine.silentDegrade",
+          "subject": "silent degrade — repair prompt write swallows failure with no log, no propagation, no metric",
+          "object": "Contract",
+          "file": "hydra/aether-auditor.ts",
+          "line": 145,
+          "evidence": "try { fs.writeFileSync(path.join(resolvedLedger, 'repair-prompt.md'), repairPrompt, 'utf-8'); } catch (ee) { void (ee as Error).message; }",
+          "implicatedSpecClause": "src/hydra/aether-templates/hunters/lasme-engine.ts:10(b) SILENT DEGRADE — degrade/fallback branches that swallow failures without logging, without propagating, or without metric + lasme-engine.ts:12(d) catch must log+recover or propagate, never empty + w1-silent.md:27 EITHER A LOUD FUCKING ERROR OR IT WORKS",
+          "severity": "HIGH",
+          "confidence": 0.93
+        },
+        {
+          "layer": "R21-lasme-engine",
+          "predicate": "engine.silentDegrade",
+          "subject": "silent degrade — repair ledger append swallows failure, repair loop failure vanishes",
+          "object": "Contract",
+          "file": "hydra/aether-auditor.ts",
+          "line": 146,
+          "evidence": "try { fs.appendFileSync(path.join(resolvedLedger, 'repair-ledger.log'), repairPrompt + '\\n', 'utf-8'); } catch (ee) { void (ee as Error).message; }",
+          "implicatedSpecClause": "src/hydra/aether-templates/hunters/lasme-engine.ts:10(b) SILENT DEGRADE + lasme-engine.ts:12(d) catch must log+recover or propagate + w1-silent.md:27",
+          "severity": "HIGH",
+          "confidence": 0.92
+        },
+        {
+          "layer": "R21-lasme-engine",
+          "predicate": "engine.silentDegrade",
+          "subject": "silent degrade — read scope check swallow bypasses READ_SCOPE_VIOLATION gate, read proceeds unguarded",
+          "object": "Gate",
+          "file": "hydra/aether-tools.ts",
+          "line": 71,
+          "evidence": "} catch (e) { void (e as Error).message; } } try { const text = fs.readFileSync(effectivePath, 'utf-8');",
+          "implicatedSpecClause": "src/hydra/aether-templates/hunters/lasme-engine.ts:10(d) UNGUARDED SIDE EFFECTS IN CRITICAL PATHS — catch must log+recover or propagate, never empty + lasme-engine.ts:10(a) UNGUARDED WRITES + src/hydra/aether-tools.ts:49-73 READ_SCOPE_VIOLATION gate",
+          "severity": "CRITICAL",
+          "confidence": 0.89
+        },
+        {
+          "layer": "R21-lasme-engine",
+          "predicate": "engine.silentDegrade",
+          "subject": "silent degrade — grep scope check swallow bypasses READ_SCOPE_VIOLATION gate, grep proceeds unguarded",
+          "object": "Gate",
+          "file": "hydra/aether-tools.ts",
+          "line": 107,
+          "evidence": "} catch (e) { void (e as Error).message; } } const maxResults = Math.min(p.maxResults ?? cap, cap);",
+          "implicatedSpecClause": "src/hydra/aether-templates/hunters/lasme-engine.ts:10(d) UNGUARDED SIDE EFFECTS IN CRITICAL PATHS + lasme-engine.ts:10(a) UNGUARDED WRITES + src/hydra/aether-tools.ts:85-108 grep scope gate",
+          "severity": "CRITICAL",
+          "confidence": 0.88
+        },
+        {
+          "layer": "R21-lasme-engine",
+          "predicate": "engine.silentDegrade",
+          "subject": "silent degrade — per-gate roster write failure swallowed, audit evidence loss is silent",
+          "object": "Contract",
+          "file": "hydra/aether-meta.ts",
+          "line": 212,
+          "evidence": "try { fs.writeFileSync(perGatePath, JSON.stringify(settledEntries, null, 2), 'utf-8'); } catch (e) { void (e as Error).message; }",
+          "implicatedSpecClause": "src/hydra/aether-templates/hunters/lasme-engine.ts:10(b) SILENT DEGRADE — write failure vanishes, caller believes audit succeeded + lasme-engine.ts:12(d) pipeline artifact generation is engine-critical path, FS writes must be guarded",
+          "severity": "HIGH",
+          "confidence": 0.86
+        },
+        {
+          "layer": "R21-lasme-engine",
+          "predicate": "engine.silentDegrade",
+          "subject": "silent degrade — roster merge write swallowed, compat roster loss silent, no propagation to caller",
+          "object": "Contract",
+          "file": "hydra/aether-meta.ts",
+          "line": 238,
+          "evidence": "} catch (ee) { void (ee as Error).message; } } const compatPath = path.join(root, 'roster.json');",
+          "implicatedSpecClause": "src/hydra/aether-templates/hunters/lasme-engine.ts:10(b) SILENT DEGRADE + lasme-engine.ts:12(d) engine-critical path side effect without error-path-first discipline",
+          "severity": "MEDIUM",
+          "confidence": 0.82
+        },
+        {
+          "layer": "R21-lasme-engine",
+          "predicate": "engine.silentDegrade",
+          "subject": "unguarded side effect — module-level spy hook swallow hides agent-ledger corruption without observation",
+          "object": "Contract",
+          "file": "hydra/aether-auditor.ts",
+          "line": 92,
+          "evidence": "try { globalThis.__aetherLedgerSpy(agent.ledger); } catch (e) { void (e as Error).message; }",
+          "implicatedSpecClause": "src/hydra/aether-templates/hunters/lasme-engine.ts:10(b) SILENT DEGRADE + lasme-engine.ts:12(d) catch must log+recover or propagate",
+          "severity": "LOW",
+          "confidence": 0.71
+        }
+      ],
+      "summary": "R21 LASME Engine Hunter — Investigation Report — 7 finding(s) extracted from markdown report"
+    },
+    "findingsCount": 7,
+    "tagsWritten": 7,
+    "durationMs": 5668
+  },
+  {
+    "layerId": "R22-lasme-adapter",
+    "layerNumber": 22,
+    "anchorPredicate": "adapter",
+    "ledgerDir": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/.trident/aether-ledger/R22-lasme-adapter",
+    "reportPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/.trident/aether-ledger/R22-lasme-adapter/findings/report.md",
+    "status": "fulfilled",
+    "fileBytes": 2763,
+    "fileMtime": 1788021896886.307,
+    "findings": {
+      "candidates": [
+        {
+          "layer": "R22-lasme-adapter",
+          "predicate": "violates",
+          "subject": "dispatchSubagent snapshot merge discarded and delegation replaced by throw — parity violation",
+          "object": "Adapter",
+          "file": "src/hydra/pipeline.ts",
+          "line": 144,
+          "evidence": "void tools; // tools assembled but unused — the primary path (runMetaLayer) bypasses this method",
+          "implicatedSpecClause": "MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md:§2.1 adapter must delegate tool set to engine — assembled spread merge must be consumed, not voided",
+          "severity": "HIGH",
+          "confidence": 0.92
+        },
+        {
+          "layer": "R22-lasme-adapter",
+          "predicate": "violates",
+          "subject": "aether-auditor builds 9-tool set then discards result — delegates to engine with divergent 5-tool set",
+          "object": "Adapter",
+          "file": "src/hydra/aether-auditor.ts",
+          "line": 94,
+          "evidence": "buildAuditorTools(resolvedLedger, graph, targetRoot);",
+          "implicatedSpecClause": "src/hydra/aether-auditor.ts:divergences Q1-tools — assembled buildAuditorTools result must be delegated to AetherAgent, not used only for side-effects",
+          "severity": "HIGH",
+          "confidence": 0.88
+        },
+        {
+          "layer": "R22-lasme-adapter",
+          "predicate": "wraps",
+          "subject": "aether-meta builds meta tool set then discards — meta delegates to generic auditor tools losing graphify and append semantics",
+          "object": "Adapter",
+          "file": "src/hydra/aether-meta.ts",
+          "line": 233,
+          "evidence": "try { buildMetaTools(doc1Path, doc2Path, graph); } catch (e) { void (e as Error).message; }",
+          "implicatedSpecClause": "MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md:§2.4 meta tools must include graphify×4+write_meta_doc+children_status — discarding buildMetaTools violates wrapper contract",
+          "severity": "HIGH",
+          "confidence": 0.86
+        },
+        {
+          "layer": "R22-lasme-adapter",
+          "predicate": "violates",
+          "subject": "graph-mapper extract discards caller scope/exclude — adapter delegation loses filter intent, parity violation",
+          "object": "Adapter",
+          "file": "src/hydra/graph-mapper.ts",
+          "line": 74,
+          "evidence": "void opts?.exclude;",
+          "implicatedSpecClause": "src/hydra/types.ts:63 GraphMapper.extract scope/exclude must be forwarded — adapter voiding params diverges from contract",
+          "severity": "MEDIUM",
+          "confidence": 0.81
+        }
+      ],
+      "summary": "R22lasme-adapter Hunt — Adapter Delegation Integrity — 4 finding(s) extracted from markdown report"
+    },
+    "findingsCount": 4,
+    "tagsWritten": 4,
+    "durationMs": 1853
+  },
+  {
+    "layerId": "R23-lasme-mpse-threshold",
+    "layerNumber": 23,
+    "anchorPredicate": "mpse-threshold",
+    "ledgerDir": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/.trident/aether-ledger/R23-lasme-mpse-threshold",
+    "reportPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/.trident/aether-ledger/R23-lasme-mpse-threshold/findings/report.md",
+    "status": "fulfilled",
+    "fileBytes": 11461,
+    "fileMtime": 1788175054028.8215,
+    "findings": {
+      "candidates": [
+        {
+          "layer": "R23-lasme-mpse-threshold",
+          "predicate": "mpse.threshold",
+          "subject": "epsilon oracle gap — register defaults missing epsilon to 0 instead of rejecting (violates REQUIRED law)",
+          "object": "Contract",
+          "file": "src/audit-engine/math/oracle.ts",
+          "line": 26,
+          "evidence": "const eps = decl.epsilon ?? 0;",
+          "implicatedSpecClause": "MASTER_CONTEXT/V443_PLAN_A_CODE_AUDIT_TOOL_L2_SPEC.md:135 epsilon REQUIRED at registration (PARAGON oracle.ts:43's law) — OracleDeclaration{exprId, oracleValue, anchor, unit?, epsilon} — epsilon REQUIRED; §2.4 SIDE 2 oracle without epsilon",
+          "severity": "HIGH",
+          "confidence": 0.92
+        },
+        {
+          "layer": "R23-lasme-mpse-threshold",
+          "predicate": "mpse.threshold",
+          "subject": "epsilon oracle gap — discharge and verifyAndDischarge use ??0 fallback, epsilonEnforced flag true for missing epsilon (bound not enforced)",
+          "object": "Contract",
+          "file": "src/audit-engine/math/oracle.ts",
+          "line": 46,
+          "evidence": "const eps = decl.epsilon ?? 0; // discharge: return Math.abs(evaluated - ov) <= eps;",
+          "implicatedSpecClause": "MASTER_CONTEXT/V443_PLAN_A_CODE_AUDIT_TOOL_L2_SPEC.md:135 epsilon REQUIRED at registration; comparison |evaluated − oracle| ≤ epsilon everywhere (KB-01:357-360); MC-A-06 present(d.epsilon)",
+          "severity": "HIGH",
+          "confidence": 0.89
+        },
+        {
+          "layer": "R23-lasme-mpse-threshold",
+          "predicate": "mpse.threshold",
+          "subject": "contract-site threshold omission — verifyAndDischarge epsilonEnforced computed via isFiniteEpsilon(... ?? 0) allows missing epsilon to pass as enforced",
+          "object": "Contract",
+          "file": "src/audit-engine/math/oracle.ts",
+          "line": 76,
+          "evidence": "return { discharged: ok, epsilonEnforced: isFiniteEpsilon(store.get(exprId)?.epsilon ?? 0) };",
+          "implicatedSpecClause": "MASTER_CONTEXT/V443_PLAN_A_CODE_AUDIT_TOOL_L2_SPEC.md:135 epsilon REQUIRED; MC-A-06 present(d.epsilon) ∧ |eval−oracle| = tol+1e-12 → FirewallError; §2.4 SIDE 2 oracle without epsilon",
+          "severity": "MEDIUM",
+          "confidence": 0.85
+        }
+      ],
+      "summary": "3 findings — 2 HIGH, 1 MEDIUM. All 3 cluster in the math oracle substrate, the canonical epsilon enforcement point.\n\n**Synthesis:** The audit target (v4.4.3) is otherwise THRESHOLD-CLEAN: every numeric decision gating a contract that was inspected is calibrated via NAMED constants with `calib:` / `BECAUSE` comments citing V443 §2.3 or the spec tier (scoring.ts SCORE_*_FLOOR, CONFIDENCE_FLOOR, DENSITY_SCALE_*; r-lexicon DECISION_LADDER_DEPTH_THRESHOLD/SWITCH_CLAUSE_THRESHOLD; query-engine PATH_DEPTH_*; expr.ts DEPTH_LIMIT_DEFAULT/DOMAIN_SI"
+    },
+    "findingsCount": 3,
+    "tagsWritten": 3,
+    "durationMs": 7303
+  },
+  {
+    "layerId": "lasme-meta",
+    "layerNumber": 18,
+    "anchorPredicate": "lasme-meta",
+    "ledgerDir": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/.trident/aether-ledger/lasme-meta",
+    "reportPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/.trident/aether-ledger/lasme-meta/findings/report.md",
+    "status": "fulfilled",
+    "fileBytes": 11973,
+    "fileMtime": 1788175042109.615,
+    "findings": {
+      "candidates": [
+        {
+          "layer": "R18-lasme-lexicon",
+          "predicate": "lexicon.threshold",
+          "subject": "godNodes bare threshold 5 without named constant — uncalibrated decision literal",
+          "object": "Contract",
+          "file": "src/hydra/graph-mapper.ts",
+          "line": 54,
+          "evidence": "const godNodes = sorted.slice(0, 5).map(([id]) => id);",
+          "implicatedSpecClause": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md:142 threshold literals without calibration are lexicon signal; Lexicon Bible 3.2 SLOP-SIG-3 magic literal gating decision requires const + calib: comment",
+          "severity": "HIGH",
+          "confidence": 0.92
+        },
+        {
+          "layer": "R18-lasme-lexicon",
+          "predicate": "lexicon.threshold",
+          "subject": "duplicate godNodes threshold 5 in merge path — systemic drift without abstraction",
+          "object": "Contract",
+          "file": "src/hydra/graph-mapper.ts",
+          "line": 221,
+          "evidence": "const godNodes = [...degree.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([id]) => id);",
+          "implicatedSpecClause": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md:142 same clause; duplicated uncalibrated threshold proves systemic drift, not one-off slip",
+          "severity": "HIGH",
+          "confidence": 0.9
+        },
+        {
+          "layer": "R23-lasme-mpse-threshold",
+          "predicate": "mpse.threshold",
+          "subject": "oracle registration defaults missing epsilon to bare 0 — unguarded threshold exact-equality gates discharge (register site)",
+          "object": "Contract",
+          "file": "src/audit-engine/math/oracle.ts",
+          "line": 23,
+          "evidence": "const eps = decl.epsilon ?? 0;",
+          "implicatedSpecClause": "MASTER_CONTEXT/V443_PLAN_A_CODE_AUDIT_TOOL_L2_SPEC.md:122 epsilon REQUIRED at registration (PARAGON oracle.ts:43's law) — OracleDeclaration epsilon is REQUIRED field, |evaluated - oracle| <= epsilon must be calibrated",
+          "severity": "HIGH",
+          "confidence": 0.94
+        },
+        {
+          "layer": "R23-lasme-mpse-threshold",
+          "predicate": "mpse.threshold",
+          "subject": "oracle discharge repeats coalesce to 0 — epsilon oracle gap on read path violates |evaluated-oracle|<=epsilon law",
+          "object": "Contract",
+          "file": "src/audit-engine/math/oracle.ts",
+          "line": 42,
+          "evidence": "const eps = decl.epsilon ?? 0;",
+          "implicatedSpecClause": "MASTER_CONTEXT/V443_PLAN_A_CODE_AUDIT_TOOL_L2_SPEC.md:122 same epsilon REQUIRED law; side-2 oracle without epsilon candidate per R-MPSE §2.4",
+          "severity": "HIGH",
+          "confidence": 0.88
+        },
+        {
+          "layer": "R21-lasme-engine",
+          "predicate": "engine.unguardedWrite",
+          "subject": "hydra/aether-auditor sync I/O on hot dispatch path — blocks event loop under Promise.allSettled 6-hunter dispatch",
+          "object": "Engine",
+          "file": "src/hydra/aether-auditor.ts",
+          "line": 72,
+          "evidence": "fs.writeFileSync(briefPath, brief, 'utf-8');",
+          "implicatedSpecClause": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md:156 r-engine hunt writeFileSync/degrade paths + unguarded side effects; AETHER §1.1 H2/H6 Hermes mandated node:fs/promises per-file queue",
+          "severity": "MEDIUM",
+          "confidence": 0.82
+        }
+      ],
+      "summary": "Investigation of 19 hunter-true-defect candidates against current code + specs:\n\n**CONFIRMED 4 FAMILIES (5 blocks above, 2+2 duplicate sites = 4 distinct roots):**\n- R18 lexicon threshold family: `graph-mapper.ts:54` and `:221` both `slice(0,5)` bare `5` with no `const GOD_NODE_LIMIT = 5 // calib: Top 5 by degree captures 95th percentile…` — file reads verified absence of calib, grep `slice\\(0, 5\\)` hits exactly 2 sites, neither hoisted. Both are the exact SLOP-SIG-3 literal the ISE law enforces; previous lasme.ts:19/116 thresholds are NOW FIXED (current lasme.ts:19-26 uses `SEVERITY_CRITICAL_WEIGHT = 4 // calib:` etc. with named constants — verified cleared, not emitted). R18 hunter's 4 other sites (r-lexicon.ts:120 `depth >=3` and :123 `clauses >=3`, hooks/trident-hooks.ts:111 `DESCRIPTIVE_CORE string[]` and :549 `sentenceVerdict` 5-branch tower) were re-audited: r-lexicon.ts NOW at lines 6-8 has `DECISION_LADDER_DEPTH_THRESHOLD = 3 // calib:` and `SWITCH_CLAUSE_THRESHOLD = 3 // calib:` plus 8-field PatternFamily with calib comment — FIXED since hunter's snapshot; hooks defects are out-of-slice for hydra target and deferred to sro dead-code hunter — not re-emitted here. Precision of R18 hunt on current hydra slice: 2/2 true, 0 false.\n\n- R23 mpse-threshold oracle family: `oracle.ts:23` (register) and `:42` (discharge) both `?? 0` bare literal with no `calib:` — verified by read 320: `createOracleRegistry` store Map, `register` does `const eps = decl.epsilon ?? 0; if (!isFiniteEpsilon(eps)) throw`, never checks `decl.epsilon === undefined` → missing epsilon passes as exact equality (`tolerance 0`). Discharge repeats same default, directly gates `Math.abs(evaluated - ov) <= eps` at :46 via EXTRACTED edge `discharge —calls→ Math.abs`. Spec §2.2.4 requires epsilon at registration; firewall.ts:correctly does `if (diff > raw.tolerance) throw` with no default, proving intended discipline is required not defaulted. r-mpse layer's own `hasEpsilonField` detector would flag same site — contradictory enforcement. Both sites are TRUE_DEFECT, same root cause — fix: `if (decl.epsilon === undefined) throw ORACLE_EPSILON_REQUIRED` in register and `const eps = decl.epsilon!` in discharge.\n\n- R21 engine sync family: `aether-auditor.ts:72` `fs.writeFileSync(briefPath, brief, 'utf-8')` plus 8 other sync sites (`aether-tools.ts:185,224` and `aether-auditor.ts` etc. total 9 per `rg writeFileSync src/hydra =9` grep 120 verified) blocks opencode event loop under `Promise.allSettled` 6-hunter dispatch; Hermes mandated async per-file queue is not present. Also `rg degrade src =0` verified —"
+    },
+    "findingsCount": 5,
+    "tagsWritten": 5,
+    "durationMs": 2635
+  }
+]

@@ -1,0 +1,218 @@
+[
+  {
+    "id": "d5ba0557e45a443a",
+    "timestamp": "2026-08-29T16:30:04.682Z",
+    "cycle": 0,
+    "type": "PHASE_TRANSITION",
+    "data": {
+      "fromPhase": "INIT",
+      "toPhase": "AUDIT",
+      "score": 0,
+      "cycle": 0
+    }
+  },
+  {
+    "id": "f161ab99979a4754",
+    "timestamp": "2026-08-29T17:41:47.476Z",
+    "cycle": 0,
+    "type": "PHASE_TRANSITION",
+    "data": {
+      "fromPhase": "AUDIT",
+      "toPhase": "SCORE",
+      "score": 0,
+      "cycle": 0
+    }
+  },
+  {
+    "id": "58d1ace54bd343aa",
+    "timestamp": "2026-08-29T17:41:47.529Z",
+    "cycle": 0,
+    "type": "PHASE_TRANSITION",
+    "data": {
+      "fromPhase": "SCORE",
+      "toPhase": "DECIDE",
+      "score": 0,
+      "cycle": 0
+    }
+  },
+  {
+    "id": "491c657f9c0cac48",
+    "timestamp": "2026-08-29T17:41:47.573Z",
+    "cycle": 0,
+    "type": "PHASE_TRANSITION",
+    "data": {
+      "fromPhase": "DECIDE",
+      "toPhase": "PROBLEM_SOLVE",
+      "score": 0,
+      "cycle": 0
+    }
+  },
+  {
+    "id": "9bf58b62b04cbeeb",
+    "timestamp": "2026-08-29T17:43:26.506Z",
+    "cycle": 0,
+    "type": "PHASE_TRANSITION",
+    "data": {
+      "fromPhase": "PROBLEM_SOLVE",
+      "toPhase": "PLAN",
+      "score": 0,
+      "cycle": 0
+    }
+  },
+  {
+    "id": "620c764574822c6d",
+    "timestamp": "2026-08-29T17:43:26.802Z",
+    "cycle": 0,
+    "type": "PHASE_TRANSITION",
+    "data": {
+      "fromPhase": "PLAN",
+      "toPhase": "DECIDE",
+      "score": 0,
+      "cycle": 0
+    }
+  },
+  {
+    "id": "bdab38d13648e383",
+    "timestamp": "2026-08-29T17:44:07.725Z",
+    "cycle": 0,
+    "type": "PHASE_TRANSITION",
+    "data": {
+      "fromPhase": "DECIDE",
+      "toPhase": "PROBLEM_SOLVE",
+      "score": 0,
+      "cycle": 0
+    }
+  },
+  {
+    "id": "daeb9114357343d8",
+    "timestamp": "2026-08-29T17:44:55.387Z",
+    "cycle": 0,
+    "type": "PHASE_TRANSITION",
+    "data": {
+      "fromPhase": "PROBLEM_SOLVE",
+      "toPhase": "PLAN",
+      "score": 0,
+      "cycle": 0
+    }
+  },
+  {
+    "id": "ed3bfa19ec31e0cb",
+    "timestamp": "2026-08-29T17:44:55.706Z",
+    "cycle": 0,
+    "type": "PHASE_TRANSITION",
+    "data": {
+      "fromPhase": "PLAN",
+      "toPhase": "DECIDE",
+      "score": 0,
+      "cycle": 0
+    }
+  },
+  {
+    "id": "d985a8d43c036d36",
+    "timestamp": "2026-08-29T17:46:01.170Z",
+    "cycle": 0,
+    "type": "PHASE_TRANSITION",
+    "data": {
+      "fromPhase": "DECIDE",
+      "toPhase": "PROBLEM_SOLVE",
+      "score": 0,
+      "cycle": 0
+    }
+  },
+  {
+    "id": "5694c89725757c8a",
+    "timestamp": "2026-08-30T04:11:18.561Z",
+    "cycle": 0,
+    "type": "PHASE_TRANSITION",
+    "data": {
+      "fromPhase": "INIT",
+      "toPhase": "AUDIT",
+      "score": 0,
+      "cycle": 0
+    }
+  },
+  {
+    "id": "8d6efe20ea2b3c97",
+    "timestamp": "2026-08-31T04:12:01.119Z",
+    "cycle": 0,
+    "type": "PHASE_TRANSITION",
+    "data": {
+      "fromPhase": "AUDIT",
+      "toPhase": "SCORE",
+      "score": 0,
+      "cycle": 0
+    }
+  },
+  {
+    "id": "9ab06a3750531c6d",
+    "timestamp": "2026-08-31T04:12:16.025Z",
+    "cycle": 1,
+    "type": "PHASE_TRANSITION",
+    "data": {
+      "fromPhase": "AUDIT_RECHECK",
+      "toPhase": "SCORE",
+      "score": 0,
+      "cycle": 1
+    }
+  },
+  {
+    "id": "5d1af22031867f16",
+    "timestamp": "2026-08-31T04:12:16.027Z",
+    "cycle": 1,
+    "type": "PHASE_TRANSITION",
+    "data": {
+      "fromPhase": "SCORE",
+      "toPhase": "DECIDE",
+      "score": 0,
+      "cycle": 1
+    }
+  },
+  {
+    "id": "c362fe3a7f647492",
+    "timestamp": "2026-08-31T04:12:16.029Z",
+    "cycle": 1,
+    "type": "PHASE_TRANSITION",
+    "data": {
+      "fromPhase": "DECIDE",
+      "toPhase": "PLAN",
+      "score": 0,
+      "cycle": 1
+    }
+  },
+  {
+    "id": "95dc942b608f3ec7",
+    "timestamp": "2026-08-31T04:16:56.681Z",
+    "cycle": 1,
+    "type": "PHASE_TRANSITION",
+    "data": {
+      "fromPhase": "PLAN",
+      "toPhase": "DECIDE",
+      "score": 0,
+      "cycle": 1
+    }
+  },
+  {
+    "id": "2be308dafd207fde",
+    "timestamp": "2026-08-31T04:17:59.332Z",
+    "cycle": 1,
+    "type": "PHASE_TRANSITION",
+    "data": {
+      "fromPhase": "DECIDE",
+      "toPhase": "PLAN",
+      "score": 0,
+      "cycle": 1
+    }
+  },
+  {
+    "id": "34e956f7581cd929",
+    "timestamp": "2026-08-31T04:26:12.824Z",
+    "cycle": 1,
+    "type": "PHASE_TRANSITION",
+    "data": {
+      "fromPhase": "PLAN",
+      "toPhase": "DISPATCH",
+      "score": 0,
+      "cycle": 1
+    }
+  }
+]

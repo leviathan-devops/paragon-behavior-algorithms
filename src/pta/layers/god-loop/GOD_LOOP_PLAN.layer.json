@@ -1,0 +1,79 @@
+{
+  "id": "GOD_LOOP_PLAN",
+  "description": "PLAN phase — groups findings by rootCause (layer:category), builds wave manifest with source context >>> markers, dynamic L1 prompts, expectedHashes. Filters non-actionable (findingWeight 0). Blocks DISPATCH without plan artifact with id intersection + agent assignment.",
+  "toolMatchers": [
+    {
+      "toolName": "trident-deep-planning",
+      "argPatterns": {
+        "command": [
+          "*plan*",
+          "*wave*",
+          "*manifest*"
+        ]
+      }
+    },
+    {
+      "toolName": "bash",
+      "argPatterns": {
+        "command": [
+          "*skip*plan*",
+          "*empty*wave*",
+          "*fake*manifest*"
+        ]
+      }
+    }
+  ],
+  "banks": {
+    "descriptive": [
+      "*plan*phase*",
+      "*wave*manifest*",
+      "*root*cause*",
+      "*source*context*"
+    ],
+    "suggestive": [
+      "*skip*plan*",
+      "*empty*wave*",
+      "*quick*plan*"
+    ],
+    "substitute": [
+      "*skip*plan*instead*",
+      "*fake*manifest*",
+      "*pretend*plan*"
+    ],
+    "use": [
+      "*wave*manifest*",
+      "*trident-deep-planning*",
+      "*plan*artifact*"
+    ]
+  },
+  "pbaContextBoost": {
+    "families": [
+      "GOD_LOOP_PLAN"
+    ],
+    "boostAmount": 0.2
+  },
+  "enforcement": {
+    "tier1": "[PTA:GOD_LOOP_PLAN:T1] DETECTED: Layer GOD_LOOP_PLAN violation — phase enforcement triggered — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_PLAN toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 1 because it violates the GOD_LOOP_PLAN contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier2": "[PTA:GOD_LOOP_PLAN:T2] DETECTED: Repeated GOD_LOOP_PLAN violation — escalated — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_PLAN toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 2 because it violates the GOD_LOOP_PLAN contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier3": "[PTA:GOD_LOOP_PLAN:T3] DETECTED: GOD_LOOP_PLAN at TEB — blocked until remediation — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_PLAN toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 3 because it violates the GOD_LOOP_PLAN contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier4": "[PTA GATE:GOD_LOOP_PLAN:T4] DETECTED: GOD_LOOP_PLAN at GATE — hard blocked; only violating toolMatchers gated, escape hatches and demanded tools always pass (R6) — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_PLAN toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 4 because it violates the GOD_LOOP_PLAN contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier"
+  },
+  "threshold": 0.52,
+  "severity": "HIGH",
+  "chainRules": [
+    {
+      "name": "god_loop_plan-requires-context",
+      "description": "Requires prior phase completion before GOD_LOOP_PLAN",
+      "requires": [
+        {
+          "tool": "trident-poseidon",
+          "withinMs": 300000
+        }
+      ],
+      "violation": {
+        "layerId": "GOD_LOOP_PLAN",
+        "customMessage": "GOD_LOOP_PLAN: prior phase not completed"
+      }
+    }
+  ]
+}

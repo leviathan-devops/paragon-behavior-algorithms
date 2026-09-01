@@ -1,0 +1,241 @@
+{
+  "runId": "R26-mpse-stage",
+  "layer": "R26-mpse-stage",
+  "layerNumber": 26,
+  "anchorPredicate": "stage",
+  "targetRoot": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3",
+  "candidatesIn": 5,
+  "generatedAt": "2026-08-31T00:00:00.000Z",
+  "verdicts": [
+    {
+      "findingIndex": 0,
+      "candidateId": "R26-001",
+      "adjudication": "TRUE_DEFECT",
+      "verdict": "TRUE_DEFECT",
+      "layer": "R26-mpse-stage",
+      "predicate": "stage.violated-inv",
+      "subject": "mpseSynthesize silently tolerates fully-rejected dispatch — empty conformanceMatrix with vacuous invariant",
+      "object": "Contract",
+      "file": "src/hydra/instances/mpse.ts",
+      "line": 401,
+      "evidence": "if (result.status !== 'fulfilled' || result.value === undefined || result.value === null) continue;",
+      "codeQuote": "if (result.status !== 'fulfilled' || result.value === undefined || result.value === null) continue;",
+      "implicatedSpecClause": "V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md §2.4 S-R26-3",
+      "specPath": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 250,
+      "specQuote": "Every declared contract has a conformance verdict",
+      "divergence": "Stage invariant violated: mpseSynthesize at 365-431 filters results via continue at 401 without enforcing at least one fulfilled before synthesis. When all 4 MPSE subagents reject (or return undefined), conformanceMatrix stays [], violations=[], traceGaps=[], and trivial invariant at 412 (matrixSize >=0) passes vacuous. Post-gate mpse-post-conformance-complete at 468-469 requires matrix non-empty but is only warned at src/hydra/aether-meta.ts:343, not failed closed. Graph query 'find stage gate violations' shows no guard node between DISPATCH Promise.allSettled at src/hydra/pipeline.ts:69-73 and SYNTHESIZE. Prior candidate at pipeline.ts:143 was RED_HERRING for stage (dead AETHER_MIGRATION stub, live path is runMetaLayer) — not emitted as stage finding; see SUMMARY adjudication note.",
+      "severity": "HIGH",
+      "confidence": 0.88,
+      "graphRefs": [
+        "mpseSynthesize --reads--> memory.getGateOutput('LASME') EXTRACTED @ src/hydra/instances/mpse.ts:374",
+        "mpseSynthesize --derives--> conformanceMatrix @ src/hydra/instances/mpse.ts:404-414",
+        "dispatchSubagent --INFERRED--> mpseSynthesize (no fulfilled guard) @ src/hydra/pipeline.ts:90"
+      ],
+      "contractId": "S-R26-3",
+      "implementationStatus": "violated"
+    },
+    {
+      "findingIndex": 1,
+      "candidateId": "R26-002",
+      "adjudication": "TRUE_DEFECT",
+      "verdict": "TRUE_DEFECT",
+      "layer": "R26-mpse-stage",
+      "predicate": "stage.missing-post",
+      "subject": "MPSE post-gate failure only warns — stage post-condition not enforced fail-closed",
+      "object": "Contract",
+      "file": "src/hydra/aether-meta.ts",
+      "line": 343,
+      "evidence": "if (!r.passed) console.warn(`[aether-meta] postGate ${gate.name} failed: ${r.reason}`);",
+      "codeQuote": "if (!r.passed) console.warn(`[aether-meta] postGate ${gate.name} failed: ${r.reason}`);",
+      "implicatedSpecClause": "V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md §2.4 S-R26-3 + S-R26-4",
+      "specPath": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 250,
+      "specQuote": "Every declared contract has a conformance verdict",
+      "divergence": "Stage missing post-condition: MPSE post-gate mpse-post-conformance-complete (requires matrix non-empty) and mpse-post-trace-gaps-named are checked at aether-meta.ts:341-345 but only console.warn on failure, then synthesis fallback {conformanceMatrix:[], violations:[], traceGaps:[], error} is stitched and setGateOutput proceeds to doc2 via buildStitchContent. Contrast pipeline.ts failLoud at 155-158 which throws GATE FAILED. AETHER spec §2.1 nesting seam requires fail-closed; warn-only violates. Evidence: read aether-meta.ts 320-360 shows try { synthesisResult = mpseSynthesize } catch warn, then for postGates warn only, then mem.setGateOutput regardless.",
+      "severity": "HIGH",
+      "confidence": 0.91,
+      "graphRefs": [
+        "aether-meta.runMetaLayer --calls--> mpseSynthesize EXTRACTED @ src/hydra/aether-meta.ts:337",
+        "aether-meta.runMetaLayer --checks--> createMpsePostGates EXTRACTED @ src/hydra/aether-meta.ts:341",
+        "mpse-post-conformance-complete --requires--> conformanceMatrix.length >0 EXTRACTED @ src/hydra/instances/mpse.ts:468"
+      ],
+      "contractId": "S-R26-3",
+      "implementationStatus": "violated"
+    },
+    {
+      "findingIndex": 2,
+      "candidateId": "R26-003",
+      "adjudication": "TRUE_DEFECT",
+      "verdict": "TRUE_DEFECT",
+      "layer": "R26-mpse-stage",
+      "predicate": "stage.skipped-pre",
+      "subject": "MPSE pre-gate failure only warns — LASME-completed pre-condition skipped",
+      "object": "Contract",
+      "file": "src/hydra/aether-meta.ts",
+      "line": 335,
+      "evidence": "if (!r.passed) console.warn(`[aether-meta] preGate ${gate.name} failed: ${r.reason}`);",
+      "codeQuote": "if (!r.passed) console.warn(`[aether-meta] preGate ${gate.name} failed: ${r.reason}`);",
+      "implicatedSpecClause": "V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md §2.4 S-R26-1",
+      "specPath": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 261,
+      "specQuote": "Pre-gates: LASME gate completed (evidence: manifest exists in shared memory)",
+      "divergence": "Stage skipped pre-condition: MPSE pre-gate mpse-pre-lasme-output-exists at src/hydra/instances/mpse.ts:437 checks mem.getGateOutput('LASME') !== null, but aether-meta.ts:333-335 only warns and continues to mpseSynthesize with memory that returns null LASME. LASME candidates then empty at mpse.ts:374-384 (fallback empty array), so lasmeShapeFound always false and stage correlation lost. Spec requires LASME→MPSE sequential; lenient warn violates. Verify: read aether-meta.ts MPSE branch shows two preGate warns, no throw; memory.getGateOutput mock in scripted tests returns null safely.",
+      "severity": "MEDIUM",
+      "confidence": 0.88,
+      "graphRefs": [
+        "aether-meta.runMetaLayer --calls--> createMpsePreGates EXTRACTED @ src/hydra/aether-meta.ts:333",
+        "mpse-pre-lasme-output-exists --reads--> memory.getGateOutput('LASME') EXTRACTED @ src/hydra/instances/mpse.ts:437",
+        "mpseSynthesize --reads--> lasmeCandidates @ src/hydra/instances/mpse.ts:374"
+      ],
+      "contractId": "S-R26-1",
+      "implementationStatus": "violated"
+    },
+    {
+      "findingIndex": 3,
+      "candidateId": "R26-004",
+      "adjudication": "TRUE_DEFECT",
+      "verdict": "TRUE_DEFECT",
+      "layer": "R26-mpse-stage",
+      "predicate": "stage.unsequenced",
+      "subject": "Gate orchestration unsequenced — LASME, MPSE, SRO dispatched concurrently despite spec sequential",
+      "object": "Contract",
+      "file": "src/audit-engine/index.ts",
+      "line": 725,
+      "evidence": "const gateResults = await Promise.allSettled([lasmeGatePromise, mpseGatePromise, sroGatePromise]);",
+      "codeQuote": "const gateResults = await Promise.allSettled([lasmeGatePromise, mpseGatePromise, sroGatePromise]);",
+      "implicatedSpecClause": "V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md §2.2 S-R26-6 + AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md §1.3 V1 meta flow",
+      "specPath": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 85,
+      "specQuote": "The meta gates are SEQUENTIAL (LASME → MPSE → SRO). Within each gate, the subagents are CONCURRENT",
+      "divergence": "Stage unsequenced: audit-engine at 580-730 defines lasmeGatePromise IIFE at ~585, mpseGatePromise at ~620, sroGatePromise at ~670, then concurrently awaits Promise.allSettled at 725 instead of sequential await lasme → then mpse → then sro. Spec V443 §2.2 4-phase pipeline and AETHER §1.3 V1 flow LASME meta dispatches → returns stitch → MPSE appends → SRO appends are sequential layers appending to same docs. Concurrent launch violates ordered stages: MPSE reads LASME memory before LASME done (null), SRO reads MPSE before MPSE done. Graph path LASME->MPSE->SRO shows sequential dependency, not concurrent. Evidence: read audit-engine/index.ts 580-730 confirms no await between gates, only final allSettled.",
+      "severity": "HIGH",
+      "confidence": 0.93,
+      "graphRefs": [
+        "audit-engine.audit --spawns--> lasmeGatePromise EXTRACTED @ src/audit-engine/index.ts:585",
+        "audit-engine.audit --spawns--> mpseGatePromise EXTRACTED @ src/audit-engine/index.ts:620",
+        "audit-engine.audit --spawns--> sroGatePromise EXTRACTED @ src/audit-engine/index.ts:670",
+        "audit-engine.audit --joins--> Promise.allSettled EXTRACTED @ src/audit-engine/index.ts:725 [INFERRED sequential violation]"
+      ],
+      "contractId": "S-R26-6",
+      "implementationStatus": "violated"
+    },
+    {
+      "findingIndex": 4,
+      "candidateId": "R26-005",
+      "adjudication": "TRUE_DEFECT",
+      "verdict": "TRUE_DEFECT",
+      "layer": "R26-mpse-stage",
+      "predicate": "stage.violated-inv",
+      "subject": "mpse invariant vacuous — matrixSize >=0 always VALID",
+      "object": "Contract",
+      "file": "src/hydra/instances/mpse.ts",
+      "line": 412,
+      "evidence": "invariants: [{ kind: 'ge' as const, l: { kind: 'var' as const, name: 'matrixSize' }, r: { kind: 'lit' as const, value: 0 } }]",
+      "codeQuote": "invariants: [{ kind: 'ge' as const, l: { kind: 'var' as const, name: 'matrixSize' }, r: { kind: 'lit' as const, value: 0 } }]",
+      "implicatedSpecClause": "V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md §2.4 S-R26-3",
+      "specPath": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 250,
+      "specQuote": "Every declared contract has a conformance verdict",
+      "divergence": "Stage invariant vacuous: at mpse.ts:406-414, mpseInvariant checks matrixSize >=0 which is always true (array length non-negative), so empty matrix when specs non-empty passes. S-R26-3 requires matrix non-empty when spec contracts declared; correct invariant should be matrixSize >0 or hasRows true when specs.length>0, or violationCount+traceGapCount derived. The invariant never DIEs, unlike contract.ts stage-respecting checkContract which maps inv→DIE. Graph query 'show function call chains with their pre/post conditions' shows no guard on empty-matrix path; file read confirms no specs length check in invariant bindings (hasRows computed but not used in invariant).",
+      "severity": "MEDIUM",
+      "confidence": 0.86,
+      "graphRefs": [
+        "mpseSynthesize --validates--> mpse-invariant EXTRACTED @ src/hydra/instances/mpse.ts:406",
+        "mpse-invariant --checks--> matrixSize >=0 EXTRACTED @ src/hydra/instances/mpse.ts:412 [INFERRED vacuous]"
+      ],
+      "contractId": "S-R26-3",
+      "implementationStatus": "violated"
+    }
+  ],
+  "conformanceMatrix": [
+    {
+      "contractId": "S-R26-1",
+      "specPath": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 245,
+      "specQuote": "Pre-gates: LASME gate completed (evidence: manifest exists in shared memory)",
+      "implementationStatus": "violated",
+      "file": "src/hydra/aether-meta.ts",
+      "line": 335,
+      "evidence": "if (!r.passed) console.warn(`[aether-meta] preGate ${gate.name} failed: ${r.reason}`); — only warns, not fail-closed"
+    },
+    {
+      "contractId": "S-R26-2",
+      "specPath": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 246,
+      "specQuote": "Spec contracts parse (declarations exist)",
+      "implementationStatus": "conformant",
+      "file": "src/hydra/instances/mpse.ts",
+      "line": 450,
+      "evidence": "if (!Array.isArray(specs)) { return { passed: false, reason: 'MPSE_PRE_SPEC_INVALID: specs must be an array' }; }"
+    },
+    {
+      "contractId": "S-R26-3",
+      "specPath": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 250,
+      "specQuote": "Every declared contract has a conformance verdict",
+      "implementationStatus": "violated",
+      "file": "src/hydra/instances/mpse.ts",
+      "line": 401,
+      "evidence": "if (result.status !== 'fulfilled' || result.value === undefined || result.value === null) continue; — tolerates all-rejected then vacuous invariant at 412"
+    },
+    {
+      "contractId": "S-R26-4",
+      "specPath": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 251,
+      "specQuote": "Every TRACE_GAP has a file:line for the missing implementation",
+      "implementationStatus": "conformant",
+      "file": "src/hydra/instances/mpse.ts",
+      "line": 495,
+      "evidence": "if (!gap.specPath || typeof gap.specLine !== 'number') { return { passed: false, reason: 'MPSE_POST_TRACE_GAP_UNNAMED' }; }"
+    },
+    {
+      "contractId": "S-R26-5",
+      "specPath": "MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md",
+      "specLine": 180,
+      "specQuote": "LASME → MPSE → SRO sequential; within each gate layers run async via Promise.allSettled",
+      "implementationStatus": "violated",
+      "file": "src/audit-engine/index.ts",
+      "line": 725,
+      "evidence": "const gateResults = await Promise.allSettled([lasmeGatePromise, mpseGatePromise, sroGatePromise]); — gates concurrent, not sequential"
+    },
+    {
+      "contractId": "S-R26-6",
+      "specPath": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 240,
+      "specQuote": "LASME → MPSE → SRO score ladder [PRELIMINARY] → [LASME-ADJUDICATED] → [MPSE-VERIFIED] → [FINAL] sequential",
+      "implementationStatus": "violated",
+      "file": "src/hydra/aether-meta.ts",
+      "line": 343,
+      "evidence": "warn-only postGate allows [MPSE-VERIFIED] to advance to [FINAL] with empty matrix"
+    }
+  ],
+  "counts": {
+    "candidatesIn": 5,
+    "trueDefect": 5,
+    "redHerring": 0,
+    "unclear": 0,
+    "unclassifiedEmitted": 0,
+    "conformanceRows": 6,
+    "violations": 4,
+    "traceGaps": 0
+  },
+  "summary": "5 findings — 3 HIGH (violated-inv mpse.ts:401, missing-post aether-meta.ts:343, unsequenced index.ts:725), 2 MEDIUM (skipped-pre aether-meta.ts:335, vacuous invariant mpse.ts:412). All TRUE_DEFECT per R26 template calibration shots 1-3. Prior pipeline.ts:143 candidate RED_HERRING for stage predicate — dead AETHER_MIGRATION stub (intentional orphan at pipeline.ts:131-137, live path is runMetaLayer) — correctly belongs to dead-code hunter R30, not stage; not counted in stage candidates. Graph law EXTRACTED vs INFERRED flagged; LASME cross-ref 0 shape; file:line evidence verbatim.",
+  "adjudicationNotes": {
+    "priorCandidatePipeline143": {
+      "originalPredicate": "stage.missing-post",
+      "originalSeverity": "HIGH",
+      "verdict": "RED_HERRING",
+      "reason": "Dead migration guard, not live stage. pipeline.ts dispatchSubagent at 131-147 is intentional orphan — comment 'actor.orphan intentional — AETHER_MIGRATION stub: no actor is created here so no subscribe/stop lifecycle is required; live path delegates to runMetaLayer' and live audit-engine/index.ts never instantiates AetherHydraPipeline (grep zero callers); runMetaLayer owns dispatch via Promise.allSettled in aether-meta. Template exempts deferred stages (defer:) and hunter should not fire on dead intentional stubs; correct hunter is dead-code. Spec linkage to S-R26-3 stretched (dispatch post-condition not declared). Not emitted as stage FINDING; belongs to R30.",
+      "file": "src/hydra/pipeline.ts",
+      "line": 143,
+      "evidence": "throw new Error('AETHER_MIGRATION: buildAndRunSubagent removed — the primary path uses runMetaLayer from aether-meta.ts');"
+    },
+    "priorCandidateMpse401": {
+      "originalPredicate": "stage.violated-inv",
+      "originalSeverity": "MEDIUM",
+      "verdict": "TRUE_DEFECT_CONFIRMED_UPGRADED_HIGH",
+      "reason": "Confirmed invariant violation: continue tolerates all-rejected batch, empty matrix, vacuous >=0 invariant, deferred to warn-only postGate. Upgraded to HIGH because fail-open allows [MPSE-VERIFIED]→[FINAL] with zero verdicts — integrity breach."
+    }
+  }
+}

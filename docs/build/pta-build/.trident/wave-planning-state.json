@@ -1,0 +1,8 @@
+{
+  "f7e065effeLw0Q35l836nakG": {
+    "plannedAt": "2026-08-31T22:30:55.950Z",
+    "planNote": "Plan 2 Wave 2 (T2): god-loop layers + firewall replacement layers — 2 build agents on disjoint file sets inside v4.4.3. Wave plan at the dedicated pta-build token.",
+    "wavesGenerated": 1,
+    "planMtimeMs": 1788215214034.0906
+  }
+}

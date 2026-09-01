@@ -1,0 +1,34 @@
+{
+  "expectedCount": "[SET TO NUMBER: total agents in your wave, e.g. 8]",
+  "agents": [
+    {
+      "name": "[NAME: e.g. explore-alpha — semantic, lowercase-with-hyphens]",
+      "template": "[TEMPLATE: E1=code-extract | E2=docs-deep | E3=research | E4=failure-evidence | B1-B5=builds]",
+      "filepaths": [
+        "[FILEPATH: absolute path the subagent will analyze, must EXIST on disk]"
+      ],
+      "mission": "[MISSION — FLOOR 200c, TARGET 400–800c. WHAT the subagent does, WHY it matters, WHAT it must NOT do. Include the specific filepath it will analyze and what findings are expected. Do NOT write less than 200 characters — thin missions are REFUSED.]",
+      "knownContext": "[KNOWN CONTEXT — FLOOR 200c, TARGET 400–800c. Measured state, file:line anchors, numbers, tables, prior findings the subagent needs. Everything it would have to discover by reading files — hand it to them here. Do NOT write less than 200 characters.]",
+      "doctrine": "[DOCTRINE — FLOOR 100c, TARGET 200–400c. Verbatim quotes from operator rulings or project conventions that govern how this task must be executed. Do NOT write less than 100 characters.]",
+      "measurements": "[MEASUREMENTS — FLOOR 100c, TARGET 200–400c. Numbers, counts, table sizes, line counts, test results — anything quantifiable the prompt must reconcile against the actual file. Do NOT write less than 100 characters.]",
+      "acceptance": "[ACCEPTANCE — FLOOR 100c, TARGET 200–400c. Checkable bullets defining DONE for this task. Each bullet must be verifiable by reading the output or running a command. Do NOT write less than 100 characters.]",
+      "taskTargets": "[TASK TARGETS — FLOOR 100c, TARGET 200–400c. Per-task expansion: WHAT to do, HOW to do it, WHY it matters, EXPECTED output format. Do NOT write less than 100 characters.]",
+      "position": "[POSITION — FLOOR 50c, TARGET 100–200c. Where this agent sits in the pipeline, what consumes its output, what feeds into it. Do NOT write less than 50 characters.]"
+    },
+    {
+      "name": "[NAME: e.g. explore-alpha — semantic, lowercase-with-hyphens]",
+      "template": "[TEMPLATE: E1=code-extract | E2=docs-deep | E3=research | E4=failure-evidence | B1-B5=builds]",
+      "filepaths": [
+        "[FILEPATH: absolute path the subagent will analyze, must EXIST on disk]"
+      ],
+      "mission": "[MISSION — FLOOR 200c, TARGET 400–800c. WHAT the subagent does, WHY it matters, WHAT it must NOT do. Include the specific filepath it will analyze and what findings are expected. Do NOT write less than 200 characters — thin missions are REFUSED.]",
+      "knownContext": "[KNOWN CONTEXT — FLOOR 200c, TARGET 400–800c. Measured state, file:line anchors, numbers, tables, prior findings the subagent needs. Everything it would have to discover by reading files — hand it to them here. Do NOT write less than 200 characters.]",
+      "doctrine": "[DOCTRINE — FLOOR 100c, TARGET 200–400c. Verbatim quotes from operator rulings or project conventions that govern how this task must be executed. Do NOT write less than 100 characters.]",
+      "measurements": "[MEASUREMENTS — FLOOR 100c, TARGET 200–400c. Numbers, counts, table sizes, line counts, test results — anything quantifiable the prompt must reconcile against the actual file. Do NOT write less than 100 characters.]",
+      "acceptance": "[ACCEPTANCE — FLOOR 100c, TARGET 200–400c. Checkable bullets defining DONE for this task. Each bullet must be verifiable by reading the output or running a command. Do NOT write less than 100 characters.]",
+      "taskTargets": "[TASK TARGETS — FLOOR 100c, TARGET 200–400c. Per-task expansion: WHAT to do, HOW to do it, WHY it matters, EXPECTED output format. Do NOT write less than 100 characters.]",
+      "position": "[POSITION — FLOOR 50c, TARGET 100–200c. Where this agent sits in the pipeline, what consumes its output, what feeds into it. Do NOT write less than 50 characters.]"
+    },
+    "// ↑ DUPLICATE THIS ENTIRE OBJECT for each additional agent. Each object spawns ONE subagent. Remove extra objects for smaller waves. Delete this comment string when done."
+  ]
+}

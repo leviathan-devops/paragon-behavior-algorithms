@@ -1,0 +1,26 @@
+{
+  "runId": "R23-lasme-mpse-threshold-20260829-aether",
+  "ready": true,
+  "provider": "opencode-go/muse-spark-1.2-contributor",
+  "counts": {
+    "candidatesIn": 7,
+    "trueDefect": 5,
+    "redHerring": 1,
+    "unclear": 1,
+    "unclassifiedEmitted": 0
+  },
+  "rounds": {
+    "used": 5,
+    "budget": 5
+  },
+  "wallClockMs": 7420,
+  "probeMs": 640,
+  "phaseLog": [
+    { "phase": "P0", "enteredAt": 0, "exitedAt": 1180 },
+    { "phase": "P1", "enteredAt": 1180, "exitedAt": 3420 },
+    { "phase": "P2", "enteredAt": 3420, "exitedAt": 4210 },
+    { "phase": "P3", "enteredAt": 4210, "exitedAt": 5820 },
+    { "phase": "P4", "enteredAt": 5820, "exitedAt": 7420 }
+  ],
+  "validatorRejects": 0
+}

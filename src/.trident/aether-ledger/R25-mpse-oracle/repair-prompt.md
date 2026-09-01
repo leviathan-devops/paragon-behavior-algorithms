@@ -1,0 +1,1 @@
+REPAIR: your findings/report.md did not parse: GRAMMAR_VIOLATION: block "ORACLE_EPSILON_REQUIRED unreachable — missing epsilon defaults to 0" malformed field 'file' — expected "<path>:<line>" got "src/audit-engine/math/oracle.ts" — rewrite findings/report.md in the markdown finding grammar: ## FINDING: blocks with - predicate/- file/- evidence/- spec

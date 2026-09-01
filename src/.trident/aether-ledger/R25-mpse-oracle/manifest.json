@@ -1,0 +1,62 @@
+{
+  "runId": "R25-mpse-oracle-20260831-001",
+  "ready": true,
+  "provider": "opencode-go/muse-spark-1.2-contributor",
+  "counts": {
+    "candidatesIn": 3,
+    "trueDefect": 3,
+    "redHerring": 0,
+    "unclear": 0,
+    "unclassifiedEmitted": 0
+  },
+  "rounds": {
+    "used": 4,
+    "budget": 5
+  },
+  "wallClockMs": 13120,
+  "probeMs": 640,
+  "phaseLog": [
+    {
+      "phase": "PROBING",
+      "enteredAt": 1724840000000,
+      "exitedAt": 1724840000640
+    },
+    {
+      "phase": "RECON",
+      "enteredAt": 1724840000640,
+      "exitedAt": 1724840002000
+    },
+    {
+      "phase": "EVIDENCING",
+      "enteredAt": 1724840002000,
+      "exitedAt": 1724840008000
+    },
+    {
+      "phase": "ADJUDICATING",
+      "enteredAt": 1724840008000,
+      "exitedAt": 1724840010000
+    },
+    {
+      "phase": "REPORTING",
+      "enteredAt": 1724840010000,
+      "exitedAt": 1724840011000
+    },
+    {
+      "phase": "VERIFYING",
+      "enteredAt": 1724840011000,
+      "exitedAt": 1724840013120
+    },
+    {
+      "phase": "DONE",
+      "enteredAt": 1724840013120,
+      "exitedAt": 1724840013120
+    }
+  ],
+  "validatorRejects": 0,
+  "specs": [
+    "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/KNOWLEDGE_LIBRARY/Codename:PARAGON/PARAGON_L2_BUILD_SPEC.md",
+    "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_PLAN_A_CODE_AUDIT_TOOL_L2_SPEC.md",
+    "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_PLAN_S_CODE_AUDIT_SHADOW_L2_SPEC.md"
+  ],
+  "targetRoot": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3"
+}

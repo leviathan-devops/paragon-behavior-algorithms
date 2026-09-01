@@ -1,0 +1,152 @@
+{
+  "runId": "audit-R20-lasme-state-machine-2026-05-13",
+  "targetRoot": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3",
+  "layerId": "R20-lasme-state-machine",
+  "anchorPredicate": "state-machine",
+  "layerNumber": 20,
+  "candidatesIn": 9,
+  "counts": {
+    "candidatesIn": 9,
+    "trueDefect": 2,
+    "redHerring": 7,
+    "unclear": 0,
+    "unclassifiedEmitted": 0
+  },
+  "verdicts": [
+    {
+      "findingIndex": 0,
+      "layer": "R20-lasme-state-machine",
+      "adjudication": "RED_HERRING",
+      "file": "src/hydra/pipeline.ts",
+      "line": 124,
+      "codeQuote": "throw new Error('AETHER_MIGRATION: buildAndRunSubagent removed — the primary path uses runMetaLayer from aether-meta.ts');",
+      "specPath": "Shared Workspace Context/KNOWLEDGE_LIBRARY/LASME/02_STATE_MACHINES_AND_GATES.md",
+      "specLine": 1,
+      "specQuote": "The state graph is fully enumerable and verifiable",
+      "legitimizingReason": "RED_HERRING: dispatchSubagent is AETHER_MIGRATION dead stub — throws before any createActor/interpret call; comment at pipeline.ts:118-124 documents intentional orphan. No actor is ever created so no subscribe/stop lifecycle is required; the live path delegates to runMetaLayer which owns Promise.allSettled + MCP disconnect in finally. Prior actor.orphan mechanism no longer exists.",
+      "confidence": 0.96,
+      "derailmentMode": "none"
+    },
+    {
+      "findingIndex": 1,
+      "layer": "R20-lasme-state-machine",
+      "adjudication": "RED_HERRING",
+      "file": "src/fsm/orchestrator-machine-v2.ts",
+      "line": 28,
+      "codeQuote": "COMPLETE: new Set(['IDLE', 'RUNNING'])",
+      "specPath": "Shared Workspace Context/KNOWLEDGE_LIBRARY/LASME/02_STATE_MACHINES_AND_GATES.md",
+      "specLine": 85,
+      "specQuote": "The FSM interpreter ensures that only valid events are processed and transitions execute atomically",
+      "legitimizingReason": "RED_HERRING: missing-terminal fixed — COMPLETE is documented as type:'final' equivalent (line 27-33) and advanceLayer() at line 137 reaches COMPLETE when currentLayer >= maxLayers; machine CAN terminate via all-layers-complete path. Infinite-loop predicate no longer fires. Auto-restart COMPLETE→RUNNING is explicit iterative-build re-entry, not a missing terminal.",
+      "confidence": 0.91,
+      "derailmentMode": "none"
+    },
+    {
+      "findingIndex": 2,
+      "layer": "R20-lasme-state-machine",
+      "adjudication": "RED_HERRING",
+      "file": "src/fsm/orchestrator-machine-v2.ts",
+      "line": 30,
+      "codeQuote": "LAYER_COMPLETE: new Set(['RUNNING', 'COMPLETE', 'ERROR', 'TIMEOUT', 'LAYER_COMPLETE'])",
+      "specPath": "Shared Workspace Context/KNOWLEDGE_LIBRARY/LASME/02_STATE_MACHINES_AND_GATES.md",
+      "specLine": 85,
+      "specQuote": "The state graph is fully enumerable and verifiable",
+      "legitimizingReason": "RED_HERRING: unreachable-state false-positive — LAYER_COMPLETE self-loop is reachable via pipelined advanceLayer() double-call without interleaving RUNNING (documented line 125-131). Every status in STATUS_TRANSITIONS has ≥1 inbound edge; COMPLETE→RUNNING auto-restart exercised in v2-machine-test. No dead state.",
+      "confidence": 0.89,
+      "derailmentMode": "none"
+    },
+    {
+      "findingIndex": 3,
+      "layer": "R20-lasme-state-machine",
+      "adjudication": "RED_HERRING",
+      "file": "src/warheads/xstate-fsm/index.ts",
+      "line": 22,
+      "codeQuote": "const auditMachine = createMachine({ id: 'audit', initial: 'idle', states: { idle, scanning, analyzing, reporting, failed, done, inconclusive } })",
+      "specPath": "Shared Workspace Context/KNOWLEDGE_LIBRARY/LASME/02_STATE_MACHINES_AND_GATES.md",
+      "specLine": 120,
+      "specQuote": "StateMachineSchema validates type: 'final' and every transition target points to a defined state",
+      "legitimizingReason": "RED_HERRING: baseline missing-terminal at index.ts:25 is FIXED — auditMachine now declares two type:'final' states done and inconclusive and wires reporting --REPORT_COMPLETE--> done at line 99. Terminal exists and is reachable; prior defect closed.",
+      "confidence": 0.94,
+      "derailmentMode": "none"
+    },
+    {
+      "findingIndex": 4,
+      "layer": "R20-lasme-state-machine",
+      "adjudication": "RED_HERRING",
+      "file": "src/orchestrator.ts",
+      "line": 20,
+      "codeQuote": "interface OrchestratorState { mode: string; currentGate: string; currentLayer: number; maxLayers: number; status: string; initialized: boolean; identityLoaded: boolean; }",
+      "specPath": "Shared Workspace Context/KNOWLEDGE_LIBRARY/LASME/02_STATE_MACHINES_AND_GATES.md",
+      "specLine": 1,
+      "specQuote": "Side effects (actions) are attached to transitions, not scattered through code",
+      "legitimizingReason": "RED_HERRING: scattered-flags intentional via delegation — booleans initialized/identityLoaded are NOT shadowing orchestratorMachineV2 status (IDLE/RUNNING/LAYER_COMPLETE/ERROR/TIMEOUT/COMPLETE). JSDoc at orchestrator.ts:13-22 documents they are backward-compat session metadata scoped per-session in Map<string,OrchestratorState>; V2 owns mode/status/layer. No dual source of truth. Matches calibration SHOT 1 (boolean scoped, not shadowing).",
+      "confidence": 0.88,
+      "derailmentMode": "none"
+    },
+    {
+      "findingIndex": 5,
+      "layer": "R20-lasme-state-machine",
+      "adjudication": "RED_HERRING",
+      "file": "src/orchestrator.ts",
+      "line": 38,
+      "codeQuote": "initialized: true, identityLoaded: false",
+      "specPath": "Shared Workspace Context/KNOWLEDGE_LIBRARY/LASME/02_STATE_MACHINES_AND_GATES.md",
+      "specLine": 1,
+      "specQuote": "Side effects (actions) are attached to transitions, not scattered through code",
+      "legitimizingReason": "RED_HERRING: same as findingIndex 4 — defaultState() initializer sets initialized:true once, never toggles alongside machine send() calls; identityLoaded toggled only via setIdentityLoaded as session flag, never diverges from V2's transition graph. Calib-documented intentional; do-not-fire 'calib: exempt' analogue satisfied via explicit JSDoc.",
+      "confidence": 0.87,
+      "derailmentMode": "none"
+    },
+    {
+      "findingIndex": 6,
+      "layer": "R20-lasme-state-machine",
+      "adjudication": "RED_HERRING",
+      "file": "src/orchestrator.ts",
+      "line": 68,
+      "codeQuote": "orchestratorMachineV2.startMode('CODE_REVIEW'); state.mode = 'CODE_REVIEW'; state.currentLayer = orchestratorMachineV2.getLayer();",
+      "specPath": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 82,
+      "specQuote": "r-state-machine = XState machine configs, scattered boolean flags, state machine integrity, missing terminal states",
+      "legitimizingReason": "RED_HERRING: topology-drift fixed — every start*() method at orchestrator.ts:68-105 mirrors V2.startMode() then copies V2.getLayer()/getStatus() keeping wrapper topology aligned with STATUS_TRANSITIONS; completeLayer()/failLayer() delegate to V2 + AuditFSM. Wrapper never diverges.",
+      "confidence": 0.9,
+      "derailmentMode": "none"
+    },
+    {
+      "findingIndex": 7,
+      "layer": "R20-lasme-state-machine",
+      "adjudication": "TRUE_DEFECT",
+      "file": "src/warheads/xstate-fsm/index.ts",
+      "line": 137,
+      "codeQuote": "inconclusive: { type: 'final' }",
+      "specPath": "Shared Workspace Context/KNOWLEDGE_LIBRARY/LASME/02_STATE_MACHINES_AND_GATES.md",
+      "specLine": 85,
+      "specQuote": "The state graph is fully enumerable and verifiable — StateMachineSchema validates that every state has valid transitions and no transition targets point to undefined states",
+      "divergence": "Declared final state 'inconclusive' has zero inbound transitions (inbound edge count 0): auditMachine defines transitions idle→scanning (START_SCAN), scanning→analyzing (SCAN_COMPLETE), analyzing→reporting (ANALYSIS_COMPLETE), reporting→done (REPORT_COMPLETE), failed↔idle (RESET), but no edge targets inconclusive. Enumerable graph law violated — dead terminal is unreachable code, satisfies hunt rule (c) UNREACHABLE STATES.",
+      "confidence": 0.92,
+      "derailmentMode": "state-machine.unreachable-state"
+    },
+    {
+      "findingIndex": 8,
+      "layer": "R20-lasme-state-machine",
+      "adjudication": "TRUE_DEFECT",
+      "file": "src/warheads/xstate-fsm/index.ts",
+      "line": 182,
+      "codeQuote": "this.send({ type: 'START_ANALYSIS', mode: 'full' }); this.send({ type: 'START_REPORT', format: 'markdown' });",
+      "specPath": "Shared Workspace Context/KNOWLEDGE_LIBRARY/LASME/02_STATE_MACHINES_AND_GATES.md",
+      "specLine": 42,
+      "specQuote": "Only valid events are processed in the current state — The FSM interpreter ensures that transitions execute atomically",
+      "divergence": "Wrapper runFullCycle() emits two events START_ANALYSIS and START_REPORT that the machine's on map never declares (machine defines only START_SCAN, SCAN_COMPLETE, ANALYSIS_COMPLETE, REPORT_COMPLETE, FAIL, RESET). XState will ignore these events, remaining in analyzing/reporting instead of transitioning — wrapper event sequence diverges from declared machine topology. Satisfies hunt rule (d) STATE TOPOLOGY DRIFT (spec declares specific transitions but code omits/handles mismatched set).",
+      "confidence": 0.88,
+      "derailmentMode": "state-machine.topology-drift"
+    }
+  ],
+  "summary": "9 candidates audited: 2 TRUE_DEFECT (HIGH unreachable inconclusive final, MEDIUM topology drift via spurious START_ANALYSIS/START_REPORT), 7 RED_HERRING (orphan stub intentionally migrated, COMPLETE terminal now reachable, self-loop reachable via pipelined advance, missing-terminal fixed with done final reachable, scattered flags documented as ancillary session metadata, topology drift aligned via V2 delegation). All findings carry file:line + verbatim codeQuote + specPath/specQuote/divergence per shadow.verdict.integrity. Confidence 0.87-0.96. Graph: createMachine at src/warheads/xstate-fsm/index.ts:22, STATUS_TRANSITIONS at src/fsm/orchestrator-machine-v2.ts:27-33, OrchestratorState at src/orchestrator.ts:20; no god-node involvement.",
+  "graphSlice": {
+    "queriedConcepts": [
+      "find machines with scattered boolean flags alongside them",
+      "show state machines with their state count",
+      "find XState createMachine configurations"
+    ],
+    "relevantSubgraph": "auditMachine(id:audit, states:[idle,scanning,analyzing,reporting,failed,done,inconclusive]) -> STATUS_TRANSITIONS[IDLE->RUNNING, RUNNING->LAYER_COMPLETE|ERROR|TIMEOUT|COMPLETE, LAYER_COMPLETE->RUNNING|COMPLETE|ERROR|TIMEOUT|LAYER_COMPLETE, ERROR->RUNNING|IDLE, TIMEOUT->IDLE, COMPLETE->IDLE|RUNNING] -> OrchestratorState{initialized,identityLoaded} Map delegation"
+  }
+}

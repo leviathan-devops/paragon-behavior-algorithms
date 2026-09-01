@@ -1,0 +1,9 @@
+{
+  "mutator": "typescript",
+  "packageManager": "npm",
+  "testRunner": "command",
+  "commandRunner": { "command": "npx tsx tests/run.ts" },
+  "thresholds": { "high": 80, "low": 60, "break": 50 },
+  "mutate": ["utils.ts"],
+  "tsconfigFile": "tsconfig.json"
+}

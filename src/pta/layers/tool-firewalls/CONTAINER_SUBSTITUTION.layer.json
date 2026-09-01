@@ -1,0 +1,59 @@
+{
+  "id": "CONTAINER_SUBSTITUTION",
+  "description": "Blocks substitution of container tests with mocks, stubs, or simulated execution; detects theatrical claims.",
+  "toolMatchers": [
+    {
+      "toolName": "bash",
+      "argPatterns": {
+        "command": [
+          "*mock*",
+          "*stub*"
+        ]
+      }
+    },
+    {
+      "toolName": "write",
+      "argPatterns": {
+        "filePath": [
+          "*mock*",
+          "*stub*"
+        ]
+      }
+    }
+  ],
+  "banks": {
+    "descriptive": [
+      "*mock*container*",
+      "*stub*test*",
+      "*simulated*execution*"
+    ],
+    "suggestive": [
+      "*just*mock*",
+      "*simply*stub*"
+    ],
+    "substitute": [
+      "*mock*instead*of*container*",
+      "*fake*test*pass*",
+      "*pretend*test*pass*"
+    ],
+    "use": [
+      "*trident-container-test*",
+      "*real*container*"
+    ]
+  },
+  "pbaContextBoost": {
+    "families": [
+      "THEATRICAL_SUBSTITUTION"
+    ],
+    "boostAmount": 0.3
+  },
+  "enforcement": {
+    "tier1": "[PTA:CONTAINER_SUBSTITUTION:T1] DETECTED: Container substitution detected \u2014 mock/stub used instead of real container \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched CONTAINER_SUBSTITUTION toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 1 because it violates the CONTAINER_SUBSTITUTION contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier2": "[PTA:CONTAINER_SUBSTITUTION:T2] DETECTED: Repeated container substitution \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched CONTAINER_SUBSTITUTION toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 2 because it violates the CONTAINER_SUBSTITUTION contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier3": "[PTA:CONTAINER_SUBSTITUTION:T3] DETECTED: Container substitution at TEB \u2014 blocked \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched CONTAINER_SUBSTITUTION toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 3 because it violates the CONTAINER_SUBSTITUTION contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier4": "[PTA GATE:CONTAINER_SUBSTITUTION:T4] DETECTED: Container substitution at GATE \u2014 hard blocked; only violating toolMatchers gated, escape hatches and demanded tools always pass (R6) \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched CONTAINER_SUBSTITUTION toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 4 because it violates the CONTAINER_SUBSTITUTION contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier"
+  },
+  "threshold": 0.5,
+  "severity": "CRITICAL",
+  "chainRules": []
+}

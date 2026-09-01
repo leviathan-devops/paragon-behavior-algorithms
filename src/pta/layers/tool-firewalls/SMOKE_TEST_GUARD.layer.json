@@ -1,0 +1,89 @@
+{
+  "id": "SMOKE_TEST_GUARD",
+  "description": "Blocks inline-exec smoke tests (node -e, bun --eval, --print) and bundle inspection as verification; claim-gated enforcement for smoke operations.",
+  "toolMatchers": [
+    {
+      "toolName": "bash",
+      "argPatterns": {
+        "command": [
+          "*node -e*",
+          "*node --eval*",
+          "*bun -e*",
+          "*bun --eval*",
+          "*--print*"
+        ]
+      }
+    },
+    {
+      "toolName": "exec",
+      "argPatterns": {
+        "command": [
+          "*node -e*",
+          "*bun -e*"
+        ]
+      }
+    },
+    {
+      "toolName": "bash",
+      "argPatterns": {
+        "command": [
+          "*dist/*",
+          "*bundle*"
+        ]
+      }
+    }
+  ],
+  "banks": {
+    "descriptive": [
+      "*for the container test*",
+      "*container test evidence*"
+    ],
+    "suggestive": [
+      "*node -e*",
+      "*node --eval*",
+      "*bun -e*",
+      "*bun --eval*",
+      "*--print*"
+    ],
+    "substitute": [
+      "*instead*of*container*",
+      "*skip*container*",
+      "*quick*test*",
+      "*smoke*verify*"
+    ],
+    "use": [
+      "*trident-container-test*"
+    ]
+  },
+  "pbaContextBoost": {
+    "families": [
+      "SMOKE_EVASION",
+      "INLINE_EXEC"
+    ],
+    "boostAmount": 0.25
+  },
+  "enforcement": {
+    "tier1": "[PTA:SMOKE_TEST_GUARD:T1] DETECTED: Inline-exec or bundle-inspection smoke operation detected \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched SMOKE_TEST_GUARD toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 1 because it violates the SMOKE_TEST_GUARD contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier2": "[PTA:SMOKE_TEST_GUARD:T2] DETECTED: Repeated smoke operation without container evidence \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched SMOKE_TEST_GUARD toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 2 because it violates the SMOKE_TEST_GUARD contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier3": "[PTA:SMOKE_TEST_GUARD:T3] DETECTED: Smoke operation at TEB \u2014 blocked until container test \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched SMOKE_TEST_GUARD toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 3 because it violates the SMOKE_TEST_GUARD contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier4": "[PTA GATE:SMOKE_TEST_GUARD:T4] DETECTED: Smoke operation at GATE \u2014 hard blocked; only violating toolMatchers gated, escape hatches and demanded tools always pass (R6) \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched SMOKE_TEST_GUARD toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 4 because it violates the SMOKE_TEST_GUARD contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier"
+  },
+  "threshold": 0.5,
+  "severity": "HIGH",
+  "chainRules": [
+    {
+      "name": "smoke-without-container",
+      "description": "Smoke exec without prior container test",
+      "requires": [
+        {
+          "tool": "trident-container-test",
+          "withinMs": 300000
+        }
+      ],
+      "violation": {
+        "layerId": "SMOKE_TEST_GUARD",
+        "customMessage": "SMOKE_TEST_GUARD: inline exec requires container test evidence"
+      }
+    }
+  ]
+}

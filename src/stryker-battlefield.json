@@ -1,0 +1,15 @@
+{
+  "mutator": "typescript",
+  "packageManager": "npm",
+  "testRunner": "command",
+  "commandRunner": { "command": "npx tsc --noEmit" },
+  "thresholds": { "high": 80, "low": 60, "break": 50 },
+  "mutate": [
+    "hooks/trident-hooks.ts",
+    "orchestrator.ts",
+    "utils.ts",
+    "security/tool-allowlist.ts",
+    "tools/trident-tools.ts"
+  ],
+  "tsconfigFile": "tsconfig.json"
+}

@@ -1,0 +1,26 @@
+{
+  "fingerprint": "15a090b65656abee0b20c2fdb6eda650a332f3c333c7ca2a37c31130fb49c44a",
+  "shas": {
+    "surface/lsp-injector.js": "7460e3875519aa7d65023324c82876ccdde9390d2906c46a57f70f0f1ce0fab8",
+    "diagnostics/engine.js": "7d4a1fdb3f5748eb18d4a8762a5ff30d6d87c63a4d64e8a75e2744262c17e218",
+    "graph/corbell-adapter.js": "8a09bbcc216ffa1cd3200b44120d09c8279fd20e85dbcb8d2a7d15eb7345c6dd"
+  },
+  "shipDirs": [
+    "dist"
+  ],
+  "ignore": [
+    "node_modules",
+    ".git",
+    "corbell-data",
+    ".corbell",
+    "corbell-data/.corbell/workspace.db"
+  ],
+  "runbook": "scripts/deploy.md",
+  "sizeFloors": {},
+  "builtAt": "2026-08-24T19:20:05.077Z",
+  "sources": [
+    "src/subagents/trident-bug-hunter/diagnostics/engine.ts",
+    "src/subagents/trident-bug-hunter/graph/corbell-adapter.ts",
+    "src/subagents/trident-bug-hunter/surface/lsp-injector.ts"
+  ]
+}

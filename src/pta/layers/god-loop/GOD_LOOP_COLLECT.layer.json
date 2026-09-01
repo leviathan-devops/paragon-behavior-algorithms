@@ -1,0 +1,77 @@
+{
+  "id": "GOD_LOOP_COLLECT",
+  "description": "COLLECT phase — T1 bridge generation, evidence append wave-collected, dispatch-evidence gate (waveOutputsOnDisk, watcher taskCalls, T1 existence). Empty-wave and non-actionable gates. File existence alone not enough. Returns to DISPATCH/SCORE if no evidence.",
+  "toolMatchers": [
+    {
+      "toolName": "bash",
+      "argPatterns": {
+        "command": [
+          "*collect*",
+          "*T1*bridge*",
+          "*t1*bridge*"
+        ]
+      }
+    },
+    {
+      "toolName": "trident-container-test",
+      "argPatterns": {
+        "action": [
+          "*collect*"
+        ]
+      }
+    }
+  ],
+  "banks": {
+    "descriptive": [
+      "*collect*phase*",
+      "*T1*bridge*",
+      "*wave*collected*",
+      "*evidence*append*"
+    ],
+    "suggestive": [
+      "*skip*collect*",
+      "*fake*collect*",
+      "*quick*collect*"
+    ],
+    "substitute": [
+      "*skip*collect*instead*",
+      "*fake*evidence*",
+      "*pretend*collect*"
+    ],
+    "use": [
+      "*collect*evidence*",
+      "*T1*bridge*",
+      "*wave*collected*"
+    ]
+  },
+  "pbaContextBoost": {
+    "families": [
+      "GOD_LOOP_COLLECT"
+    ],
+    "boostAmount": 0.2
+  },
+  "enforcement": {
+    "tier1": "[PTA:GOD_LOOP_COLLECT:T1] DETECTED: Layer GOD_LOOP_COLLECT violation — phase enforcement triggered — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_COLLECT toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 1 because it violates the GOD_LOOP_COLLECT contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier2": "[PTA:GOD_LOOP_COLLECT:T2] DETECTED: Repeated GOD_LOOP_COLLECT violation — escalated — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_COLLECT toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 2 because it violates the GOD_LOOP_COLLECT contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier3": "[PTA:GOD_LOOP_COLLECT:T3] DETECTED: GOD_LOOP_COLLECT at TEB — blocked until remediation — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_COLLECT toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 3 because it violates the GOD_LOOP_COLLECT contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier4": "[PTA GATE:GOD_LOOP_COLLECT:T4] DETECTED: GOD_LOOP_COLLECT at GATE — hard blocked; only violating toolMatchers gated, escape hatches and demanded tools always pass (R6) — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_COLLECT toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 4 because it violates the GOD_LOOP_COLLECT contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier"
+  },
+  "threshold": 0.5,
+  "severity": "MEDIUM",
+  "chainRules": [
+    {
+      "name": "god_loop_collect-requires-context",
+      "description": "Requires prior phase completion before GOD_LOOP_COLLECT",
+      "requires": [
+        {
+          "tool": "trident-poseidon",
+          "withinMs": 300000
+        }
+      ],
+      "violation": {
+        "layerId": "GOD_LOOP_COLLECT",
+        "customMessage": "GOD_LOOP_COLLECT: prior phase not completed"
+      }
+    }
+  ]
+}

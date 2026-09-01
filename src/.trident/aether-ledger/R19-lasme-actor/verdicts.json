@@ -1,0 +1,71 @@
+{
+  "runId": "R19-lasme-actor-20260830",
+  "verdicts": [
+    {
+      "findingIndex": 0,
+      "layer": "R19-lasme-actor",
+      "adjudication": "TRUE_DEFECT",
+      "file": "src/audit-engine/layers/r-actor.ts",
+      "line": 23,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 195,
+      "specQuote": "Actor topology, createActor/createMachine/send/subscribe calls, missing subscriptions, message flow integrity",
+      "codeQuote": "subscribe: 'subscribeCount',",
+      "divergence": "Detector counts any callee named subscribe as actor subscription via ACTOR_CALL_TARGETS generic map and isCallByName('subscribe') without verifying receiver is Actor instance; unrelated Observable/EventEmitter subscribe hides missing actor.subscribe per R19 mandate (a) MISSING SUBSCRIPTIONS — messages vanish silently",
+      "confidence": 0.88
+    },
+    {
+      "findingIndex": 1,
+      "layer": "R19-lasme-actor",
+      "adjudication": "TRUE_DEFECT",
+      "file": "src/audit-engine/layers/r-actor.ts",
+      "line": 184,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 195,
+      "specQuote": "Actor topology, createActor/createMachine/send/subscribe calls, missing subscriptions, message flow integrity",
+      "codeQuote": "if (specInfo.declared && stats.createActorCount === 0 && (stats.classDecls > 0 || stats.sendCount > 0 || stats.subscribeCount > 0)) {",
+      "divergence": "Phantom shouldBe topology-drift fires on any classDecl/sendCount/subscribeCount without actor when spec declares actor; sendCount via broad isCallByName('send') captures non-actor sends (HTTP, stream) and classDecls is not actor-specific, inventing requirement per (c) TOPOLOGY DRIFT",
+      "confidence": 0.85
+    },
+    {
+      "findingIndex": 2,
+      "layer": "R19-lasme-actor",
+      "adjudication": "TRUE_DEFECT",
+      "file": "src/warheads/xstate-fsm/index.ts",
+      "line": 133,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 195,
+      "specQuote": "Actor topology, createActor/createMachine/send/subscribe calls, missing subscriptions, message flow integrity",
+      "codeQuote": "this.actor = interpret(auditMachine);",
+      "divergence": "AuditFSM creates actor via interpret(auditMachine), calls start() and send() for 5-state machine (idle→scanning→analyzing→reporting→failed→done/inconclusive) but never calls subscribe(); polling via getSnapshot replaces subscription yet per-spec message-flow integrity requires subscribe handler for dispatched events per (a)(b); long-lived machine not exempt as single-fire",
+      "confidence": 0.78
+    },
+    {
+      "findingIndex": 3,
+      "layer": "R19-lasme-actor",
+      "adjudication": "RED_HERRING",
+      "file": "src/hydra/aether-templates/hunters/lasme-actor.ts",
+      "line": 48,
+      "legitimizingReason": "String literal in graphQueries array — not a CallExpression, correctly filtered by ts.isCallExpression guard; no runtime actor message flow to verify per hunt mandate do-not-fire on literals and calibration shot 3",
+      "confidence": 0.78
+    },
+    {
+      "findingIndex": 4,
+      "layer": "R19-lasme-actor",
+      "adjudication": "RED_HERRING",
+      "file": "src/hydra/pipeline.ts",
+      "line": 145,
+      "legitimizingReason": "dispatchSubagent is intentional AETHER_MIGRATION stub with JSDoc actor.orphan intentional documenting no actor created (void tools; throw) and live path delegates to runMetaLayer with Promise.allSettled+MCP disconnect; no orphan lifecycle required, per pipeline.ts:139-152",
+      "confidence": 0.92
+    },
+    {
+      "findingIndex": 5,
+      "layer": "R19-lasme-actor",
+      "adjudication": "RED_HERRING",
+      "file": "src/audit-engine/layers/r-actor.ts",
+      "line": 245,
+      "legitimizingReason": "Global actor vs machine count mismatch is legitimate reuse — one createMachine spawns many createActor instances via setup pattern; numeric parity is not a spec invariant per V443 §2.3",
+      "confidence": 0.75
+    }
+  ]
+}

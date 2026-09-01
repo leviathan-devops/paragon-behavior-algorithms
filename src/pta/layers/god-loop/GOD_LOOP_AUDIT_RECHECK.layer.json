@@ -1,0 +1,78 @@
+{
+  "id": "GOD_LOOP_AUDIT_RECHECK",
+  "description": "AUDIT_RECHECK phase — re-audits modified files, updates postAuditFindings, quality recheck, increments cycle. Keeps preAuditFindings as baseline for score baseline. Blocks SCORE without re-audit findings.",
+  "toolMatchers": [
+    {
+      "toolName": "trident-code-audit",
+      "argPatterns": {
+        "command": [
+          "*recheck*",
+          "*re-audit*",
+          "*re*audit*"
+        ]
+      }
+    },
+    {
+      "toolName": "bash",
+      "argPatterns": {
+        "command": [
+          "*skip*recheck*",
+          "*fake*recheck*"
+        ]
+      }
+    }
+  ],
+  "banks": {
+    "descriptive": [
+      "*recheck*phase*",
+      "*re*audit*",
+      "*modified*files*",
+      "*post*findings*"
+    ],
+    "suggestive": [
+      "*skip*recheck*",
+      "*fake*recheck*",
+      "*quick*recheck*"
+    ],
+    "substitute": [
+      "*skip*recheck*instead*",
+      "*fake*audit*",
+      "*pretend*recheck*"
+    ],
+    "use": [
+      "*re*audit*",
+      "*audit*recheck*",
+      "*modified*files*"
+    ]
+  },
+  "pbaContextBoost": {
+    "families": [
+      "GOD_LOOP_AUDIT_RECHECK"
+    ],
+    "boostAmount": 0.2
+  },
+  "enforcement": {
+    "tier1": "[PTA:GOD_LOOP_AUDIT_RECHECK:T1] DETECTED: Layer GOD_LOOP_AUDIT_RECHECK violation — phase enforcement triggered — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_AUDIT_RECHECK toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 1 because it violates the GOD_LOOP_AUDIT_RECHECK contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier2": "[PTA:GOD_LOOP_AUDIT_RECHECK:T2] DETECTED: Repeated GOD_LOOP_AUDIT_RECHECK violation — escalated — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_AUDIT_RECHECK toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 2 because it violates the GOD_LOOP_AUDIT_RECHECK contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier3": "[PTA:GOD_LOOP_AUDIT_RECHECK:T3] DETECTED: GOD_LOOP_AUDIT_RECHECK at TEB — blocked until remediation — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_AUDIT_RECHECK toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 3 because it violates the GOD_LOOP_AUDIT_RECHECK contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier4": "[PTA GATE:GOD_LOOP_AUDIT_RECHECK:T4] DETECTED: GOD_LOOP_AUDIT_RECHECK at GATE — hard blocked; only violating toolMatchers gated, escape hatches and demanded tools always pass (R6) — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_AUDIT_RECHECK toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 4 because it violates the GOD_LOOP_AUDIT_RECHECK contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier"
+  },
+  "threshold": 0.48,
+  "severity": "MEDIUM",
+  "chainRules": [
+    {
+      "name": "god_loop_audit_recheck-requires-context",
+      "description": "Requires prior phase completion before GOD_LOOP_AUDIT_RECHECK",
+      "requires": [
+        {
+          "tool": "trident-poseidon",
+          "withinMs": 300000
+        }
+      ],
+      "violation": {
+        "layerId": "GOD_LOOP_AUDIT_RECHECK",
+        "customMessage": "GOD_LOOP_AUDIT_RECHECK: prior phase not completed"
+      }
+    }
+  ]
+}

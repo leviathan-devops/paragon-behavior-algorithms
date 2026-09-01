@@ -1,0 +1,27 @@
+{
+  "runId": "audit-1787997122241",
+  "ready": true,
+  "stage": "reporting",
+  "provider": "opencode-go/muse-spark-1.2-contributor",
+  "counts": {
+    "candidatesIn": 10,
+    "trueDefect": 7,
+    "redHerring": 2,
+    "unclear": 1,
+    "unclassifiedEmitted": 0
+  },
+  "rounds": {
+    "used": 2,
+    "budget": 3
+  },
+  "wallClockMs": 5420,
+  "probeMs": 420,
+  "phaseLog": [
+    {"phase": "probe", "enteredAt": 0, "exitedAt": 420},
+    {"phase": "recon", "enteredAt": 420, "exitedAt": 980},
+    {"phase": "evidencing", "enteredAt": 980, "exitedAt": 3200},
+    {"phase": "adjudicating", "enteredAt": 3200, "exitedAt": 4800},
+    {"phase": "reporting", "enteredAt": 4800, "exitedAt": 5420}
+  ],
+  "validatorRejects": 0
+}

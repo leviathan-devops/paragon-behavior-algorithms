@@ -1,0 +1,61 @@
+{
+  "runId": "R24-mpse-contract-20260829-001",
+  "ready": true,
+  "provider": "opencode-go/muse-spark-1.2-contributor",
+  "counts": {
+    "candidatesIn": 6,
+    "trueDefect": 3,
+    "redHerring": 3,
+    "unclear": 0,
+    "unclassifiedEmitted": 0
+  },
+  "rounds": {
+    "used": 4,
+    "budget": 5
+  },
+  "wallClockMs": 1873,
+  "probeMs": 0,
+  "phaseLog": [
+    {
+      "phase": "IDLE",
+      "enteredAt": 1720000000000,
+      "exitedAt": 1720000000012
+    },
+    {
+      "phase": "PROBING",
+      "enteredAt": 1720000000012,
+      "exitedAt": 1720000000045
+    },
+    {
+      "phase": "RECON",
+      "enteredAt": 1720000000045,
+      "exitedAt": 1720000000120
+    },
+    {
+      "phase": "EVIDENCING",
+      "enteredAt": 1720000000120,
+      "exitedAt": 1720000000890
+    },
+    {
+      "phase": "ADJUDICATING",
+      "enteredAt": 1720000000890,
+      "exitedAt": 1720000001450
+    },
+    {
+      "phase": "REPORTING",
+      "enteredAt": 1720000001450,
+      "exitedAt": 1720000001700
+    },
+    {
+      "phase": "VERIFYING",
+      "enteredAt": 1720000001700,
+      "exitedAt": 1720000001873
+    },
+    {
+      "phase": "DONE",
+      "enteredAt": 1720000001873,
+      "exitedAt": 1720000001873
+    }
+  ],
+  "validatorRejects": 1
+}

@@ -1,0 +1,51 @@
+{
+  "runId": "R26-mpse-stage",
+  "ready": true,
+  "provider": "opencode-go/muse-spark-1.2-contributor",
+  "counts": {
+    "candidatesIn": 2,
+    "trueDefect": 2,
+    "redHerring": 0,
+    "unclear": 0,
+    "unclassifiedEmitted": 0
+  },
+  "rounds": {
+    "used": 2,
+    "budget": 5
+  },
+  "wallClockMs": 3420,
+  "probeMs": 120,
+  "phaseLog": [
+    {
+      "phase": "PROBING",
+      "enteredAt": 0,
+      "exitedAt": 120
+    },
+    {
+      "phase": "RECON",
+      "enteredAt": 120,
+      "exitedAt": 400
+    },
+    {
+      "phase": "EVIDENCING",
+      "enteredAt": 400,
+      "exitedAt": 1200
+    },
+    {
+      "phase": "ADJUDICATING",
+      "enteredAt": 1200,
+      "exitedAt": 2200
+    },
+    {
+      "phase": "REPORTING",
+      "enteredAt": 2200,
+      "exitedAt": 3000
+    },
+    {
+      "phase": "VERIFYING",
+      "enteredAt": 3000,
+      "exitedAt": 3420
+    }
+  ],
+  "validatorRejects": 0
+}

@@ -1,0 +1,30 @@
+{
+  "runId": "R31-sro-cycles",
+  "ready": true,
+  "stage": "verifying",
+  "provider": "opencode-go/muse-spark-1.2-contributor",
+  "counts": {
+    "candidatesIn": 1,
+    "trueDefect": 0,
+    "redHerring": 1,
+    "unclear": 0,
+    "unclassifiedEmitted": 0
+  },
+  "rounds": {
+    "used": 3,
+    "budget": 3
+  },
+  "wallClockMs": 842,
+  "probeMs": 12,
+  "phaseLog": [
+    { "phase": "IDLE", "enteredAt": 0, "exitedAt": 5 },
+    { "phase": "PROBING", "enteredAt": 5, "exitedAt": 17 },
+    { "phase": "RECON", "enteredAt": 17, "exitedAt": 227 },
+    { "phase": "EVIDENCING", "enteredAt": 227, "exitedAt": 227 },
+    { "phase": "ADJUDICATING", "enteredAt": 227, "exitedAt": 407 },
+    { "phase": "REPORTING", "enteredAt": 407, "exitedAt": 847 },
+    { "phase": "VERIFYING", "enteredAt": 847, "exitedAt": 847 },
+    { "phase": "DONE", "enteredAt": 847, "exitedAt": 847 }
+  ],
+  "validatorRejects": 0
+}

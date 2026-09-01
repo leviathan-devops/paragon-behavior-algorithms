@@ -1,0 +1,68 @@
+{
+  "id": "SHIP_EVIDENCE_GATE",
+  "description": "Gates ship/delivery on evidence artifacts; blocks delivery claims without ContainerTestResult, gate-state, and audit evidence.",
+  "toolMatchers": [
+    {
+      "toolName": "trident-ship-package"
+    },
+    {
+      "toolName": "bash",
+      "argPatterns": {
+        "command": [
+          "*ship*",
+          "*delivery*",
+          "*deploy*"
+        ]
+      }
+    }
+  ],
+  "banks": {
+    "descriptive": [
+      "*ship*evidence*",
+      "*delivery*gate*",
+      "*evidence*missing*"
+    ],
+    "suggestive": [
+      "*ready*to*ship*",
+      "*delivery*claim*"
+    ],
+    "substitute": [
+      "*ship*without*evidence*",
+      "*skip*evidence*gate*"
+    ],
+    "use": [
+      "*container*test*evidence*",
+      "*gate*evidence*"
+    ]
+  },
+  "pbaContextBoost": {
+    "families": [
+      "SHIP_WITHOUT_EVIDENCE"
+    ],
+    "boostAmount": 0.2
+  },
+  "enforcement": {
+    "tier1": "[PTA:SHIP_EVIDENCE_GATE:T1] DETECTED: Ship evidence gate \u2014 delivery attempted without required evidence \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched SHIP_EVIDENCE_GATE toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 1 because it violates the SHIP_EVIDENCE_GATE contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier2": "[PTA:SHIP_EVIDENCE_GATE:T2] DETECTED: Repeated ship without evidence \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched SHIP_EVIDENCE_GATE toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 2 because it violates the SHIP_EVIDENCE_GATE contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier3": "[PTA:SHIP_EVIDENCE_GATE:T3] DETECTED: Ship evidence gate at TEB \u2014 blocked \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched SHIP_EVIDENCE_GATE toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 3 because it violates the SHIP_EVIDENCE_GATE contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier4": "[PTA GATE:SHIP_EVIDENCE_GATE:T4] DETECTED: Ship evidence gate at GATE \u2014 hard blocked; only violating toolMatchers gated, escape hatches and demanded tools always pass (R6) \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched SHIP_EVIDENCE_GATE toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 4 because it violates the SHIP_EVIDENCE_GATE contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier"
+  },
+  "threshold": 0.65,
+  "severity": "HIGH",
+  "chainRules": [
+    {
+      "name": "ship-requires-container-evidence",
+      "description": "Ship requires prior container test evidence",
+      "requires": [
+        {
+          "tool": "trident-container-test",
+          "withinMs": 600000
+        }
+      ],
+      "violation": {
+        "layerId": "SHIP_EVIDENCE_GATE",
+        "customMessage": "SHIP_EVIDENCE_GATE: delivery requires container test evidence"
+      }
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "agents": {
+    "spider": {
+      "directory_name": "Spider Agent",
+      "default_build_agent": "trident"
+    },
+    "shark": {
+      "directory_name": "Shark Agent",
+      "default_build_agent": "shark"
+    },
+    "manta": {
+      "directory_name": "Manta Agent",
+      "default_build_agent": "manta"
+    },
+    "kraken": {
+      "directory_name": "Kraken Agent",
+      "default_build_agent": "kraken"
+    },
+    "trident": {
+      "directory_name": "Spider Agent",
+      "default_build_agent": "trident",
+      "note": "Trident is under the Spider Agent hierarchy"
+    }
+  },
+  "canon_docs": [
+    "POST_COMPACTION_PROMPT.md",
+    "build-library/00_PROJECT_OVERVIEW.md",
+    "build-library/01_ARCHITECTURE.md",
+    "build-library/02_WORKFLOW.md",
+    "build-library/03_DECISIONS.md",
+    "build-library/04_FAILURES.md",
+    "build-library/05_CONTEXT.md",
+    "build-library/06_NEXT_STEPS.md",
+    "build-library/07_REFERENCE.md"
+  ],
+  "paths": {
+    "workspace_root_env_var": "TRIDENT_WORKSPACE_ROOT",
+    "home_convention": "OPENCODE_WORKSPACE/Shared Workspace Context",
+    "marker_dir": ".opencode/.trident",
+    "marker_file": ".opencode/.trident/.current-project",
+    "log_file": ".opencode/.trident/project-folder.log"
+  }
+}

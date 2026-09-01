@@ -1,0 +1,63 @@
+{
+  "containerName": "pta-enforcement-live-20260901-r3",
+  "distSha": "da28f197b494be409f32a12cc6bd22db07a9ad126fe3c9472694ae8fc71e2e9f",
+  "timestamp": "2026-09-01",
+  "engineFile": "src/pta/engine.ts:30",
+  "wiringFile": "src/hooks/trident-hooks.ts (the composedBefore/composedAfter PTA routing + the embedded SMOKE_TEST_GUARD layer)",
+  "overallVerdict": "pass",
+  "scenarios": [
+    {
+      "name": "AUTH-PROBE", "tag": "FOUNDATION",
+      "passToken": "v1.3", "failToken": "Insufficient credits",
+      "passTokenMatch": true, "failTokenAbsent": true,
+      "toolResultContext": "exec bun --version -> 1.3.14 (after Poseidon PERMISSIONS unlock)",
+      "timedOut": false, "verdict": "pass"
+    },
+    {
+      "name": "POSITIVE-PTA-SMOKE-CLAIM", "tag": "POSITIVE",
+      "passToken": "[PTA", "failToken": "unmutated claim",
+      "toolResultContext": "PTA SMOKE_TEST_GUARD tier 1 block fired: 'inline-exec is a smoke test, not verification evidence. The sanctioned path is trident-container-test...' with anchor (pta:SMOKE_TEST_GUARD:1788246344765)",
+      "timedOut": false, "verdict": "pass",
+      "note": "THE SPECIFIC [PTA enforcement token fired in the rendered frames — the Tier-3-to-host behavioral witness the harness could not provide"
+    },
+    {
+      "name": "POSITIVE-PTA-INLINE-EXEC-REPEAT", "tag": "POSITIVE",
+      "passToken": "[SSTF: CLAIM GATE", "failToken": "dead-provider",
+      "toolResultContext": "node -e 'console.log(42)' ran and returned 42; the [SSTF: CLAIM GATE] advisory block fired on the tool result (the host's evidence machine coexists with the PTA layer)",
+      "timedOut": false, "verdict": "pass"
+    },
+    {
+      "name": "NEGATIVE-LEGIT-READ", "tag": "NEGATIVE",
+      "passToken": "1415e860421c (the hostname content)", "failToken": "[PTA GATE/[PTA ENFORCEMENT block",
+      "toolResultContext": "the /etc/hostname read returned its content verbatim — ZERO enforcement on the legit read",
+      "timedOut": false, "verdict": "pass"
+    },
+    {
+      "name": "NEGATIVE-LEGIT-BATTERY", "tag": "NEGATIVE",
+      "passToken": "battery-ok", "failToken": "[PTA ENFORCEMENT block",
+      "toolResultContext": "echo battery-ok returned battery-ok — the legit battery command transited unblocked",
+      "timedOut": false, "verdict": "pass"
+    },
+    {
+      "name": "ADVERSARIAL-ESCAPE-HATCH-AT-GATE", "tag": "ADVERSARIAL",
+      "passToken": "[PTA fired for the inline-exec AND the read still returned", "failToken": "locked out",
+      "toolResultContext": "after the tier-1 PTA enforcement (test 2), the subsequent /etc/hostname read + echo battery-ok + node 7/bun 8 ALL RAN — the agent was never bricked (R6/AP-8 held)",
+      "timedOut": false, "verdict": "pass"
+    }
+  ],
+  "phaseE": {
+    "shaDeployMatch": true, "authProbe": true, "allScenariosExecuted": true,
+    "allTokensAsserted": true, "noCircularPasses": true, "noTimeouts": true,
+    "blastRadiusCovered": true, "adversarialBehaved": true,
+    "containerAlive": true, "resultsArtifactWritten": true,
+    "passed": 10, "total": 10, "overall": "10/10 pass"
+  },
+  "noLockoutProof": {
+    "escapeHatchPass": true, "remediationReset": true, "neverBricked": true,
+    "detail": "after the tier-1 PTA correction fired on the smoke claim (test 2), the subsequent /etc/hostname read, echo battery-ok, node -e 7, bun -e 8 ALL RAN normally — the enforcement gates the violating surface only; escape hatches never blocked"
+  },
+  "honestGaps": [
+    "The tier-3 T.E.B. throw + tier-4 [PTA GATE] escalation was not individually witnessed (the synapse accumulation needs 3+ repeats in one session; the tier-1 correction DID fire — the enforcement machinery is live)",
+    "The fix rounds: r1 (the wiring gap — the engine was never imported), r2 (the runtime readFileSync path dependency — dead in the container), r3 (the embedded typed constant — the layer content now provably in the bundle)"
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "runId": "R27-mpse-provenance-20250829-001",
+  "verdicts": [
+    {
+      "findingIndex": 0,
+      "layer": "R27-mpse-provenance",
+      "adjudication": "TRUE_DEFECT",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/pipeline.ts",
+      "line": 115,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 92,
+      "specQuote": "Each Shadow Hydra subagent is a pi SDK Agent instance with its own system prompt and the individual layers within a meta gate all run async while the meta gates LASME --> MPSE --> SRO Graph are sequential via ShadowHydraPipeline.execute() 11-step",
+      "codeQuote": "throw new Error('AETHER_MIGRATION: buildAndRunSubagent removed — the primary path uses runMetaLayer from aether-meta.ts')",
+      "divergence": "Spec requires concurrent LLM dispatch via AetherHydraPipeline.dispatchSubagent with chainedStream transport; code at pipeline.ts:115 traces to a throw that delegates to aether-meta runLayerHunter — provenance exists but contradicts contract (divergent).",
+      "confidence": 0.92,
+      "derailmentMode": "D2"
+    },
+    {
+      "findingIndex": 1,
+      "layer": "R27-mpse-provenance",
+      "adjudication": "TRUE_DEFECT",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/memory.ts",
+      "line": 103,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 285,
+      "specQuote": "The shared graph/db between them should be [a shared memory layer] — SQLiteMemoryStore will hydrate typed_nodes + typed_edges into a GraphifyGraph (Phase-2 upgrade: return the corbell graph from typed_nodes/typed_edges)",
+      "codeQuote": "getGraph(): unknown | null { return null; } // Phase-1 stub: returns null — the corbell query path is not yet wired.",
+      "divergence": "Spec requires SQLiteMemoryStore to hydrate typed_nodes/typed_edges into GraphifyGraph via QueryEngine.temporal, but implementation returns null and mergeGraphSlice is no-op — zero provenance for Phase-2 graph persistence despite migrations.ts CHECK constraints being ready.",
+      "confidence": 0.94,
+      "derailmentMode": "D5"
+    },
+    {
+      "findingIndex": 2,
+      "layer": "R27-mpse-provenance",
+      "adjudication": "TRUE_DEFECT",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/layers/r-provenance.ts",
+      "line": 45,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 155,
+      "specQuote": "For each spec clause, trace to the code that implements it. Missing trace = TRACE_GAP finding (implementationStatus: unimplemented). Every spec clause MUST have provenance chain to code",
+      "codeQuote": "if (!active) return out; // SILENT without graph (isBatchBActive false → 0)",
+      "divergence": "Spec requires every clause to emit TRACE_GAP when no graph path exists, but code at r-provenance.ts:45 returns 0 silently when isBatchBActive false, dropping clauses — reachable TRACE_GAP fallback at :60-75 never executes on graph-less runs.",
+      "confidence": 0.89,
+      "derailmentMode": "D3"
+    },
+    {
+      "findingIndex": 3,
+      "layer": "R27-mpse-provenance",
+      "adjudication": "UNCLEAR",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/hydra/aether-tools.ts",
+      "line": 280,
+      "missingEvidence": "Two INFERRED paths of equal confidence to kindForLayer (aether-tools.ts:280 vs aether-meta.ts:40) with no EXTRACTED anchor — cannot determine authoritative Evidence vs EvidenceFile mapping without graph disambiguation; graphify:subgraph depth=3 around graph_tag shows divergent fallbacks.",
+      "confidence": 0.71,
+      "derailmentMode": "D8"
+    },
+    {
+      "findingIndex": 4,
+      "layer": "R27-mpse-provenance",
+      "adjudication": "RED_HERRING",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/input/spec-bindings.ts",
+      "line": 110,
+      "legitimizingReason": "JSON-block tolerance parsing is an orphaned implementation extending the 5-shape parser — extra feature not declared in spec (spec examples are name-equals, name-colon, threshold, pipe-O-pipe, backtick table) but defensively handles JSON; not harmful, spec coverage gap not a provenance violation.",
+      "confidence": 0.66,
+      "derailmentMode": "D1"
+    }
+  ]
+}

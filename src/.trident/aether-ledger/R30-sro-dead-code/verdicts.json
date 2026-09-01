@@ -1,0 +1,61 @@
+{
+  "runId": "R30-sro-dead-code",
+  "verdicts": [
+    {
+      "findingIndex": 0,
+      "layer": "R30-sro-dead-code",
+      "adjudication": "RED_HERRING",
+      "file": "src/hydra/instances/sro.ts",
+      "line": 592,
+      "specPath": "MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md",
+      "specLine": 245,
+      "specQuote": "Find exports with no importers, functions with no callers, modules with no consumers — measured, never assumed — an empty list is a VALID result when genuinely empty.",
+      "codeQuote": "export const sroPreGates = createSroPreGates;",
+      "confidence": 0.82,
+      "legitimizingReason": "STALE candidate — symbol ABSENT in current baseline (src/hydra/instances/sro.ts is 592 lines, stat 31531 bytes, mtime 1788063471978; read @590 returns EOF; grep 'sroPreGates' → 0 src hits). Current code exports factory createSroPreGates (live, imported by audit-engine/index.ts:183) not alias. Two-leg verification now shows 0 hits total, not 0 importers of an existing export — candidate line beyond EOF. Re-measured as RED_HERRING (stale).",
+      "derailmentMode": "D5"
+    },
+    {
+      "findingIndex": 1,
+      "layer": "R30-sro-dead-code",
+      "adjudication": "RED_HERRING",
+      "file": "src/hydra/instances/sro.ts",
+      "line": 593,
+      "specPath": "MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md",
+      "specLine": 245,
+      "specQuote": "Find exports with no importers, functions with no callers, modules with no consumers — measured, never assumed — an empty list is a VALID result when genuinely empty.",
+      "codeQuote": "export const sroPostGates = createSroPostGates;",
+      "confidence": 0.82,
+      "legitimizingReason": "STALE candidate — symbol ABSENT in current baseline (file ends ~592, grep 'sroPostGates' → 0 src hits). Current code exports factory createSroPostGates at sro.ts:522-591, not alias. Orchestrator imports factory not alias. Candidate beyond EOF, not a live dead export — RED_HERRING (stale).",
+      "derailmentMode": "D5"
+    },
+    {
+      "findingIndex": 2,
+      "layer": "R30-sro-dead-code",
+      "adjudication": "RED_HERRING",
+      "file": "src/hydra/instances/sro.ts",
+      "line": 273,
+      "specPath": "MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md",
+      "specLine": 245,
+      "specQuote": "Find exports with no importers, functions with no callers, modules with no consumers — measured, never assumed — an empty list is a VALID result when genuinely empty.",
+      "codeQuote": "export const sroSubagentIds: string[] = ['graph-builder', 'path-hunter', 'dead-code-hunter', 'cycle-hunter'];",
+      "confidence": 0.78,
+      "legitimizingReason": "Spec-mandated public registry export per V443 L2 Spec §2.5 (B2 SRO deliverable: 'Export sroSubagentIds + sroSpecs + sroSynthesize + gate factories') and AETHER §2.2 SRO roster. Graph in-degree 0 is expected for registry constants; legitimized by spec. Two-leg verification shows 0 importers (grep 'sroSubagentIds' → 0 src hits, audit-engine/index.ts:183 imports sroSpecs/createSroPreGates/createSroPostGates not this array) — technically dead per measurement law but intentionally public API for future dynamic registry, not a defect. Confidence 0.78 reflects spec authority override.",
+      "derailmentMode": "D5"
+    },
+    {
+      "findingIndex": 3,
+      "layer": "R30-sro-dead-code",
+      "adjudication": "RED_HERRING",
+      "file": "src/hydra/pipeline.ts",
+      "line": 153,
+      "specPath": "MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md",
+      "specLine": 245,
+      "specQuote": "Find exports with no importers, functions with no callers, modules with no consumers — measured, never assumed — an empty list is a VALID result when genuinely empty.",
+      "codeQuote": "private extractJSON(message: { content?: Array<{ type?: string; text?: string }> }): unknown {",
+      "confidence": 0.92,
+      "legitimizingReason": "STALE candidate — method DELETED in current baseline (src/hydra/pipeline.ts is 153 lines, stat 7209 bytes, mtime 1788065098840; full read shows dispatchSubagent throwing AETHER_MIGRATION at pipeline.ts:108-134, no extractJSON string; grep 'extractJSON' → 0 src hits). Per explore-hydra.md:29 'extractJSON deleted from pipeline.ts (172→153L)' as part of Aether migration to aether-meta.ts runMetaLayer. Single-source law now expects export from src/hydra/subagent.ts (ENOENT — not yet landed). Candidate references deleted code, not a live dead function — RED_HERRING (stale).",
+      "derailmentMode": "D5"
+    }
+  ]
+}

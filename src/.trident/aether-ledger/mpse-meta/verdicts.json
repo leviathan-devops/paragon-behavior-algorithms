@@ -1,0 +1,89 @@
+{
+  "runId": "audit-1788174665340",
+  "verdicts": [
+    {
+      "findingIndex": 0,
+      "layer": "mpse-meta",
+      "adjudication": "TRUE_DEFECT",
+      "file": "audit-engine/index.ts",
+      "line": 82,
+      "specPath": "MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md",
+      "specLine": 240,
+      "specQuote": "mechanical template doctrine — brief IS the prompt, AuditorTemplate is the sole dispatch contract, SubagentSpec uses function-based builders",
+      "codeQuote": "import { lasmeSpecs, lasmeSynthesize, lasmePreGates, lasmePostGates } from '../hydra/instances/lasme.ts';",
+      "divergence": "Spec mandates AuditorTemplate as sole dispatch contract (14 hunters + 3 metas), but audit-engine/index.ts:82-95 simultaneously imports BOTH hierarchies (SubagentSpec via instances/* AND AuditorTemplate via aether-templates/*), creating duplicate hunter communities (24 nodes for 14 logical hunters) and violating layer boundary.",
+      "confidence": 0.89,
+      "derailmentMode": "contract.violated"
+    },
+    {
+      "findingIndex": 1,
+      "layer": "mpse-meta",
+      "adjudication": "TRUE_DEFECT",
+      "file": "audit-engine/math/contract.ts",
+      "line": 54,
+      "specPath": "MASTER_CONTEXT/PARAGON_L2_BUILD_SPEC.md",
+      "specLine": 681,
+      "specQuote": "OracleDeclaration {exprId, oracleValue, epsilon?} — floats compare ONLY against REGISTERED epsilon via discharge discipline",
+      "codeQuote": "return ev === ov ? 'VALID' : 'CONTRADICTED';",
+      "divergence": "Spec requires floating-point oracle comparisons to use registered epsilon envelope (Math.abs(a-b) < epsilon), but toBrandedVerdict uses bare strict equality (ev === ov) and JSON.stringify equality for arrays, failing on floating-point noise — threshold without epsilon guard is VIOLATION per V443 §2.4.",
+      "confidence": 0.91,
+      "derailmentMode": "oracle.unguarded"
+    },
+    {
+      "findingIndex": 2,
+      "layer": "mpse-meta",
+      "adjudication": "TRUE_DEFECT",
+      "file": "hydra/aether-tools.ts",
+      "line": 70,
+      "specPath": "MASTER_CONTEXT/AETHER_CLEANUP_OVERHAUL_PLAN.md",
+      "specLine": 6,
+      "specQuote": "Scope Pinning — reads confined to targetRoot via READ_SCOPE_VIOLATION + one-target law — hunt ONLY inside targetRoot",
+      "codeQuote": "} catch (e) { void (e as Error).message; }",
+      "divergence": "Invariant requires confinement to be fail-closed (any scope-resolution error must deny). makeCappedReadTool's outer try swallows errors from realResolve/isWithinRoot and falls through to fs.readFileSync outside targetRoot — KRAKEN wander residual, fail-open bypass (identical pattern in makeCappedGrepTool).",
+      "confidence": 0.9,
+      "derailmentMode": "stage.violated-inv"
+    },
+    {
+      "findingIndex": 3,
+      "layer": "mpse-meta",
+      "adjudication": "TRUE_DEFECT",
+      "file": "hydra/memory.ts",
+      "line": 140,
+      "specPath": "MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md",
+      "specLine": 240,
+      "specQuote": "one shared graph — all hunters query the SAME shared graph; V443 §2.8 SharedMemoryStore.mergeGraphSlice()/queryGraph() hydrate path for corbell merged graph",
+      "codeQuote": "mergeGraphSlice(_slice: object): void { return; }",
+      "divergence": "Spec mandates mergeGraphSlice to hydrate Graphify slices into corbell typed_nodes/typed_edges inside transaction, and queryGraph to query corbell. Implementation is no-op void and return null stub — two graphs never merge (GraphifyMCPMapper vs shared.db), causing false TRACE_GAPs and preventing TRIPLE-CONFIRMED correlation.",
+      "confidence": 0.88,
+      "derailmentMode": "provenance.trace-gap"
+    },
+    {
+      "findingIndex": 4,
+      "layer": "mpse-meta",
+      "adjudication": "TRUE_DEFECT",
+      "file": "hydra/instances/mpse.ts",
+      "line": 418,
+      "specPath": "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 420,
+      "specQuote": "MPSE Gate Conditions Pre-gates: LASME gate completed (evidence: manifest exists in shared memory)",
+      "codeQuote": "const mem = (_target as unknown as { memory?: SharedMemoryStore }).memory;",
+      "divergence": "AuditGateInput has no memory field (only targetRoot/specs), memory lives on PipelineConfig.memory. Pre-gate casts input to {memory?: SharedMemoryStore} and always takes MPSE_PRE_LASME_MISSING branch unless caller illegally injects memory, masking true LASME completion — contract drift between spec wiring and implementation.",
+      "confidence": 0.87,
+      "derailmentMode": "contract.violated"
+    },
+    {
+      "findingIndex": 5,
+      "layer": "mpse-meta",
+      "adjudication": "TRUE_DEFECT",
+      "file": "hydra/pipeline.ts",
+      "line": 143,
+      "specPath": "MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md",
+      "specLine": 410,
+      "specQuote": "pipeline dispatch must Promise.allSettled concurrent subagents with graphifyTools; AetherHydraPipeline is the gate skeleton",
+      "codeQuote": "throw new Error('AETHER_MIGRATION: buildAndRunSubagent removed — the primary path uses runMetaLayer from aether-meta.ts');",
+      "divergence": "AetherHydraPipeline.dispatchSubagent assembles tools then does void tools and always throws — dead dispatch seam masquerading as live orchestrator. Real dispatch is runMetaLayer in aether-meta.ts, leaving pipeline.ts as orphaned provenance with two competing implementations and no EXTRACTED edge disambiguating authoritative path.",
+      "confidence": 0.91,
+      "derailmentMode": "provenance.trace-gap"
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "id": "TOOL_PERMISSION",
+  "description": "Enforces tool allowlist per agent phase; disallows opencode-run, inline-exec, and unauthorized tools outside Poseidon.",
+  "toolMatchers": [
+    {
+      "toolName": "bash",
+      "argPatterns": {
+        "command": [
+          "*opencode run*",
+          "*opencode exec*"
+        ]
+      }
+    },
+    {
+      "toolName": "write"
+    },
+    {
+      "toolName": "edit"
+    },
+    {
+      "toolName": "bash"
+    }
+  ],
+  "banks": {
+    "descriptive": [
+      "*tool*permission*",
+      "*allowlist*violation*",
+      "*unauthorized*tool*"
+    ],
+    "suggestive": [
+      "*try*tool*",
+      "*attempt*exec*"
+    ],
+    "substitute": [
+      "*bypass*allowlist*",
+      "*skip*permission*"
+    ],
+    "use": [
+      "*poseidon*mode*",
+      "*authorized*tool*"
+    ]
+  },
+  "pbaContextBoost": {
+    "families": [
+      "TOOL_EVASION"
+    ],
+    "boostAmount": 0.15
+  },
+  "enforcement": {
+    "tier1": "[PTA:TOOL_PERMISSION:T1] DETECTED: Tool permission violation \u2014 unauthorized tool outside allowed context \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched TOOL_PERMISSION toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 1 because it violates the TOOL_PERMISSION contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier2": "[PTA:TOOL_PERMISSION:T2] DETECTED: Repeated tool permission violation \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched TOOL_PERMISSION toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 2 because it violates the TOOL_PERMISSION contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier3": "[PTA:TOOL_PERMISSION:T3] DETECTED: Tool permission violation at TEB \u2014 blocked \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched TOOL_PERMISSION toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 3 because it violates the TOOL_PERMISSION contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier4": "[PTA GATE:TOOL_PERMISSION:T4] DETECTED: Tool permission violation at GATE \u2014 hard blocked; only violating toolMatchers gated, escape hatches and demanded tools always pass (R6) \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched TOOL_PERMISSION toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 4 because it violates the TOOL_PERMISSION contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier"
+  },
+  "threshold": 0.5,
+  "severity": "HIGH",
+  "chainRules": []
+}

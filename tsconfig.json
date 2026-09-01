@@ -3,13 +3,18 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "outDir": "../dist",
+    "rootDir": ".",
     "strict": true,
+    "declaration": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "outDir": "dist",
-    "declaration": true,
-    "types": ["bun"]
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "types": ["node"]
   },
-  "include": ["core/**/*", "capture/**/*", "actuation/**/*", "config/**/*", "hooks/**/*", "tests/**/*", "index.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "checkpoints", "Checkpoints", "src_old_backup", "dist_old_backup", "SHIP_PACKAGE"]
 }

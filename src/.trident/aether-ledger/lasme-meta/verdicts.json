@@ -1,0 +1,82 @@
+{
+  "runId": "lasme-meta-investigate-20260830",
+  "targetRoot": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src",
+  "specs": [
+    "MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+    "MASTER_CONTEXT/AETHER_CODE_AUDIT_OVERHAUL_ARCHITECTURE.md",
+    "MASTER_CONTEXT/V443_PLAN_A_CODE_AUDIT_TOOL_L2_SPEC.md"
+  ],
+  "candidatesIn": 5,
+  "verdicts": [
+    {
+      "findingIndex": 0,
+      "layer": "R18-lasme-lexicon",
+      "adjudication": "TRUE_DEFECT",
+      "file": "src/hydra/graph-mapper.ts",
+      "line": 54,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 142,
+      "specQuote": "r-lexicon | PatternFamily interfaces, ISE lexicons, decision ladders ≥3, threshold literals without calibration — threshold literals without named calibration constant and no calib: comment",
+      "codeQuote": "const godNodes = sorted.slice(0, 5).map(([id]) => id);",
+      "divergence": "Bare literal 5 gates god-node selection (which nodes are single points of failure) with no const GOD_NODE_TOP_N = 5 // calib: … — violates ISE named-threshold law that r-lexicon enforces; no hoisted constant, no calib comment, decision site directly in slice.",
+      "confidence": 0.92,
+      "severity": "HIGH"
+    },
+    {
+      "findingIndex": 1,
+      "layer": "R18-lasme-lexicon",
+      "adjudication": "TRUE_DEFECT",
+      "file": "src/hydra/graph-mapper.ts",
+      "line": 221,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 142,
+      "specQuote": "r-lexicon | PatternFamily interfaces, ISE lexicons, decision ladders ≥3, threshold literals without calibration",
+      "codeQuote": "const godNodes = [...degree.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([id]) => id);",
+      "divergence": "Duplicate bare 5 in merge() path — same decision reproduced without abstraction, proving systemic drift not one-off slip; both sites lack const+calib, should be hoisted to single GOD_NODE_LIMIT.",
+      "confidence": 0.9,
+      "severity": "HIGH"
+    },
+    {
+      "findingIndex": 2,
+      "layer": "R23-lasme-mpse-threshold",
+      "adjudication": "TRUE_DEFECT",
+      "file": "src/audit-engine/math/oracle.ts",
+      "line": 23,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_PLAN_A_CODE_AUDIT_TOOL_L2_SPEC.md",
+      "specLine": 122,
+      "specQuote": "epsilon REQUIRED at registration (PARAGON oracle.ts:43's law) — OracleDeclaration epsilon is REQUIRED field, |evaluated - oracle| <= epsilon must be calibrated",
+      "codeQuote": "const eps = decl.epsilon ?? 0;",
+      "divergence": "Register coalesces missing epsilon to bare 0 via ?? 0 with no calib comment, silently downgrading contract to exact equality (tolerance 0); guard checks isFiniteEpsilon(eps) but never checks presence, so missing epsilon passes instead of throwing ORACLE_EPSILON_REQUIRED.",
+      "confidence": 0.94,
+      "severity": "HIGH"
+    },
+    {
+      "findingIndex": 3,
+      "layer": "R23-lasme-mpse-threshold",
+      "adjudication": "TRUE_DEFECT",
+      "file": "src/audit-engine/math/oracle.ts",
+      "line": 42,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_PLAN_A_CODE_AUDIT_TOOL_L2_SPEC.md",
+      "specLine": 122,
+      "specQuote": "epsilon REQUIRED at registration (PARAGON oracle.ts:43's law) — |evaluated - oracle| <= epsilon everywhere (KB-01:357-360)",
+      "codeQuote": "const eps = decl.epsilon ?? 0;",
+      "divergence": "Discharge repeats same coalesce to 0 on read path, directly gating Math.abs(evaluated - ov) <= eps at oracle.ts:46 via EXTRACTED edge; violates same epsilon REQUIRED law, makes every discharge brittle exact-match and hides value drift.",
+      "confidence": 0.88,
+      "severity": "HIGH"
+    },
+    {
+      "findingIndex": 4,
+      "layer": "R21-lasme-engine",
+      "adjudication": "TRUE_DEFECT",
+      "file": "src/hydra/aether-auditor.ts",
+      "line": 72,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_SHADOW_HYDRA_CODE_AUDIT_L2_SPEC.md",
+      "specLine": 156,
+      "specQuote": "r-engine | writeFileSync/degrade paths, engine-level side effects without guards — engine-level side effects without guards, container deploy surface",
+      "codeQuote": "fs.writeFileSync(briefPath, brief, 'utf-8');",
+      "divergence": "Synchronous I/O blocks opencode event loop under Promise.allSettled 6-hunter dispatch; 9 sync sites via rg writeFileSync src/hydra =9, zero async per-file queue; Hermes mandated node:fs/promises, only boot mkdirSync whitelisted.",
+      "confidence": 0.82,
+      "severity": "MEDIUM"
+    }
+  ]
+}

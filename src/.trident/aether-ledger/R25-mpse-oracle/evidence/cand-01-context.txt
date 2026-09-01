@@ -1,0 +1,22 @@
+CANDIDATE 1 — RED_HERRING — r-mpse oracle.ts:17
+File: src/audit-engine/math/oracle.ts:17
+Layer: r-mpse
+Evidence Quote: if (!isFiniteEpsilon(eps)) throw new Error(`ORACLE_EPSILON_REQUIRED ...
+Code Window (±40L):
+```
+src/audit-engine/math/oracle.ts:11-22
+function isFiniteEpsilon(e: unknown): boolean { return typeof e === 'number' && Number.isFinite(e) && e >= 0; }
+export function createOracleRegistry(): OracleRegistry {
+  return {
+    register(decl: OracleDeclaration): void {
+      const eps = decl.epsilon ?? 0; // <-- line 15 defect
+      if (!isFiniteEpsilon(eps)) throw new Error(`ORACLE_EPSILON_REQUIRED: epsilon must be finite >=0 for ${decl.exprId}`); // <-- THIS LINE
+      if (store.has(decl.exprId)) throw new Error(`ORACLE_CONFLICT: duplicate exprId ${decl.exprId}`);
+      store.set(decl.exprId, normalized);
+    }
+```
+Spec Clause: PARAGON §4.2.5:695 `a non-integer float without the epsilon THROWS OracleEpsilonError` + SPEC-A §2.2.4 `epsilon REQUIRED`
+Spec Quote: `a non-integer float without the epsilon THROWS OracleEpsilonError` and `OracleDeclaration{..., epsilon} — epsilon REQUIRED at registration`
+Divergence Check: NONE for this line in isolation — the throw DOES enforce ORACLE_EPSILON_REQUIRED (finite ≥0) and ORACLE_CONFLICT. The candidate's 'floating threshold without epsilon' shape is refuted because this code explicitly validates epsilon finiteness and duplicate exprId before store.set. The hole is one line above (??0 laundering), not this line. Hence RED_HERRING — the gate itself is legitimate firewall.
+Derailment Mode: D5
+Confidence: 0.85

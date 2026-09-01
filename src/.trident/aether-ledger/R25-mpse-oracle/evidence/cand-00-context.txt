@@ -1,0 +1,26 @@
+CANDIDATE 0 — RED_HERRING — r-mpse oracle.ts:26
+File: src/audit-engine/math/oracle.ts:26
+Layer: r-mpse
+Side: — (threshold pattern)
+Evidence Quote: return Math.abs(evaluated - ov) <= eps;
+Code Window (±40L):
+```
+src/audit-engine/math/oracle.ts:8-36
+export interface OracleDeclaration { epsilon?: number; }
+...
+  discharge(exprId, evaluated): boolean {
+    const decl = store.get(exprId);
+    const ov = decl.oracleValue;
+    const eps = decl.epsilon ?? 0;
+    if (typeof ov === 'number' && typeof evaluated === 'number') {
+      return Math.abs(evaluated - ov) <= eps; // <-- THIS LINE — the epsilon remediation
+    }
+    if (typeof ov === 'boolean' && typeof evaluated === 'boolean') return ov === evaluated;
+    if (Array.isArray(ov) && Array.isArray(evaluated)) return JSON.stringify(ov) === JSON.stringify(evaluated);
+  }
+```
+Spec Clause: PARAGON §4.2.5 `a non-integer float without the epsilon THROWS OracleEpsilonError` + `|evaluated − oracle| ≤ epsilon` (KB-01:357-360)
+Spec Quote: `a non-integer float without the epsilon THROWS OracleEpsilonError (the hidden tolerance BANNED)` (PARAGON:695) and `floats compare ONLY against REGISTERED epsilon`
+Divergence Check: NONE — this line IS the legit remediation, not an unguarded threshold. `eps` is `decl.epsilon` from the registered OracleDeclaration, the exact contract the detector hunts. The detector fired because it saw Math.abs without explicit epsilon token in same line, but cross-file provenance shows eps IS the registered epsilon. Hence RED_HERRING.
+Derailment Mode: D5 (constraint provenance — detector lacked cross-file provenance)
+Confidence: 0.90

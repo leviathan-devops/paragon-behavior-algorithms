@@ -1,0 +1,30 @@
+version: "1"
+
+workspace:
+  name: "src"
+  root: ".."
+
+services:
+  - id: src
+    repo: ..
+    language: typescript
+    tags: [core]
+
+existing_docs:
+  auto_scan: true
+  paths: []
+  patterns:
+    - "*.design.md"
+    - "*-spec.md"
+    - "RFC-*.md"
+    - "ADR-*.md"
+    - "DESIGN.md"
+
+storage:
+  graph:
+    backend: sqlite
+    path: .corbell/workspace.db
+  embeddings:
+    backend: sqlite
+    path: .corbell/workspace.db
+  model: all-MiniLM-L6-v2

@@ -1,0 +1,49 @@
+{
+  "runId": "R25-mpse-oracle-20260828-001",
+  "verdicts": [
+    {
+      "findingIndex": 0,
+      "layer": "r-mpse",
+      "adjudication": "RED_HERRING",
+      "file": "src/audit-engine/math/oracle.ts",
+      "line": 26,
+      "confidence": 0.9,
+      "legitimizingReason": "The Math.abs guard at this line IS the mandated epsilon remediation (PARAGON §4.2.5 floats compare ONLY against REGISTERED epsilon); the candidate's 'threshold without epsilon' shape is cosmetic-but-legitimate BECAUSE it implements the very contract the detector hunts (Math.abs(evaluated - ov) <= eps) with epsilon sourced from the registered OracleDeclaration.",
+      "derailmentMode": "D5"
+    },
+    {
+      "findingIndex": 1,
+      "layer": "r-mpse",
+      "adjudication": "RED_HERRING",
+      "file": "src/audit-engine/math/oracle.ts",
+      "line": 17,
+      "confidence": 0.85,
+      "legitimizingReason": "The throw at this site enforces ORACLE_EPSILON_REQUIRED and ORACLE_CONFLICT per PARAGON §4.2.5:695; the candidate's 'floating threshold without epsilon' shape is refuted because the code explicitly validates epsilon finiteness (>=0) and duplicate exprId before store.set, so the shape is legitimate firewall, not unguarded threshold.",
+      "derailmentMode": "D5"
+    },
+    {
+      "findingIndex": 2,
+      "layer": "r-mpse",
+      "adjudication": "TRUE_DEFECT",
+      "file": "src/audit-engine/math/oracle.ts",
+      "line": 15,
+      "specPath": "KNOWLEDGE_LIBRARY/Codename:PARAGON/PARAGON_L2_BUILD_SPEC.md",
+      "specLine": 695,
+      "specQuote": "a non-integer float without the epsilon THROWS OracleEpsilonError (the hidden tolerance BANNED)",
+      "codeQuote": "const eps = decl.epsilon ?? 0;",
+      "divergence": "the spec declares a non-integer float without epsilon must THROW OracleEpsilonError (PARAGON §4.2.5:695); the code at oracle.ts:15 does 'const eps = decl.epsilon ?? 0' and only checks isFiniteEpsilon(eps), which permits a float oracleValue=0.1 with eps=0 (no throw), so the hidden zero-tolerance is not banned and the gap is a missing float-requires-epsilon guard.",
+      "confidence": 0.95,
+      "derailmentMode": "D1"
+    },
+    {
+      "findingIndex": 3,
+      "layer": "r-lexicon",
+      "adjudication": "UNCLEAR",
+      "file": "src/audit-engine/math/eval.ts",
+      "line": 12,
+      "confidence": 0.65,
+      "missingEvidence": "cannot adjudicate: the spec clause 'depthLimit=256 and domainSizeLimit=10_000' (PARAGON §4.2.2:610) declares the thresholds as named constants with BECAUSE, but the code window at eval.ts:12 shows DEPTH_LIMIT_DEFAULT, DOMAIN_SIZE_LIMIT_DEFAULT imports without their definition sites; needs grep for 'DEPTH_LIMIT_DEFAULT' in expr.ts and read of the MAX constant's BECAUSE comment to confirm named+calibrated exemption per §2.10.",
+      "derailmentMode": "D5"
+    }
+  ]
+}

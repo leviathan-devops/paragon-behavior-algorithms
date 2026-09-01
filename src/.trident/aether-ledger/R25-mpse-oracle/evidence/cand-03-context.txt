@@ -1,0 +1,23 @@
+CANDIDATE 3 — UNCLEAR — r-lexicon eval.ts:12
+File: src/audit-engine/math/eval.ts:12
+Layer: r-lexicon (threshold naming)
+Evidence Quote: import { DEPTH_LIMIT_DEFAULT, DOMAIN_SIZE_LIMIT_DEFAULT } from './expr.ts';
+Code Window (±40L):
+```
+src/audit-engine/math/eval.ts:1-20
+import type { Bindings, ExprKind, MathExpr } from './expr.ts';
+import { DEPTH_LIMIT_DEFAULT, DOMAIN_SIZE_LIMIT_DEFAULT, TEMPORAL_KINDS } from './expr.ts';
+export interface EvalContext { bindings: Bindings; depthLimit: number; domainSizeLimit: number; }
+...
+function evalInternal(e: MathExpr, ctx: EvalContext, depth: number): Checked<ScalarOrSet> {
+  if (depth > ctx.depthLimit) return { ok: false, code: 'DEPTH_EXCEEDED', depth };
+  ...
+  if (arr.length > ctx.domainSizeLimit) return { ok: false, code: 'DOMAIN_UNBOUNDED', binder };
+}
+```
+Spec Clause: PARAGON §4.2.2:610 `depthLimit=256 and domainSizeLimit=10_000` declares thresholds as named constants with BECAUSE
+Spec Quote: (needs definition site) — the spec at PARAGON §4.2.2:610 says the thresholds are `DEPTH_LIMIT_DEFAULT=256` and `DOMAIN_SIZE_LIMIT_DEFAULT=10_000` with BECAUSE about 13 phases × nested set ops
+Missing Evidence: cannot adjudicate — the code window at eval.ts:12 shows imports without their definition sites; needs read of `src/audit-engine/math/expr.ts` offset 50 limit 20 to capture the BECAUSE comment at expr.ts:54-55 `export const DEPTH_LIMIT_DEFAULT = 256; // BECAUSE ...` to confirm named+calibrated exemption per §2.10. The definition at expr.ts:54-55 with BECAUSE is not yet in evidence window (evidence/cand-03-context.txt only has file:line eval.ts:12). Without that, cannot tell if this is a magic number or a named+calibrated threshold (the §2.10 exemption: `HEALTH_THRESHOLDS-style named+calibrated thresholds are exempt from magic-number findings`).
+Derailment Mode: D5
+Confidence: 0.65
+Next Step: read_file expr.ts offset 50 limit 20; if BECAUSE present → RED_HERRING (exempt), else TRUE_DEFECT.

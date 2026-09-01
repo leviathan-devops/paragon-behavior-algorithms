@@ -1,0 +1,44 @@
+{
+  "runId": "R23-lasme-mpse-threshold-20260831-aether",
+  "verdicts": [
+    {
+      "findingIndex": 0,
+      "layer": "R23-lasme-mpse-threshold",
+      "adjudication": "TRUE_DEFECT",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/math/oracle.ts",
+      "line": 26,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_PLAN_A_CODE_AUDIT_TOOL_L2_SPEC.md",
+      "specLine": 122,
+      "specQuote": "epsilon REQUIRED at registration (PARAGON oracle.ts:43's law)",
+      "codeQuote": "const eps = decl.epsilon ?? 0;",
+      "divergence": "Spec §2.2.4 requires epsilon at oracle registration — OracleDeclaration{…, epsilon} is REQUIRED and comparison |evaluated − oracle| ≤ epsilon must be calibrated; code at oracle.ts:26 substitutes bare literal 0 via ?? 0 when decl.epsilon absent, silently downgrading contract to exact equality (tolerance 0) with no calib: comment reconciling divergence, and repeats default at discharge. This is unguarded threshold (bare 0 gating contract) per hunt rule (a) and epsilon oracle gap per (b), and threshold drift per (c) from any spec-declared epsilon (e.g., ±0.05) to 0.",
+      "confidence": 0.94
+    },
+    {
+      "findingIndex": 1,
+      "layer": "R23-lasme-mpse-threshold",
+      "adjudication": "TRUE_DEFECT",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/math/oracle.ts",
+      "line": 46,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_PLAN_A_CODE_AUDIT_TOOL_L2_SPEC.md",
+      "specLine": 122,
+      "specQuote": "epsilon REQUIRED at registration (PARAGON oracle.ts:43's law)",
+      "codeQuote": "const eps = decl.epsilon ?? 0;",
+      "divergence": "discharge path repeats coalesce to 0, so |evaluated − oracle| ≤ epsilon is checked against bare literal 0 when epsilon missing, hiding unguarded threshold and violating KB-01:357-360 epsilon law |evaluated-oracle|<=epsilon everywhere and MC-A-06 present(d.epsilon). Same root cause as findingIndex 0, second site — violates (b) epsilon oracle gap and (d) contract-site without threshold guard: Math.abs(evaluated - ov) <= eps gates discharge verdict with 0.",
+      "confidence": 0.92
+    },
+    {
+      "findingIndex": 2,
+      "layer": "R23-lasme-mpse-threshold",
+      "adjudication": "TRUE_DEFECT",
+      "file": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/src/audit-engine/math/oracle.ts",
+      "line": 76,
+      "specPath": "/home/leviathan/OPENCODE_WORKSPACE/Shared Workspace Context/Trident_Agent/Active_Projects/v4.4.3/MASTER_CONTEXT/V443_PLAN_A_CODE_AUDIT_TOOL_L2_SPEC.md",
+      "specLine": 122,
+      "specQuote": "epsilon REQUIRED at registration (PARAGON oracle.ts:43's law)",
+      "codeQuote": "return { discharged: ok, epsilonEnforced: isFiniteEpsilon(store.get(exprId)?.epsilon ?? 0) };",
+      "divergence": "verifyAndDischarge epsilonEnforced computed via isFiniteEpsilon(... ?? 0) allows missing epsilon to pass as enforced (isFiniteEpsilon(0)=true), so downstream consumers believe epsilon was enforced when oracle gap was merely masked. Bare literal 0 with no calib: comment gates numeric decision epsilonEnforced, violating (b) epsilon oracle gap and (d) contract-site threshold omission; requires epsilon presence check not fallback.",
+      "confidence": 0.88
+    }
+  ]
+}

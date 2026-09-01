@@ -1,0 +1,80 @@
+{
+  "id": "GOD_LOOP_CONTAINER_TEST",
+  "description": "CONTAINER_TEST phase — LASME results artifact gate (.trident/container-test-results.json evaluated by evaluateContainerResults), Docker validation, PASS waits for score>=96 AND LASME-PASS. Below target returns to AUDIT_RECHECK. Mechanically blocks PASS without valid results file.",
+  "toolMatchers": [
+    {
+      "toolName": "trident-container-test",
+      "argPatterns": {
+        "action": [
+          "*setup*",
+          "*send*",
+          "*verify*",
+          "*results*"
+        ]
+      }
+    },
+    {
+      "toolName": "bash",
+      "argPatterns": {
+        "command": [
+          "*container*test*",
+          "*LASME*",
+          "*docker*"
+        ]
+      }
+    }
+  ],
+  "banks": {
+    "descriptive": [
+      "*container*test*",
+      "*LASME*artifact*",
+      "*docker*validation*",
+      "*results*artifact*"
+    ],
+    "suggestive": [
+      "*skip*container*",
+      "*fake*container*",
+      "*fake*PASS*"
+    ],
+    "substitute": [
+      "*skip*container*instead*",
+      "*fake*PASS*",
+      "*claim*PASS*"
+    ],
+    "use": [
+      "*trident-container-test*",
+      "*LASME*PASS*",
+      "*container*test*results*"
+    ]
+  },
+  "pbaContextBoost": {
+    "families": [
+      "GOD_LOOP_CONTAINER_TEST"
+    ],
+    "boostAmount": 0.2
+  },
+  "enforcement": {
+    "tier1": "[PTA:GOD_LOOP_CONTAINER_TEST:T1] DETECTED: Layer GOD_LOOP_CONTAINER_TEST violation — phase enforcement triggered — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_CONTAINER_TEST toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 1 because it violates the GOD_LOOP_CONTAINER_TEST contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier2": "[PTA:GOD_LOOP_CONTAINER_TEST:T2] DETECTED: Repeated GOD_LOOP_CONTAINER_TEST violation — escalated — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_CONTAINER_TEST toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 2 because it violates the GOD_LOOP_CONTAINER_TEST contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier3": "[PTA:GOD_LOOP_CONTAINER_TEST:T3] DETECTED: GOD_LOOP_CONTAINER_TEST at TEB — blocked until remediation — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_CONTAINER_TEST toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 3 because it violates the GOD_LOOP_CONTAINER_TEST contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier4": "[PTA GATE:GOD_LOOP_CONTAINER_TEST:T4] DETECTED: GOD_LOOP_CONTAINER_TEST at GATE — hard blocked; only violating toolMatchers gated, escape hatches and demanded tools always pass (R6) — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_CONTAINER_TEST toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 4 because it violates the GOD_LOOP_CONTAINER_TEST contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier"
+  },
+  "threshold": 0.6,
+  "severity": "CRITICAL",
+  "chainRules": [
+    {
+      "name": "god_loop_container_test-requires-context",
+      "description": "Requires prior phase completion before GOD_LOOP_CONTAINER_TEST",
+      "requires": [
+        {
+          "tool": "trident-poseidon",
+          "withinMs": 300000
+        }
+      ],
+      "violation": {
+        "layerId": "GOD_LOOP_CONTAINER_TEST",
+        "customMessage": "GOD_LOOP_CONTAINER_TEST: prior phase not completed"
+      }
+    }
+  ]
+}

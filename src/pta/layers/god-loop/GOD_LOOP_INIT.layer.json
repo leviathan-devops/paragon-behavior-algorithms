@@ -1,0 +1,82 @@
+{
+  "id": "GOD_LOOP_INIT",
+  "description": "INIT phase — validates target directory, scans .ts files, computes snapshot hash, writes sessionStart. Blocks premature AUDIT/PLAN/DISPATCH without INIT. Phase gate: targetPath must be directory with >=1 .ts file. Stall guard not yet active. The 6-section warhead enforces correct init behavior.",
+  "toolMatchers": [
+    {
+      "toolName": "trident-poseidon",
+      "argPatterns": {
+        "command": [
+          "*AUDIT*",
+          "*DISPATCH*",
+          "*PLAN*"
+        ]
+      }
+    },
+    {
+      "toolName": "bash",
+      "argPatterns": {
+        "command": [
+          "*skip*init*",
+          "*bypass*init*",
+          "*fake*init*"
+        ]
+      }
+    },
+    {
+      "toolName": "trident-code-audit"
+    }
+  ],
+  "banks": {
+    "descriptive": [
+      "*init*phase*",
+      "*target*validation*",
+      "*snapshot*hash*",
+      "*scan*ts*files*"
+    ],
+    "suggestive": [
+      "*skip*init*",
+      "*bypass*scan*",
+      "*quick*init*"
+    ],
+    "substitute": [
+      "*skip*init*instead*",
+      "*fake*init*",
+      "*pretend*init*"
+    ],
+    "use": [
+      "*trident-poseidon*init*",
+      "*scan*ts*files*",
+      "*snapshot*hash*"
+    ]
+  },
+  "pbaContextBoost": {
+    "families": [
+      "GOD_LOOP_INIT"
+    ],
+    "boostAmount": 0.2
+  },
+  "enforcement": {
+    "tier1": "[PTA:GOD_LOOP_INIT:T1] DETECTED: Layer GOD_LOOP_INIT violation — phase enforcement triggered — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_INIT toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 1 because it violates the GOD_LOOP_INIT contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier2": "[PTA:GOD_LOOP_INIT:T2] DETECTED: Repeated GOD_LOOP_INIT violation — escalated — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_INIT toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 2 because it violates the GOD_LOOP_INIT contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier3": "[PTA:GOD_LOOP_INIT:T3] DETECTED: GOD_LOOP_INIT at TEB — blocked until remediation — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_INIT toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 3 because it violates the GOD_LOOP_INIT contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier4": "[PTA GATE:GOD_LOOP_INIT:T4] DETECTED: GOD_LOOP_INIT at GATE — hard blocked; only violating toolMatchers gated, escape hatches and demanded tools always pass (R6) — tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched GOD_LOOP_INIT toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 4 because it violates the GOD_LOOP_INIT contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier"
+  },
+  "threshold": 0.52,
+  "severity": "MEDIUM",
+  "chainRules": [
+    {
+      "name": "god_loop_init-requires-context",
+      "description": "Requires prior phase completion before GOD_LOOP_INIT",
+      "requires": [
+        {
+          "tool": "trident-poseidon",
+          "withinMs": 300000
+        }
+      ],
+      "violation": {
+        "layerId": "GOD_LOOP_INIT",
+        "customMessage": "GOD_LOOP_INIT: prior phase not completed"
+      }
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "id": "HASH_AS_PROOF",
+  "description": "Blocks hash-as-proof claims; a content hash proves identity, not runtime correctness \u2014 container test required.",
+  "toolMatchers": [
+    {
+      "toolName": "bash",
+      "argPatterns": {
+        "command": [
+          "*sha256*",
+          "*hash*",
+          "*checksum*"
+        ]
+      }
+    },
+    {
+      "toolName": "bash",
+      "argPatterns": {
+        "command": [
+          "*grep*hash*",
+          "*verify*hash*"
+        ]
+      }
+    }
+  ],
+  "banks": {
+    "descriptive": [
+      "*hash*proof*",
+      "*checksum*verify*",
+      "*hash*correctness*"
+    ],
+    "suggestive": [
+      "*hash*matches*",
+      "*checksum*ok*"
+    ],
+    "substitute": [
+      "*hash*instead*of*test*",
+      "*skip*container*hash*"
+    ],
+    "use": [
+      "*trident-container-test*",
+      "*runtime*proof*"
+    ]
+  },
+  "pbaContextBoost": {
+    "families": [
+      "HASH_PROOF_CLAIM"
+    ],
+    "boostAmount": 0.22
+  },
+  "enforcement": {
+    "tier1": "[PTA:HASH_AS_PROOF:T1] DETECTED: Hash-as-proof claim detected \u2014 hash is not runtime evidence \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched HASH_AS_PROOF toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 1 because it violates the HASH_AS_PROOF contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier2": "[PTA:HASH_AS_PROOF:T2] DETECTED: Repeated hash-as-proof without container evidence \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched HASH_AS_PROOF toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 2 because it violates the HASH_AS_PROOF contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier3": "[PTA:HASH_AS_PROOF:T3] DETECTED: Hash-as-proof at TEB \u2014 blocked until container test \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched HASH_AS_PROOF toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 3 because it violates the HASH_AS_PROOF contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier",
+    "tier4": "[PTA GATE:HASH_AS_PROOF:T4] DETECTED: Hash-as-proof at GATE \u2014 hard blocked; only violating toolMatchers gated, escape hatches and demanded tools always pass (R6) \u2014 tool={toolName} args={args} count={count} anchor={anchor} | WHY THIS FIRED: The tool call matched HASH_AS_PROOF toolMatchers and banks; chainViolations={chainViolations} pbaFamilies={pbaFamilies} pbaTier={pbaTier} escalation={escalationCount} | WHAT THIS MEANS: This action is blocked at tier 4 because it violates the HASH_AS_PROOF contract; bypass would produce false evidence | CORRECT BEHAVIOR: Use the demanded remediation tool {correctTool} or an escape-hatch tool (read/grep/glob) which always pass even at tier 4 (R6 NO LOCKOUTS) | SELF-CHECK: Verify your tool args against the layer's toolMatchers and banks; if legitimate, use an escape hatch or remediation path | RESET PATH: Run {correctTool} successfully (exit 0, output >20 chars) to trigger COMPLIANCE_VERIFIED and reset tier"
+  },
+  "threshold": 0.6,
+  "severity": "MEDIUM",
+  "chainRules": []
+}
