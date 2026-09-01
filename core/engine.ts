@@ -1,524 +1,313 @@
-// core/engine.ts — THE INTEGRATION SPINE
-//
-// Composes the full enforcement loop: the platform adapter's events flow
-// through the role gate → the capture planes → the classifier → the synapse →
-// the machine → the gates → the tier-proportional dispatch, with the
-// compliance observation closing the loop (the reset + the pool bridge).
-//
-// THE WIRING CONTRACT (spec §2.6):
-//   onToolAfter(remediation tool, success)
-//     → measureCompliance → a fresh verified test_result in the pool
-//     → COMPLIANCE_VERIFIED → MONITORING tier 0
-//   deadline passed without compliance
-//     → COMPLIANCE_FAILED → tier++ → the DEMAND redispatch (the climb is seen)
-//   tier ≥ 3 non-hatch tool call
-//     → StructuredEnforcementError (the DENY — the teeth)
-
-import { RoleGate, readPart } from './role-gate.js';
-import { scoreSignals, confidence, modulateWeight, batchScan,
-         ENFORCE_CONF_BAND } from './classifier.js';
-import { V2Synapse } from './synapse.js';
 import { step, createInitialRecord } from './machine.js';
-import type { MachineEvent } from './machine.js';
-import { GateEngine } from './gate-engine.js';
+import type { BehaviorRecord, ToolChainModule, ToolChainLayer, ToolIntent, ChainRule } from './types.js';
+import { V2Synapse } from './synapse.js';
+import { ChainTracker } from './chain-tracker.js';
+import { PbaBridgeImpl, correlateEscalation } from './pba-bridge.js';
 import { ComplianceCollector } from './collector.js';
-import { CircuitBreaker } from './circuit.js';
-import type { DomainModule, WeightedViolation, BehavioralState,
-                BehaviorRecord, EvidenceRecord, GateResult,
-                StructuredEnforcementError as SEE,
-                PbaSignalExport, PbaStateExport } from './types.js';
-import { StructuredEnforcementError } from './types.js';
-import { dispatchDirective, throwMandate, composeAdaptive,
-         shouldRedispatch, markDispatched } from '../actuation/dispatch.js';
-
-// ═══ THE SESSION STATE (per-sid — no cross-session bleed) ═══
-
-interface SessionState {
-  record: BehaviorRecord;
-  synapse: V2Synapse;
-  behavioral: BehavioralState;
-  pendingCalls: Array<{ tool: string; args: Record<string, unknown>; exitCode?: number }>;
-  lastSeq: number;
-  pendingRedispatch?: boolean;
-  lastPrimedFamily?: string;
-}
+import { classifyIntent } from './intent-classifier.js';
+import { fillTemplate, resolveWarhead } from '../actuation/warhead-templates.js';
+import { dispatchTea, blockAtTeb } from '../actuation/dispatch.js';
 
 const SESSION_CAP = 256;
 
-// ═══ THE ENGINE ═══
-
-export interface EngineHooks {
-  /** Receives every enforcement audit row (the observability surface). */
-  onEvent?: (row: { kind: string; detail: Record<string, unknown> }) => void;
-  /** The enforcement dial (FULL default per the operator doctrine; OFF = kill switch). */
-  level?: 'OFF' | 'STEER' | 'FULL';
+interface PtaSession {
+  record: BehaviorRecord;
+  synapse: V2Synapse;
+  seq: number;
 }
 
-export class ParagonEngine {
-  readonly roleGate = new RoleGate();
-  readonly gates = new GateEngine();
-  readonly circuit = new CircuitBreaker(3);
-  readonly collector: ComplianceCollector;
-  readonly level: 'OFF' | 'STEER' | 'FULL';
+export class ParagonToolEngine {
+  readonly pbaBridge = new PbaBridgeImpl();
+  readonly chainTracker = new ChainTracker();
+  readonly collector = new ComplianceCollector();
 
-  private readonly sessions = new Map<string, SessionState>();
-  private readonly hooks: EngineHooks;
+  private readonly sessions = new Map<string, PtaSession>();
   private seq = 0;
-  private readonly signalListeners: Array<(sig: PbaSignalExport) => void> = [];
-  private readonly stateListeners: Array<(st: PbaStateExport) => void> = [];
+  private readonly layers = new Map<string, ToolChainLayer>();
+  private readonly module: ToolChainModule;
 
-  constructor(readonly domain: DomainModule, hooks: EngineHooks = {}) {
-    this.level = hooks.level ?? 'FULL';
-    this.hooks = hooks;
-    this.collector = new ComplianceCollector(`paragon-${domain.name}`);
-    this.circuit.setEscapeHatches(domain.compliance.escapeHatches);
-    this.registerTierGates();
+  constructor(module: ToolChainModule) {
+    if (!module || typeof module.name !== 'string' || !module.name) throw new Error('ParagonToolEngine: module.name required');
+    if (!Array.isArray(module.layers)) throw new Error('ParagonToolEngine: module.layers must be array');
+    this.module = module;
+    for (const layer of module.layers) {
+      this.registerLayer(layer);
+    }
   }
 
-  // ══ THE TIER GATES (the fresh-subset criteria per tier) ══
-
-  private registerTierGates(): void {
-    const ttl = 300_000;
-    this.gates.registerGate({
-      gateId: 'steer', description: 'tier-1 dispatch gate',
-      minEvidenceCount: 1, requiredEvidenceTypes: ['audit_log'], ttlMs: ttl,
-    });
-    this.gates.registerGate({
-      gateId: 'demand', description: 'tier-2 dispatch gate',
-      minEvidenceCount: 2, requiredEvidenceTypes: ['audit_log'], ttlMs: ttl,
-    });
-    this.gates.registerGate({
-      gateId: 'deny', description: 'tier-3 dispatch gate',
-      minEvidenceCount: 2, requiredEvidenceTypes: ['audit_log', 'test_result'],
-      ttlMs: ttl, requireAllTypes: true,
-    });
+  registerLayer(layer: ToolChainLayer): void {
+    if (!layer || typeof layer.id !== 'string' || !layer.id) throw new Error('ParagonToolEngine.registerLayer: layer.id required');
+    if (this.layers.has(layer.id)) throw new Error(`ParagonToolEngine.registerLayer: duplicate layer id '${layer.id}'`);
+    this.layers.set(layer.id, layer);
+    if (layer.pbaContextBoost) {
+      this.pbaBridge.registerLayer({ layerId: layer.id, pbaContextBoost: layer.pbaContextBoost });
+    }
   }
 
-  // ══ SESSION RESOLUTION ══
+  getLayerCount(): number {
+    return this.layers.size;
+  }
 
-  private sessionFor(sessionID: string): SessionState {
-    const sid = sessionID && sessionID !== '' ? sessionID : 'default';
+  getLayers(): ToolChainLayer[] {
+    return [...this.layers.values()];
+  }
+
+  private sessionFor(sessionId: string): PtaSession {
+    const sid = sessionId && sessionId !== '' ? sessionId : 'default';
     let s = this.sessions.get(sid);
     if (!s) {
       if (this.sessions.size >= SESSION_CAP) {
         const oldest = this.sessions.keys().next().value;
         if (typeof oldest === 'string') this.sessions.delete(oldest);
       }
+      const thresholds: Record<string, number> = {};
+      for (const layer of this.layers.values()) {
+        thresholds[layer.id] = layer.threshold;
+      }
+      if (Object.keys(thresholds).length === 0) thresholds['default'] = 0.9;
       s = {
-        record: createInitialRecord(sid, this.level),
-        synapse: new V2Synapse({ fire: this.domain.thresholds, decayAlpha: 0.05, refractorySeq: 25 }),
-        behavioral: {
-          claims: 0, results: 0, claimedPaths: [], narrationTurns: 0,
-          toolCalls: 0, completionClaims: 0, verificationCalls: 0,
-          seq: 0, sessionID: sid,
-        },
-        pendingCalls: [],
-        lastSeq: 0,
+        record: createInitialRecord(),
+        synapse: new V2Synapse({ fire: thresholds, decayAlpha: 0.05, refractorySeq: 25 }),
+        seq: 0,
       };
       this.sessions.set(sid, s);
     }
     return s;
   }
 
-  getRecord(sessionID: string): BehaviorRecord {
-    return this.sessionFor(sessionID).record;
+  getRecord(sessionId: string): BehaviorRecord {
+    return this.sessionFor(sessionId).record;
   }
 
-  private emit(kind: string, detail: Record<string, unknown>): void {
-    if (this.hooks.onEvent) this.hooks.onEvent({ kind, detail });
+  getSynapse(sessionId: string): V2Synapse {
+    return this.sessionFor(sessionId).synapse;
   }
 
-  onSignal(cb: (sig: PbaSignalExport) => void): () => boolean {
-    this.signalListeners.push(cb);
-    return () => {
-      const idx = this.signalListeners.indexOf(cb);
-      if (idx === -1) return false;
-      this.signalListeners.splice(idx, 1);
-      return true;
-    };
-  }
-
-  onStateChange(cb: (st: PbaStateExport) => void): () => boolean {
-    this.stateListeners.push(cb);
-    return () => {
-      const idx = this.stateListeners.indexOf(cb);
-      if (idx === -1) return false;
-      this.stateListeners.splice(idx, 1);
-      return true;
-    };
-  }
-
-  private emitSignal(sig: PbaSignalExport): void {
-    for (const cb of [...this.signalListeners]) {
-      try { cb(sig); } catch (err) {
-        this.emit('bridge-signal-error', { error: String(err) });
-      }
-    }
-  }
-
-  private emitState(s: SessionState): void {
-    const payload: PbaStateExport = {
-      tier: s.record.tier,
-      escalationCount: s.record.escalationCount,
-      activeFamilies: Object.keys(s.record.counters),
-      lastWarheadBody: s.lastPrimedFamily ?? null,
-    };
-    for (const cb of [...this.stateListeners]) {
-      try { cb(payload); } catch (err) {
-        this.emit('bridge-state-error', { error: String(err) });
-      }
-    }
-  }
-
-  // ══ THE CAPTURE ENTRY (every platform text event) ══
-
-  /**
-   * Feed a text emission (reasoning or text-think) from an ASSISTANT part.
-   * The caller is responsible for role gating — or use handleEvent which
-   * routes through the built-in RoleGate.
-   */
-  observeText(text: string, sessionID: string, plane: 'reasoning' | 'text-think'): WeightedViolation[] {
-    if (text === '') return [];
-    this.seq++;
-    const s = this.sessionFor(sessionID);
-    const violations = this.classifyText(text, sessionID, plane);
-    const machineViolations = this.runBehavioralChecks(s);
-
-    const all = [...violations, ...machineViolations];
-    for (const v of all) {
-      this.emitSignal({ family: v.family, confidence: v.weight, excerpt: v.excerpt, seq: v.anchor.seq, sessionId: v.anchor.sessionID });
-    }
-    if (all.length > 0) {
-      this.onSignals(s, all);
-    }
-    this.tickEscalation(s);
-    return all;
-  }
-
-  /** Feed a raw platform event through the built-in role gate + planes. */
-  handleEvent(rawEvent: unknown): void {
-    const evt = (rawEvent as { type?: string; properties?: unknown });
-    if (!evt || typeof evt.type !== 'string') return;
-
-    this.roleGate.observe(evt as never);
-
-    if (evt.type === 'message.updated' || evt.type === 'message.created') return;
-
-    if (evt.type === 'message.part.updated' || evt.type === 'message.part.delta') {
-      if (!this.roleGate.shouldProcess(evt as never)) {
-        this.emit('role-gate-drop', { type: evt.type });
-        return;
-      }
-      const part = readPart(evt as never);
-      if (part && typeof part.text === 'string' && part.text !== '') {
-        const plane = part.type === 'reasoning' ? 'reasoning' as const : 'text-think' as const;
-        // the tagless path: text parts without think-tag shapes feed directly
-        this.observeText(part.text, part.sessionID ?? 'default', plane);
-      }
-    }
-  }
-
-  // ══ THE CLASSIFIER LADDER ══
-
-  private classifyText(text: string, sessionID: string,
-    plane: 'reasoning' | 'text-think'): WeightedViolation[] {
-    const out: WeightedViolation[] = [];
-
-    // The per-signal confidence ladder
-    for (const member of this.domain.families) {
-      const scored = scoreSignals(text, member);
-      const conf = confidence(scored.pos, scored.neg);
-      const modulated = modulateWeight(0.9, conf);
-      if (modulated > 0) {
-        out.push({
-          memberId: member.id, family: member.id.split('.')[0], plane,
-          excerpt: scored.evidence.slice(0, 200),
-          anchor: { seq: this.seq, ts: Date.now(), sessionID },
-          weight: modulated,
-        });
-      }
-    }
-
-    // The batch-wide FI-1 scan (the paraphrase synthesis)
-    const synth = batchScan(text, this.domain.families);
-    if (synth && !out.some((w) => w.memberId === synth.memberId)) {
-      out.push({
-        memberId: synth.memberId, family: synth.family, plane,
-        excerpt: synth.evidence.slice(0, 200),
-        anchor: { seq: this.seq, ts: Date.now(), sessionID },
-        weight: synth.weight,
-      });
-    }
-
-    // The behavioral feed (the domain checks' text input: claims + completion claims)
-    const s = this.sessionFor(sessionID);
-    if (/\b(done|complete|finished|verified|working)\b/i.test(text)) s.behavioral.completionClaims++;
-    if (/\bI (?:will|'ll|have) (?:built|written|created|fixed|deployed|shipped)\b/i.test(text)) s.behavioral.claims++;
-    s.behavioral.narrationTurns++;
-    s.behavioral.seq = this.seq;
-
-    return out;
-  }
-
-  // ══ THE BEHAVIORAL CHECKS (the text-independent detectors) ══
-
-  private runBehavioralChecks(s: SessionState): WeightedViolation[] {
-    const out: WeightedViolation[] = [];
-    for (const check of this.domain.behavioralChecks) {
-      const v = check({ ...s.behavioral });
-      if (v !== null) out.push(v);
-    }
-    return out;
-  }
-
-  // ══ THE SIGNALS → THE MACHINE (the accrual + the fusion) ══
-
-  private onSignals(s: SessionState, violations: WeightedViolation[]): void {
-    for (const v of violations) {
-      s.synapse.accumulate(v, this.seq);
-    }
-
-    // The synapse fire → PATTERN_HIT (the fusion primes the machine)
-    const fired = this.firstFiringFamily(s);
-    if (fired !== null) {
-      s.lastPrimedFamily = fired;
-      this.feed(s, 'PATTERN_HIT', { patternId: fired, family: fired });
-      return;
-    }
-
-    // The accrual events
-    if (s.record.state === 'IDLE') {
-      this.feed(s, 'FIRST_SIGNAL', { family: violations[0].family });
-    } else {
-      this.feed(s, 'SIGNAL', { family: violations[0].family });
-    }
-  }
-
-  private firstFiringFamily(s: SessionState): string | null {
-    // The synapse's ACTUAL neurons are the source of truth (the families the
-    // signals created), NOT the domain's threshold keys — the contract bug
-    // class where the member-id family prefix diverges from the threshold key.
-    for (const [family, snap] of Object.entries(s.synapse.snapshot())) {
-      const n = s.synapse.getNeuron(family);
-      if (!n) continue;
-      void snap;
-      if (n.canFire(this.seq)) {
-        n.fire(this.seq);
-        return family;
-      }
-    }
-    return null;
-  }
-
-  // ══ THE MACHINE FEED ══
-
-  private feed(s: SessionState, type: MachineEvent['type'],
-    payload: Record<string, unknown>): void {
-    const event: MachineEvent = {
-      type,
-      payload,
-      triad: {
-        pattern: { memberId: String(payload['family'] ?? payload['patternId'] ?? 'unknown') },
-        state: { from: s.record.state, to: s.record.state },
-        evidence: { file: 'engine', line: this.seq },
-        seq: this.seq,
-        observedAt: Date.now(),
-      },
-    };
-    const result = step(s.record, event);
-    if (result.kind === 'TRANSITIONED') {
-      s.record = result.record;
-      this.emit('machine-transition', {
-        event: type, from: event.triad.state.from,
-        to: s.record.state, tier: s.record.tier, seq: this.seq,
-      });
-      this.emitState(s);
-    } else if (result.kind === 'UNCHANGED' && result.reason) {
-      this.emit('machine-unchanged', { event: type, reason: result.reason });
-    }
-  }
-
-  // ══ THE ESCALATION TICK (the deadline clock) ══
-
-  private tickEscalation(s: SessionState): void {
-    if (s.record.state !== 'INTERVENING') return;
-    if (s.record.complianceDeadlineSeq === null) return;
-    if (this.seq >= s.record.complianceDeadlineSeq + 5) {
-      const tierBefore = s.record.tier;
-      this.feed(s, 'COMPLIANCE_FAILED', { deadline: s.record.complianceDeadlineSeq });
-      if (s.record.tier > tierBefore) {
-        this.emit('escalate-tick', { tier: s.record.tier, seq: this.seq });
-        // The redispatch: the model SEES the climb (the tier-proportional demand)
-        s.pendingRedispatch = true;
-      }
-    }
-  }
-
-  // ══ THE INTERVENTION SURFACES ══
-
-  /**
-   * Try to dispatch on a surface. Call from messages.transform (every turn)
-   * and tool.before (every call). Returns the appended text (or null).
-   */
-  tryIntervene(sessionID: string, surface: 'messages.transform' | 'tool-before',
-    attach: (text: string) => void): string | null {
-    const s = this.sessionFor(sessionID);
-
-    // The PRIMED → INTERVENING lift (tier 1) on an eligible surface
-    if (s.record.state === 'PRIMED') {
-      this.feed(s, 'INTERVENE', { surface, family: s.lastPrimedFamily ?? 'signals' });
-      // feed() reassigns s.record — read the state through the fresh reference
-      if ((s.record as { state: string }).state !== 'INTERVENING') return null;
-
-      // THE POOL-ORDER FIX: the offense IN the pool BEFORE the gate eval
-      void this.collector.recordOffense(
-        { family: s.lastPrimedFamily ?? 'signals', excerpt: 'intervene' }, this.seq);
-
-      // The dispatch: adaptive-primary, domain-fallback
-      const family = s.lastPrimedFamily ?? 'signals';
-      const anchor = `engine:${this.seq}`;
-      const adaptive = composeAdaptive(this.domain, family, s.record.tier, anchor, { family, excerpt: family } as unknown as never);
-      const directiveText = adaptive ?? (s.record.tier >= 2
-        ? this.domain.templates.demand(family, anchor)
-        : this.domain.templates.steer(family, anchor));
-      attach(directiveText);
-      markDispatched(sessionID, s.record.tier);
-      void this.collector.recordDispatch({ verb: 'STEER_INJECT', tier: s.record.tier }, this.seq);
-      this.emit('steer-appended', {
-        tier: s.record.tier, len: directiveText.length,
-        head: directiveText.slice(0, 60), seq: this.seq,
-      });
-      // The gate eval: observability-only, never blocks the delivery
-      void this.evaluateGate(s, s.record.tier);
-      return directiveText;
-    }
-
-    // The tier≥3 teeth (the DENY — dial-independent) — adaptive via family hint
-    if (s.record.tier >= 3 && surface === 'tool-before') {
-      const familyHint = s.lastPrimedFamily ?? this.domain.families[0]?.id.split('.')[0] ?? 'TEST_EVASION';
-      const err = throwMandate(this.domain, s.record.tier, familyHint, {
-        count: (s.record.counters as Record<string, number> | undefined)?.[familyHint] ?? 1,
-      });
-      attach(err.message);
-      this.emit('deny-throw', { tier: s.record.tier, seq: this.seq });
-      return err.message;
-    }
-
-    // The escalation redispatch (the DEMAND append on the climb) — adaptive-primary
-    if (s.pendingRedispatch && s.record.state === 'INTERVENING' && surface === 'messages.transform') {
-      s.pendingRedispatch = false;
-      const family = s.lastPrimedFamily ?? 'signals';
-      const anchor = `engine:${this.seq}`;
-      const adaptiveRe = composeAdaptive(this.domain, family, s.record.tier, anchor, { family, excerpt: family } as unknown as never);
-      const directiveText = adaptiveRe ?? this.domain.templates.demand(family, anchor);
-      attach(directiveText);
-      markDispatched(sessionID, s.record.tier);
-      void this.collector.recordDispatch({ verb: 'STEER_INJECT', tier: s.record.tier }, this.seq);
-      this.emit('steer-appended', {
-        tier: s.record.tier, len: directiveText.length,
-        head: directiveText.slice(0, 60), seq: this.seq, redispatch: true,
-      });
-      void this.evaluateGate(s, s.record.tier);
-      return directiveText;
-    }
-
-    return null;
-  }
-
-  /** The gate evaluation (observability — the verdict never blocks the dispatch). */
-  private async evaluateGate(s: SessionState, tier: number): Promise<void> {
-    const gateId = tier >= 3 ? 'deny' : tier >= 2 ? 'demand' : 'steer';
-    const result: GateResult = await this.gates.evaluate(gateId, this.collector.getRecords());
-    this.emit('gate-eval', {
-      gateId, verdict: result.verdict,
-      pool: this.collector.getRecords().length, tier,
-    });
-  }
-
-  // ══ THE COMPLIANCE OBSERVATION (tool.after — the loop closer) ══
-
-  /**
-   * Observe a completed tool call. A successful remediation-tool call
-   * closes the escalation window: COMPLIANCE_VERIFIED → tier 0 + the pool
-   * insert (the bridge) + the circuit recordSuccess.
-   */
-  observeTool(sessionID: string, toolName: string,
-    _args: Record<string, unknown>, exitCode?: number): void {
-    const s = this.sessionFor(sessionID);
-    s.behavioral.toolCalls++;
-    s.behavioral.verificationCalls = this.isRemediationTool(toolName)
-      ? s.behavioral.verificationCalls + 1 : s.behavioral.verificationCalls;
-    s.pendingCalls.push({ tool: toolName, args: _args, exitCode });
-
-    // The compliance detection: the REMEDIATION class only (anti-eager)
-    const isRemediation = this.isRemediationTool(toolName);
-    const succeeded = exitCode === undefined || exitCode === 0;
-
-    if (s.record.state === 'INTERVENING' && isRemediation && succeeded) {
-      // THE POOL BRIDGE: the comply-millisecond insert
-      void this.collector.measureCompliance(
-        { toolClass: toolName, toolPattern: this.remediationPattern() },
-        [{ tool: toolName, args: _args, exitCode }]);
-      this.feed(s, 'COMPLIANCE_VERIFIED', { tool: toolName });
-      this.circuit.recordSuccess();
-      this.emit('v2-comply', { tool: toolName, tier: s.record.tier, seq: this.seq });
-    }
-  }
-
-  private isRemediationTool(toolName: string): boolean {
+  private isEscapeHatch(toolName: string): boolean {
+    const hatches = this.module.compliance?.escapeHatches ?? [];
     const lower = toolName.toLowerCase();
-    for (const t of this.domain.compliance.remediationTools) {
-      if (lower.includes(t.toLowerCase()) || t.toLowerCase().includes(lower)) return true;
-    }
-    for (const p of this.domain.compliance.verificationPatterns) {
-      if (p.test(toolName)) return true;
-    }
-    return false;
+    return hatches.some((h) => lower.includes(h.toLowerCase()) || h.toLowerCase().includes(lower));
   }
 
-  private remediationPattern(): RegExp {
-    return new RegExp(
-      this.domain.compliance.remediationTools.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'),
-      'i');
+  private isDemandedTool(toolName: string): boolean {
+    const tools = this.module.compliance?.remediationTools ?? [];
+    const lower = toolName.toLowerCase();
+    return tools.some((t) => lower.includes(t.toLowerCase()) || t.toLowerCase().includes(lower));
   }
 
-  // ══ THE TOOL INTERCEPTION (tool.before — the teeth) ══
+  private getAllChainRules(): ChainRule[] {
+    const rules: ChainRule[] = [...(this.module.chainRules ?? [])];
+    for (const layer of this.layers.values()) {
+      if (layer.chainRules) {
+        for (const r of layer.chainRules) rules.push(r);
+      }
+    }
+    return rules;
+  }
 
-  /**
-   * Intercept a tool call before execution. Returns a StructuredEnforcementError
-   * to block, or null to allow. The escape hatch NEVER blocks (the anti-lock law).
-   */
-  interceptTool(sessionID: string, toolName: string,
-    args: Record<string, unknown>): SEE | null {
-    const s = this.sessionFor(sessionID);
+  onToolEvent(sessionId: string, event: { type: 'started' | 'completed' | 'before'; toolName: string; args?: Record<string, unknown>; exitCode?: number; output?: string }): ToolIntent | string | null {
+    if (!sessionId || typeof sessionId !== 'string') throw new Error('onToolEvent: sessionId required');
+    if (!event || typeof event.toolName !== 'string') throw new Error('onToolEvent: event.toolName required');
 
-    // The escape hatch: the instrument passes at every tier
-    const isHatch = this.domain.compliance.escapeHatches.some(
-      (h) => toolName.toLowerCase().includes(h.toLowerCase()));
-    if (isHatch) return null;
+    const s = this.sessionFor(sessionId);
+    this.seq++;
+    s.seq = this.seq;
 
-    // The circuit: when OPEN, only the hatches pass
-    if (!this.circuit.allowRequest(toolName)) {
-      const fh = s.lastPrimedFamily ?? this.domain.families[0]?.id.split('.')[0] ?? 'TEST_EVASION';
-      return throwMandate(this.domain, 4, fh);
+    if (event.type === 'started') {
+      try {
+        this.chainTracker.recordCall(sessionId, event.toolName, event.args ?? {});
+      } catch (e) {
+        console.error(`[ParagonToolEngine] recordCall failed: ${String(e)}`);
+      }
+      return null;
     }
 
-    // The tier≥3 DENY
-    if (s.record.tier >= 3) {
-      const fh2 = s.lastPrimedFamily ?? this.domain.families[0]?.id.split('.')[0] ?? 'TEST_EVASION';
-      const err = throwMandate(this.domain, s.record.tier, fh2);
-      this.circuit.recordFailure();
-      this.emit('tool-denied', { tool: toolName, tier: s.record.tier, seq: this.seq });
-      return err;
+    if (event.type === 'completed') {
+      try {
+        this.chainTracker.recordResult(sessionId, event.toolName, event.exitCode ?? 0, event.output ?? '');
+        this.collector.measureCompliance(event.toolName, event.args ?? {}, event.exitCode ?? 0, event.output ?? '');
+        if (s.record.state === 'INTERVENING' && this.isDemandedTool(event.toolName) && (event.exitCode ?? 0) === 0) {
+          const out = event.output ?? '';
+          const isGenuine = out.length > 50 || out.includes('artifact') || out.includes('PASS');
+          s.record = step(s.record, 'COMPLIANCE_VERIFIED', { isGenuine, instrument: event.toolName });
+        }
+      } catch (e) {
+        console.error(`[ParagonToolEngine] completed handling failed: ${String(e)}`);
+      }
+      return null;
     }
 
-    void args;
+    if (event.type === 'before') {
+      if (this.isEscapeHatch(event.toolName)) return null;
+      if (this.isDemandedTool(event.toolName)) return null;
+
+      if (s.record.state === 'INTERVENING' && s.record.tier >= 3) {
+        const lastDirective = s.record.directives[s.record.directives.length - 1];
+        const directiveLayerId = lastDirective?.patternOrMember ?? '';
+        const layer = this.layers.get(directiveLayerId) ?? [...this.layers.values()][0];
+        if (layer) {
+          const pbaFamilies = this.pbaBridge.getActiveFamilies(sessionId).join(', ') || 'none';
+          const pbaTier = this.pbaBridge.getMacroTier(sessionId);
+          if (s.record.tier >= 4) {
+            const body = fillTemplate(layer.enforcement.tier4, {
+              count: s.record.counters[layer.id] ?? 1,
+              toolName: event.toolName,
+              args: JSON.stringify(event.args ?? {}),
+              escalationCount: s.record.escalationCount,
+              pbaFamilies,
+              pbaTier,
+              anchor: `pta:${layer.id}:${Date.now()}`,
+            });
+            blockAtTeb(`[PTA GATE] ${body}`, layer.id);
+          } else {
+            const body = fillTemplate(layer.enforcement.tier3, {
+              count: s.record.counters[layer.id] ?? 1,
+              toolName: event.toolName,
+              args: JSON.stringify(event.args ?? {}),
+              chainViolations: 'none',
+              pbaFamilies,
+              pbaTier,
+              anchor: `pta:${layer.id}:${Date.now()}`,
+            });
+            blockAtTeb(body, layer.id);
+          }
+        }
+        return null;
+      }
+
+      const allLayers = [...this.layers.values()];
+      if (allLayers.length === 0) return null;
+
+      const chainViolations = this.chainTracker.evaluateRules(sessionId, event.toolName, event.args ?? {}, this.getAllChainRules());
+      const chainViolationIds = chainViolations.map((v) => v.layerId);
+
+      let intent: ToolIntent;
+      try {
+        intent = classifyIntent(
+          { toolName: event.toolName, args: event.args ?? {} },
+          { previousTools: this.chainTracker.recentTools(sessionId, 10).map((r) => r.tool), chainViolations: chainViolationIds },
+          { activeFamilies: this.pbaBridge.getActiveFamilies(sessionId), latestSignals: this.pbaBridge.getRecentSignals(sessionId, 10), macroTier: this.pbaBridge.getMacroTier(sessionId) },
+          allLayers.map((l) => ({
+            id: l.id,
+            threshold: l.threshold,
+            banks: l.banks,
+            toolMatchers: l.toolMatchers,
+            pbaContextBoost: l.pbaContextBoost,
+          })),
+        );
+      } catch (e) {
+        console.error(`[ParagonToolEngine] classifyIntent failed: ${String(e)}`);
+        throw e;
+      }
+
+      if (intent.action === 'ALLOW') {
+        if (s.record.state === 'IDLE') {
+          s.record = step(s.record, 'FIRST_TOOL_SIGNAL', { family: event.toolName });
+        } else {
+          s.record = step(s.record, 'TOOL_SIGNAL', { family: event.toolName });
+        }
+        return intent;
+      }
+
+      const weight = intent.confidence * 2;
+      const family = intent.layerId ?? event.toolName;
+      try {
+        s.synapse.accumulate({ familyId: family, weight, family }, this.seq);
+      } catch (e) {
+        console.error(`[ParagonToolEngine] synapse accumulate failed: ${String(e)}`);
+      }
+
+      let fired = false;
+      try {
+        const neuron = s.synapse.getNeuron(family);
+        if (neuron.canFire()) {
+          neuron.fire();
+          fired = true;
+        }
+      } catch (e) {
+        console.error(`[ParagonToolEngine] neuron fire check failed: ${String(e)}`);
+      }
+
+      if (fired) {
+        if (s.record.state === 'IDLE') {
+          s.record = step(s.record, 'FIRST_TOOL_SIGNAL', { family });
+        } else if (s.record.state === 'MONITORING') {
+          s.record = step(s.record, 'CHAIN_PATTERN_HIT', { patternId: family, memberId: family, family });
+          if (s.record.state === 'PRIMED') {
+            s.record = step(s.record, 'INTERVENE', { patternId: family, family });
+            const pbaTier = this.pbaBridge.getMacroTier(sessionId);
+            const correlated = correlateEscalation(s.record.tier, pbaTier);
+            if (correlated !== s.record.tier) {
+              s.record = { ...s.record, tier: correlated as BehaviorRecord['tier'] };
+            }
+          }
+        } else if (s.record.state === 'PRIMED') {
+          s.record = step(s.record, 'INTERVENE', { patternId: family, family });
+          const pbaTier = this.pbaBridge.getMacroTier(sessionId);
+          const correlated = correlateEscalation(s.record.tier, pbaTier);
+          if (correlated !== s.record.tier) {
+            s.record = { ...s.record, tier: correlated as BehaviorRecord['tier'] };
+          }
+        }
+      } else {
+        if (s.record.state === 'IDLE') {
+          s.record = step(s.record, 'FIRST_TOOL_SIGNAL', { family });
+        } else {
+          s.record = step(s.record, 'TOOL_SIGNAL', { family });
+        }
+      }
+
+      if (s.record.state === 'INTERVENING') {
+        const tier = s.record.tier;
+        const layer = intent.layerId ? this.layers.get(intent.layerId) ?? allLayers[0]! : allLayers[0]!;
+        if (!layer) return intent;
+
+        if (tier >= 3) {
+          const body = resolveWarhead(layer as unknown as import('./types.js').WarheadLayer, tier, {
+            count: s.record.counters[family] ?? 1,
+            toolName: event.toolName,
+            args: JSON.stringify(event.args ?? {}),
+            chainViolations: chainViolationIds.join(', ') || 'none',
+            pbaFamilies: this.pbaBridge.getActiveFamilies(sessionId).join(', ') || 'none',
+            pbaTier: this.pbaBridge.getMacroTier(sessionId),
+            escalationCount: s.record.escalationCount,
+            correctTool: this.module.compliance?.remediationTools[0] ?? 'trident-container-test',
+            anchor: `pta:${layer.id}:${Date.now()}`,
+          });
+          if (tier >= 4) {
+            blockAtTeb(`[PTA GATE] ${body}`, layer.id);
+          } else {
+            blockAtTeb(body, layer.id);
+          }
+        }
+
+        if (tier === 1 || tier === 2) {
+          const body = resolveWarhead(layer as unknown as import('./types.js').WarheadLayer, tier, {
+            count: s.record.counters[family] ?? 1,
+            toolName: event.toolName,
+            args: JSON.stringify(event.args ?? {}),
+            chainViolations: chainViolationIds.join(', ') || 'none',
+            pbaFamilies: this.pbaBridge.getActiveFamilies(sessionId).join(', ') || 'none',
+            pbaTier: this.pbaBridge.getMacroTier(sessionId),
+            escalationCount: s.record.escalationCount,
+            correctTool: this.module.compliance?.remediationTools[0] ?? 'trident-container-test',
+            anchor: `pta:${layer.id}:${Date.now()}`,
+          });
+          return dispatchTea(body, '');
+        }
+      }
+
+      return intent;
+    }
+
     return null;
   }
 
-  // ══ THE OBSERVABILITY ══
+  getSessionCount(): number {
+    return this.sessions.size;
+  }
 
-  getSeq(): number { return this.seq; }
-  getSessionCount(): number { return this.sessions.size; }
-  getPool(): EvidenceRecord[] { return this.collector.getRecords(); }
+  getSeq(): number {
+    return this.seq;
+  }
 }

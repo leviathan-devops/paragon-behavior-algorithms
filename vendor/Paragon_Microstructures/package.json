@@ -1,0 +1,16 @@
+{
+  "name": "paragon-microstructures",
+  "version": "1.0.0",
+  "description": "The 12 self-contained enforcement microstructures composing the Paragon engines (PBA + PTA). Each ms-* subdirectory is independently importable, independently testable, and has ZERO cross-MS dependencies.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "for d in ms-*/; do (cd \"$d\" && echo \"=== $d ===\" && bun test); done",
+    "test:all": "bun run test",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "@types/bun": "^1.1.0"
+  }
+}

@@ -1,245 +1,91 @@
-// core/types.ts — THE SHARED TYPE VOCABULARY (domain-agnostic, never edited)
-//
-// The complete type vocabulary for the Paragon V2 behavior enforcement stack.
-// Every module (core, capture, actuation, config, hooks) imports from here.
-
-// ═══ THE DIAL ═══
-export type DialLevel = 'OFF' | 'STEER' | 'FULL';
-
-// ═══ THE STATE ═══
 export type BehaviorState = 'IDLE' | 'MONITORING' | 'PRIMED' | 'INTERVENING';
 
-// ═══ THE PLANES (the capture discriminators) ═══
-export type CapturePlane = 'reasoning' | 'text-think' | 'tool-cadence';
+export type MachineEvent =
+  | 'TOOL_SIGNAL'
+  | 'FIRST_TOOL_SIGNAL'
+  | 'CHAIN_PATTERN_HIT'
+  | 'INTERVENE'
+  | 'COMPLIANCE_VERIFIED'
+  | 'COMPLIANCE_FAILED'
+  | 'SEQ_WINDOW';
 
-// ═══ THE VIOLATION FAMILIES (the detection categories) ═══
-// NOTE: in the pluggable architecture, families are defined per domain.
-// This type is the generic string — the domain module provides its own union.
-export type ViolationFamily = string;
-
-// ═══ THE ENFORCEMENT VERBS ═══
-export type EnforcementVerb = 'TOOL_PREPEND' | 'STEER_INJECT' | 'EVIDENCE_FEED' | 'ADVISORY';
-
-// ═══ THE FOUR-BANK PATTERN FAMILY (the classifier's input) ═══
-export interface FourBankFamily {
-  readonly descriptive: readonly RegExp[];   // neg += 1 per hit (context suppresses)
-  readonly suggestive: readonly RegExp[];    // pos += 1, +2 if word-bounded
-  readonly substitute?: readonly RegExp[];  // pos += 2 per hit (the paraphrase class)
-  readonly use?: readonly RegExp[];          // neg += 3 per hit (the legitimate exemptors)
-}
-
-// ═══ THE PATTERN FAMILY MEMBER (the domain module's unit of detection) ═══
-export interface PatternFamilyMember extends FourBankFamily {
-  readonly id: string;                        // e.g. 'TEST_EVASION.skip-verify'
-  readonly kind: 'detector' | 'classifier';
-  readonly group: string;                     // e.g. 'verb-frame', 'claim-signal'
-  readonly matcher: {
-    kind: 'sentence-frame' | 'frame-pattern';
-    positive: readonly string[];
-    negative: readonly string[];
-    markers?: Array<{ re: RegExp; weight: number }>;
-  };
-  readonly triggerCondition: string | null;
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  readonly messageTemplate: string;
-  readonly remediationHook?: string;
-  readonly exampleHits: ReadonlyArray<{
-    text: string;
-    shouldFlag: boolean;
-    because?: string;
-  }>;
-}
-
-// ═══ THE CLASSIFIER ═══
-export interface ClassifierInput {
-  readonly text: string;
-  readonly tool?: string;
-  readonly args?: Record<string, unknown>;
-  readonly sessionID?: string;
-}
-
-export interface ClassifierResult {
-  readonly intent: string;
-  readonly confidence: number;
-  readonly action: 'allow' | 'block' | 'warn' | 'chain';
-  readonly matchedFamilies: readonly string[];
-  readonly evidence: string;
-}
-
-// ═══ THE WEIGHTED VIOLATION (the classified signal) ═══
-export interface StreamSignal {
-  readonly memberId: string;
-  readonly plane: CapturePlane;
-  readonly excerpt: string;
-  readonly anchor: { readonly seq: number; readonly ts: number; readonly sessionID: string };
-  readonly weight: number;
-}
-
-export interface WeightedViolation extends StreamSignal {
-  readonly family: ViolationFamily;
-}
-
-// ═══ THE MACRO PATTERN (the fusion hit) ═══
-export interface MacroPatternHit {
-  readonly patternId: string;
-  readonly evidence: ReadonlyArray<WeightedViolation>;
-  readonly windowSeq: number;
-}
-
-// ═══ THE BEHAVIORAL STATE (the tracker's input) ═══
-export interface BehavioralState {
-  claims: number;
-  results: number;
-  claimedPaths: string[];
-  narrationTurns: number;
-  toolCalls: number;
-  completionClaims: number;
-  verificationCalls: number;
-  seq: number;
-  sessionID: string;
-}
-
-// ═══ THE BEHAVIORAL SIGNAL (a check's output) ═══
-export type BehavioralSignal = WeightedViolation;
-
-// ═══ THE MACHINE RECORD (the per-session state) ═══
 export interface BehaviorRecord {
-  sessionID: string;
-  level: DialLevel;
-  counters: Record<string, number>;
-  directives: Array<{ seq: number; verb: string; patternOrMember: string }>;
+  state: BehaviorState;
   tier: 0 | 1 | 2 | 3 | 4;
   denialCount: number;
   escalationCount: number;
   lastComplianceVerified: boolean | null;
   complianceDeadlineSeq: number | null;
   seq: number;
-  state: BehaviorState;
+  counters: Record<string, number>;
+  directives: Array<{ seq: number; verb: string; patternOrMember: string }>;
 }
 
-// ═══ THE EVIDENCE (the gate's input) ═══
-export type EvidenceType = 'audit_log' | 'test_result' | 'build_output' | 'deploy_confirm' | 'metric';
-
-export interface EvidenceRecord {
-  id: string;
-  gateId: string;
-  operationId: string;
-  type: EvidenceType;
-  data: Record<string, unknown>;
-  signature: string;
-  timestamp: number;
-  verified: boolean;
+export interface StepPayload {
+  patternId?: string;
+  memberId?: string;
+  family?: string;
+  advanced?: number;
+  isGenuine?: boolean;
+  instrument?: string;
+  [key: string]: unknown;
 }
 
-// ═══ THE GATE ═══
-export interface GateCriteria {
-  gateId: string;
-  description: string;
-  minEvidenceCount: number;
-  requiredEvidenceTypes: string[];
-  ttlMs: number;
-  requireAllTypes?: boolean;
-  verifySignatures?: boolean;
-}
-
-export interface GateResult {
-  gateId: string;
-  verdict: 'PASS' | 'INCONCLUSIVE' | 'FAIL' | 'ERROR';
-  evidenceEvaluated: number;
-  evidencePassed: number;
-  evidenceFailed: number;
-  criteriaResults: Array<{ criteria: string; passed: boolean; detail: string }>;
-  timestamp: number;
-  durationMs: number;
-}
-
-// ═══ THE COMPLIANCE ═══
-export interface ComplianceDemand {
-  toolClass: string;
-  toolPattern: RegExp;
-}
-
-export interface ObservedCall {
-  tool: string;
-  args: Record<string, unknown>;
-  exitCode?: number;
-}
-
-// ═══ THE ENFORCEMENT DIRECTIVE ═══
-export interface EnforcementDirective {
-  verb: EnforcementVerb;
-  trigger: MacroPatternHit | WeightedViolation;
-  level: DialLevel;
-  tier?: number;
-  triad: EvidenceTriad;
-}
-
-// ═══ THE EVIDENCE TRIAD (the LASME contract) ═══
-export interface EvidenceTriad {
-  pattern: { memberId: string; familySeverity: string };
-  state: { machineId: string; from: string; to: string };
-  evidence: { file: string; line: number };
-  seq: number;
-  observedAt: number;
-}
-
-// ═══ THE DISPATCH SURFACE ═══
-export interface DirectiveSurface {
-  kind: 'tool-before' | 'messages' | 'advisory' | 'none';
-  attach: (text: string) => void;
-}
-
-// ═══ THE DOMAIN MODULE (THE PLUG — the aggregate interface) ═══
-export interface DomainModule {
-  name: string;
-  brandPrefix: string;
-  instrumentName: string;
-  instrumentTier3: string;
-  families: readonly PatternFamilyMember[];
-  behavioralChecks: ((st: BehavioralState) => WeightedViolation | null)[];
-  templates: {
-    steer: (families: string, anchor: string) => string;
-    demand: (families: string, anchor: string) => string;
-    mandate: (tier: number) => string;
-    advisory: (patternId: string, summary: string) => string;
+export function createInitialRecord(overrides?: Partial<BehaviorRecord>): BehaviorRecord {
+  return {
+    state: 'IDLE',
+    tier: 0,
+    denialCount: 0,
+    escalationCount: 0,
+    lastComplianceVerified: null,
+    complianceDeadlineSeq: null,
+    seq: 0,
+    counters: {},
+    directives: [],
+    ...overrides,
   };
-  thresholds: Record<string, number>;
-  compliance: {
-    remediationTools: string[];
-    verificationPatterns: RegExp[];
-    escapeHatches: string[];
-  };
-  macroPatterns: MacroPatternDefinition[];
-  testFixtures: {
-    evasionText: string;
-    legitimateText: string;
-  };
-  lexicon?: Record<string, string>;
 }
 
-export interface MacroPatternDefinition {
-  id: string;
-  description: string;
-  families: string[];
-  window: number;
+export interface FourBankFamily {
+  id?: string;
+  descriptive: RegExp[];
+  suggestive: RegExp[];
+  substitute: RegExp[];
+  use: RegExp[];
 }
 
-// ═══ THE PLATFORM ADAPTER (the per-runtime interface) ═══
-export interface PlatformEvent {
-  type: string;
-  properties?: unknown;
+export interface ScoreResult {
+  pos: number;
+  neg: number;
+  evidence: string;
 }
 
-export interface PlatformAdapter {
-  normalizeEvent(rawEvent: unknown): PlatformEvent | null;
-  inject(text: string, context: unknown): void;
-  interceptTool(toolName: string, args: Record<string, unknown>): StructuredEnforcementError | null;
-  observeTool(toolName: string, args: Record<string, unknown>, result: unknown): void;
-  observeCompletion(text: string, sessionID: string): void;
+export type ConfidenceBand = 'ENFORCE' | 'DAMPEN' | 'SUPPRESS';
+
+export interface WeightedViolation {
+  familyId: string | number;
+  pos: number;
+  neg: number;
+  confidence: number;
+  weight: number;
+  evidence: string;
 }
 
-// ═══ THE PBA BRIDGE EXPORTS (PBA→PTA one-directional) ═══
-export interface PbaSignalExport {
+export interface V2Thresholds {
+  fire: Record<string, number>;
+  decayAlpha: number;
+  refractorySeq: number;
+}
+
+export interface NeuronSnapshot {
+  lambda: number;
+  primed: boolean;
+  lastAccumSeq: number;
+  lastFireSeq: number;
+  currentSeq: number;
+}
+
+export interface PbaSignal {
   family: string;
   confidence: number;
   excerpt: string;
@@ -247,32 +93,374 @@ export interface PbaSignalExport {
   sessionId: string;
 }
 
-export interface PbaStateExport {
+export interface PbaStateChange {
   tier: number;
   escalationCount: number;
   activeFamilies: string[];
   lastWarheadBody: string | null;
 }
 
-// ═══ THE STRUCTURED ENFORCEMENT ERROR ═══
+export interface PrearmTarget {
+  layerId: string;
+  boostAmount: number;
+}
+
+export interface LayerBoostConfig {
+  layerId: string;
+  pbaContextBoost?: {
+    families: string[];
+    boostAmount: number;
+  };
+}
+
+export interface PbaBridge {
+  onPbaSignal(signal: PbaSignal): void;
+  onPbaStateChange(state: PbaStateChange & { sessionId?: string }): void;
+  getRecentSignals(sessionId: string, limit: number): PbaSignal[];
+  getActiveFamilies(sessionId: string): string[];
+  getMacroTier(sessionId: string): number;
+}
+
+export type ViolationType = 'MISSING_PREREQUISITE' | 'FORBIDDEN_PRECEDENT' | 'LOOP_DETECTED' | 'SEQUENCE_REVERSED';
+
+export interface ChainRule {
+  name: string;
+  description: string;
+  requires?: Array<{
+    tool: string | RegExp;
+    args?: Record<string, string | RegExp>;
+    withinMs?: number;
+  }>;
+  forbids?: Array<{
+    tool: string | RegExp;
+    withinMs?: number;
+  }>;
+  violation: {
+    layerId: string;
+    customMessage?: string;
+  };
+}
+
+export interface ChainViolation {
+  ruleName: string;
+  violationType: ViolationType;
+  expectedTool: string;
+  actualContext: string;
+  layerId: string;
+}
+
+export interface CallRecord {
+  tool: string;
+  at: number;
+  args?: Record<string, unknown>;
+  exitCode?: number;
+  output?: string;
+}
+
+export type DeliverySurface = 'TEA' | 'TEB' | 'GATE';
+
+export interface WarheadContext {
+  count?: number;
+  toolName?: string;
+  args?: string;
+  chainViolations?: string;
+  pbaFamilies?: string;
+  pbaTier?: number;
+  escalationCount?: number;
+  correctTool?: string;
+  anchor?: string;
+}
+
+export interface WarheadLayer {
+  id: string;
+  enforcement: {
+    tier1: string;
+    tier2: string;
+    tier3: string;
+    tier4: string;
+  };
+}
+
+export interface PlatformAdapter {
+  inject(message: { type: string; content?: string; body?: string; text?: string; [key: string]: unknown }): void;
+}
+
 export class StructuredEnforcementError extends Error {
-  readonly machine: string;
+  readonly machine: 'pta' = 'pta';
   readonly detected: string;
   readonly correction: string;
-  readonly evidenceRequired: boolean;
-  readonly phase: 'A' | 'B';
-  readonly tier: number;
-
-  constructor(fields: {
-    machine: string; detected: string; correction: string;
-    evidenceRequired: boolean; phase: 'A' | 'B'; tier: number;
-  }) {
-    super(`[${fields.machine.toUpperCase()}] tier ${fields.tier}: ${fields.detected}. ${fields.correction}`);
-    this.machine = fields.machine;
-    this.detected = fields.detected;
-    this.correction = fields.correction;
-    this.evidenceRequired = fields.evidenceRequired;
-    this.phase = fields.phase;
-    this.tier = fields.tier;
+  readonly evidenceRequired: true = true;
+  readonly tier: 3 = 3;
+  constructor(opts: { detected: string; correction: string }) {
+    super(`[PTA ENFORCEMENT] ${opts.detected}`);
+    this.name = 'StructuredEnforcementError';
+    this.detected = opts.detected;
+    this.correction = opts.correction;
   }
+}
+
+export interface ToolEvidenceRecord {
+  type: 'tool_result';
+  tool: string;
+  args: Record<string, unknown>;
+  exitCode: number;
+  output: string;
+  timestamp: number;
+  signature: string;
+}
+
+export interface GateCriteria {
+  minEvidenceCount: boolean;
+  freshness: boolean;
+  requiredTypes: boolean;
+  allTypes: boolean;
+  signatureVerification: boolean;
+}
+
+export interface GateResult {
+  verdict: 'PASS' | 'INCONCLUSIVE' | 'FAIL';
+  criteria: GateCriteria;
+  poolSize: number;
+  totalFresh?: number;
+}
+
+export interface OffenseRecord {
+  layerId: string;
+  violation: unknown;
+  timestamp: number;
+}
+
+export interface DispatchRecord {
+  layerId: string;
+  tier: number;
+  surface: string;
+  timestamp: number;
+}
+
+export const POOL_TTL_MS = 600_000;
+export const GATE_TTL_MS = 300_000;
+
+export interface EnforcementEvent {
+  type: string;
+  sessionId?: string;
+  layerId?: string;
+  tier?: number;
+  timestamp: number;
+  [key: string]: unknown;
+}
+
+export interface PersistenceConfig {
+  stateDir: string;
+}
+
+export interface LayerJson {
+  id: string;
+  description?: string;
+  toolMatchers: Array<{
+    toolName: string;
+    argPatterns?: Record<string, string[]>;
+  }>;
+  banks: {
+    descriptive: string[];
+    suggestive: string[];
+    substitute: string[];
+    use: string[];
+  };
+  pbaContextBoost?: {
+    families: string[];
+    boostAmount: number;
+  };
+  enforcement: {
+    tier1: string;
+    tier2: string;
+    tier3: string;
+    tier4: string;
+  };
+  threshold: number;
+  severity: string;
+  chainRules?: Array<{
+    name: string;
+    description?: string;
+    requires?: Array<{ tool: string; withinMs?: number }>;
+    forbids?: Array<{ tool: string; withinMs?: number }>;
+    violation: { layerId: string; customMessage?: string };
+  }>;
+}
+
+export interface CompiledLayer {
+  id: string;
+  description: string;
+  toolMatchers: Array<{
+    toolName: string;
+    argPatterns?: Record<string, RegExp[]>;
+  }>;
+  banks: {
+    descriptive: RegExp[];
+    suggestive: RegExp[];
+    substitute: RegExp[];
+    use: RegExp[];
+  };
+  pbaContextBoost?: {
+    families: string[];
+    boostAmount: number;
+  };
+  enforcement: {
+    tier1: string;
+    tier2: string;
+    tier3: string;
+    tier4: string;
+  };
+  threshold: number;
+  severity: string;
+  chainRules: Array<{
+    name: string;
+    description: string;
+    requires?: Array<{ tool: string; withinMs?: number }>;
+    forbids?: Array<{ tool: string; withinMs?: number }>;
+    violation: { layerId: string; customMessage?: string };
+  }>;
+}
+
+export interface LayerRegistry {
+  layers: Map<string, CompiledLayer>;
+  chainRules: Array<{ name: string; layerId: string; [k: string]: unknown }>;
+  pbaBoosts: Array<{ layerId: string; families: string[]; boostAmount: number }>;
+}
+
+export class LoaderValidationFailedError extends Error {
+  readonly missingField: string;
+  constructor(missingField: string) {
+    super(`LOADER_VALIDATION_FAILED: missing field '${missingField}'`);
+    this.name = 'LoaderValidationFailedError';
+    this.missingField = missingField;
+  }
+}
+
+export interface IntentSources {
+  toolMatch: { toolName: string; matchedPattern: string | null; confidence: number };
+  chainContext: { previousTools: string[]; chainViolations: string[]; confidence: number };
+  pbaContext: { activeFamilies: string[]; latestSignals: PbaSignal[]; macroTier: number; confidence: number };
+}
+
+export interface ToolIntent {
+  action: 'ALLOW' | 'ADVISE' | 'BLOCK';
+  layerId: string | null;
+  confidence: number;
+  tier: number;
+  sources: IntentSources;
+}
+
+export interface LayerShape {
+  id: string;
+  threshold: number;
+  banks: {
+    descriptive: RegExp[];
+    suggestive: RegExp[];
+    substitute: RegExp[];
+    use: RegExp[];
+  };
+  toolMatchers: Array<{
+    toolName: string | RegExp;
+    argPatterns?: Record<string, (string | RegExp)[]>;
+  }>;
+  pbaContextBoost?: {
+    families: string[];
+    boostAmount: number;
+  };
+  enforcement?: {
+    tier1: string;
+    tier2: string;
+    tier3: string;
+    tier4: string;
+  };
+}
+
+export interface EscalationState {
+  escalationCount: number;
+  lastEscalationSeq: number;
+  deadlineWindow: number;
+  debounceWindow: number;
+  skipTierLevel: number;
+}
+
+export interface ToolChainLayer {
+  id: string;
+  description: string;
+  toolMatchers: {
+    toolName: string | RegExp;
+    argPatterns?: Record<string, (string | RegExp)[]>;
+  }[];
+  banks: {
+    descriptive: RegExp[];
+    suggestive: RegExp[];
+    substitute: RegExp[];
+    use: RegExp[];
+  };
+  pbaContextBoost?: {
+    families: string[];
+    boostAmount: number;
+  };
+  enforcement: {
+    tier1: string;
+    tier2: string;
+    tier3: string;
+    tier4: string;
+  };
+  threshold: number;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  chainRules?: ChainRule[];
+}
+
+export interface ToolChainModule {
+  name: string;
+  brandPrefix: string;
+  layers: ToolChainLayer[];
+  chainRules: ChainRule[];
+  compliance: {
+    escapeHatches: string[];
+    remediationTools: string[];
+    verificationPatterns: RegExp[];
+  };
+  pbaBridge: {
+    enabled: boolean;
+    signalFilter?: string[];
+    contextWindowSize?: number;
+    confidenceBoost?: number;
+  };
+}
+
+export interface PtaSessionState {
+  sessionId: string;
+  record: BehaviorRecord;
+  synapse: V2SynapseShape;
+  chainState: {
+    callHistory: CallRecord[];
+    activeViolations: ChainViolation[];
+  };
+  pbaSignals: PbaSignal[];
+  behavioral: {
+    toolCalls: number;
+    verificationCalls: number;
+    completionClaims: number;
+    lastClaimTimestamp: number | null;
+  };
+  lastDispatchedTier: Map<string, number>;
+}
+
+export interface V2SynapseShape {
+  accumulate(violation: { familyId?: string; weight: number; family?: string }, seq: number): void;
+  canAnyFire(): boolean;
+  getNeuron(family: string): FamilyNeuronShape;
+  snapshot(): Record<string, NeuronSnapshot>;
+  restore(snap: Record<string, NeuronSnapshot>): void;
+}
+
+export interface FamilyNeuronShape {
+  accumulate(weight: number, atSeq: number): void;
+  canFire(): boolean;
+  fire(): void;
+  value(): number;
+  boostBaseline(amount: number): void;
+  restore(snapshot: NeuronSnapshot): void;
+  snapshot(): NeuronSnapshot;
 }

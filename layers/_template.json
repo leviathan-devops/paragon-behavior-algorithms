@@ -1,0 +1,97 @@
+{
+  "_header": "PTA Layer Template — Paragon V3 Tool-Chain Algorithms v1.0.0",
+  "_usage": "Copy to layers/<name>.layer.json, fill every field, register via loadLayer + registerLayer",
+  "_source": "PTA_L2_SPEC.md 2.3 (ToolChainLayer) + 2.7 (layer system) + config/loader.ts",
+  "_seeAlso": "layers/_guide.md (30-min walkthrough), OPERATING_MANUAL.md (full guide), NEURAL_MAP_V3.md (12 MS)",
+  "_note": "All fields below have _doc companion entries explaining type, constraints, and examples",
+
+  "id": "EXAMPLE_LAYER",
+  "_id_type": "string, REQUIRED, SCREAMING_SNAKE, unique",
+  "_id_examples": "SMOKE_TEST_GUARD, CONFIG_LOCK, WAVE_DISPATCH, HASH_AS_PROOF",
+  "_id_usedIn": "synapse per-family lambda, persistence pta-state-<sid>.json, ledger pta-ledger.jsonl, anchor pta:<id>:<timestamp>",
+  "description": "Template layer — copy and fill in your enforcement behavior",
+  "toolMatchers": [
+    {
+      "toolName": "bash",
+      "_toolName_type": "string | RegExp, REQUIRED — exact ('bash','write','task') or regex (/trident-.*/)",
+      "_toolName_note": "Matched against toolCall.toolName. Layer only scores calls matching at least one entry.",
+
+      "argPatterns": {
+        "command": ["node -e*", "bun -e*"]
+      },
+      "_argPatterns_type": "Record<string, string[]>, OPTIONAL — key=arg name, value=glob patterns",
+      "_argPatterns_compilation": "Glob compiled via config/loader.ts: 'node -e*' -> /^node -e.*$/i",
+      "_argPatterns_matching": "OR-matched within each arg. If absent: watches ALL calls to the matched tool",
+      "_argPatterns_examples": "write to config: { filePath: ['*config*','*.env*'] }, task all: no argPatterns"
+    }
+  ],
+  "_toolMatchers_type": "array, REQUIRED — at least one entry { toolName, argPatterns? }. OR-matched (any match triggers scoring)",
+  "_toolMatchers_examples": "SMOKE_TEST_GUARD: bash with inline-exec, CONFIG_LOCK: write+edit to *config*, WAVE_DISPATCH: task (no filter)",
+  "banks": {
+    "descriptive": ["for the container test"],
+    "_descriptive_type": "RegExp[], REQUIRED — legitimate context, weight neg+1 (suppresses)",
+    "_descriptive_note": "if match: neg+=1. Examples: for the container test, as pre-flight check, per the tool result",
+
+    "suggestive": ["just quickly check"],
+    "_suggestive_type": "RegExp[], REQUIRED — violation pattern, weight pos+1 (+2 word-bound)",
+    "_suggestive_note": "if match: pos+=(hasWordBoundary?2:1). Examples: just quickly check, smoke test, quick test",
+
+    "substitute": ["instead of the container"],
+    "_substitute_type": "RegExp[], REQUIRED — theatrical alternative, weight pos+2 (strong)",
+    "_substitute_note": "if match: pos+=2. Examples: instead of the container, good enough for now",
+
+    "use": ["trident-container-test"],
+    "_use_type": "RegExp[], REQUIRED — sanctioned usage, weight neg+3 SHORT-CIRCUIT (stops all)",
+    "_use_note": "if any match: return {pos:0, neg, evidence} immediately. Always SUPPRESSES. MOST COMMON MISTAKE: forgetting use -> false positives. Always populate with sanctioned tool."
+  },
+  "_banks_type": "object, REQUIRED — 4 opposed banks, same shape as PBA PatternFamilyMember",
+  "_banks_formula": "confidence = pos/(pos+neg+1). ENFORCE >= 0.5, DAMPEN >= 0.3, SUPPRESS < 0.3",
+  "_banks_textBlob": "Scored against textBlob = toolName + JSON(args) + PBA excerpt (if bridge). String patterns compiled via loader: glob->RegExp, substring->RegExp",
+  "_banks_fi1": "FI-1: every family scores full batch, pos>0 + conf>=0.5 + pos>neg -> synthesize weight=conf x 2",
+  "pbaContextBoost": {
+    "families": ["TEST_EVASION"],
+    "_families_type": "string[], REQUIRED within pbaContextBoost — PBA family names that boost this layer",
+    "_families_values": "TEST_EVASION, FORGERY_INTENT, THEATRICAL_PLANNING, SCOPE_SHRINK, DOUBT_HEDGE, PERMISSION_GATE",
+    "_families_examples": "SMOKE_TEST_GUARD: [TEST_EVASION,FORGERY_INTENT], CONFIG_LOCK: [PERMISSION_GATE,SCOPE_SHRINK], WAVE_DISPATCH: [PERMISSION_GATE,SCOPE_SHRINK]",
+
+    "boostAmount": 0.2,
+    "_boostAmount_type": "number, REQUIRED — per active family, default 0.2, capped at 1.0 in fusion",
+    "_boostAmount_formula": "totalConfidence = (toolConf x 0.5) + (chainConf x 0.3) + (pbaConf x 0.2). Pre-arming: boostBaseline(0.2) lambda 0->0.2, ~3 calls -> ~2 calls"
+  },
+  "_pbaContextBoost_type": "object, OPTIONAL — PBA amplification. If absent: standalone (lower accuracy for ambiguous calls)",
+  "_pbaContextBoost_bridge": "Bridge one-directional PBA->PTA (R5). Standalone when pbaBridge.enabled=false. Mechanism 2 pre-arming + Mechanism 3 escalation correlation.",
+  "enforcement": {
+    "tier1": "DETECTED: Tool call matched EXAMPLE_LAYER. WHY THIS FIRED: Tool match + chain {chainViolations} + PBA {pbaFamilies} tier {pbaTier} WHAT THIS MEANS: Pattern matches. CORRECT BEHAVIOR: Call {correctTool}. SELF-CHECK: Am I calling {correctTool}? RESET PATH: Call {correctTool} to clear. ({anchor})",
+    "tier2": "DETECTED: Repeated violations {count} for EXAMPLE_LAYER. WHY THIS FIRED: Repeated despite corrections. WHAT THIS MEANS: Escalated — next tier refuses. CORRECT BEHAVIOR: Call {correctTool}. SELF-CHECK: Have I addressed corrections? RESET PATH: Call {correctTool}. ({anchor})",
+    "tier3": "DETECTED: REFUSED — EXAMPLE_LAYER tier 3. WHY THIS FIRED: Repeated violations through tier 2. WHAT THIS MEANS: Tool call refused. CORRECT BEHAVIOR: Call {correctTool} — only reset path. SELF-CHECK: Calling {correctTool} next? RESET PATH: Call {correctTool}. ({anchor})",
+    "tier4": "[PTA GATE] BEHAVIORAL CORRECTION — EXAMPLE_LAYER cycles {escalationCount} PBA {pbaFamilies} tier {pbaTier}. DETECTED: Sustained pattern. WHY THIS FIRED: Tier 3 not followed by compliance. WHAT THIS MEANS: Behavioral catalyst. CORRECT BEHAVIOR: Call {correctTool}. SELF-CHECK: Do I understand the demand? RESET PATH: {correctTool} transits. ({anchor})"
+  },
+  "threshold": 0.9,
+  "_threshold_type": "number, REQUIRED — fire threshold 0.0-1.0, compared against totalConfidence after fusion",
+  "_threshold_bands": ">= threshold: ENFORCE (fire surface), >= threshold x 0.6: DAMPEN (accumulate in synapse), < threshold x 0.6: SUPPRESS",
+  "_threshold_typical": "0.9 for most layers, 0.8 for high-signal (WAVE_DISPATCH dispatch is almost always wrong). Per-layer, NOT global.",
+  "_threshold_tuning": "If never fires: too high or banks too narrow. If fires on noise: too low or banks too broad.",
+
+  "severity": "HIGH",
+  "_severity_type": "string, REQUIRED — LOW | MEDIUM | HIGH | CRITICAL",
+  "_severity_usage": "Conflict resolution: highest confidence wins -> highest severity -> first registered (deterministic AP-4)",
+  "_severity_examples": "SMOKE_TEST_GUARD: HIGH, CONFIG_LOCK: CRITICAL (unrecoverable), WAVE_DISPATCH: HIGH",
+  "chainRules": [
+    {
+      "name": "example-requires-prerequisite",
+      "_name_type": "string, REQUIRED — unique rule name, e.g. verification-requires-container-test",
+      "description": "Prerequisite tool must have been called",
+      "_description_type": "string, REQUIRED — human-readable rule description",
+      "requires": [{ "tool": "trident-container-test" }],
+      "_requires_type": "array, OPTIONAL — ALL must be satisfied (AND). Each: { tool: string|RegExp, args?, withinMs? }",
+      "_requires_withinMs": "Time window in ms (default: session-start = never expires). Avoid short windows (AP-5). Checked via ChainTracker.wasCalled.",
+      "violation": { "layerId": "EXAMPLE_LAYER" },
+      "_violation_type": "object, REQUIRED — layerId: which layer fires. Maps to ChainViolation { ruleName, MISSING_PREREQUISITE, expectedTool, layerId }"
+    }
+  ],
+  "_chainRules_type": "array, OPTIONAL — layer-local chain rules via ChainTracker.evaluateRules(). Also global chainRules in ToolChainModule",
+  "_chainRules_forbids": "Also supports forbids: { forbids: [{ tool: 'forbidden-tool', withinMs: 5000 }] } -> FORBIDDEN_PRECEDENT if called. History cap 100 calls/session ring buffer.",
+  "_chainRules_types": "Violation types: MISSING_PREREQUISITE, FORBIDDEN_PRECEDENT, LOOP_DETECTED (same tool x3+), SEQUENCE_REVERSED",
+  "_creation_process": "30-min: 0-5min describe behavior, 5-20min fill this JSON, 20-30min register via loadLayer + registerLayer. See layers/_guide.md for 3 real examples.",
+  "_validation": "config/loader.ts validates: throws LOADER_VALIDATION_FAILED if id/toolMatchers/banks/enforcement missing. String patterns compiled to RegExp."
+}

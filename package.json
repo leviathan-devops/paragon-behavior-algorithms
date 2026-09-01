@@ -1,7 +1,7 @@
 {
-  "name": "paragon-v2-behavior-algorithms",
+  "name": "paragon-v3-tool-chain-algorithms",
   "version": "1.0.0",
-  "description": "The universal behavior enforcement boilerplate — plug in any domain's detection families, behavioral checks, templates, and compliance demands.",
+  "description": "Paragon V3 Tool-Chain Algorithms (PTA) — the sibling enforcement machinery for tool execution + model action policing. Vendors the 12 enforcement microstructures into a standalone boilerplate.",
   "type": "module",
   "main": "index.ts",
   "types": "index.ts",
@@ -15,9 +15,11 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "bun test"
+    "test": "bun test",
+    "build": "bun build index.ts --outdir dist --target bun --format esm"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "typescript": "^5.5.0",
+    "@types/bun": "^1.1.0"
   }
 }
