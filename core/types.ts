@@ -238,6 +238,22 @@ export interface PlatformAdapter {
   observeCompletion(text: string, sessionID: string): void;
 }
 
+// ═══ THE PBA BRIDGE EXPORTS (PBA→PTA one-directional) ═══
+export interface PbaSignalExport {
+  family: string;
+  confidence: number;
+  excerpt: string;
+  seq: number;
+  sessionId: string;
+}
+
+export interface PbaStateExport {
+  tier: number;
+  escalationCount: number;
+  activeFamilies: string[];
+  lastWarheadBody: string | null;
+}
+
 // ═══ THE STRUCTURED ENFORCEMENT ERROR ═══
 export class StructuredEnforcementError extends Error {
   readonly machine: string;

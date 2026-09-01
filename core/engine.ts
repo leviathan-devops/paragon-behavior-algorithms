@@ -24,8 +24,9 @@ import { GateEngine } from './gate-engine.js';
 import { ComplianceCollector } from './collector.js';
 import { CircuitBreaker } from './circuit.js';
 import type { DomainModule, WeightedViolation, BehavioralState,
-               BehaviorRecord, EvidenceRecord, GateResult,
-               StructuredEnforcementError as SEE } from './types.js';
+                BehaviorRecord, EvidenceRecord, GateResult,
+                StructuredEnforcementError as SEE,
+                PbaSignalExport, PbaStateExport } from './types.js';
 import { StructuredEnforcementError } from './types.js';
 import { dispatchDirective, throwMandate, composeAdaptive,
          shouldRedispatch, markDispatched } from '../actuation/dispatch.js';
@@ -63,6 +64,8 @@ export class ParagonEngine {
   private readonly sessions = new Map<string, SessionState>();
   private readonly hooks: EngineHooks;
   private seq = 0;
+  private readonly signalListeners: Array<(sig: PbaSignalExport) => void> = [];
+  private readonly stateListeners: Array<(st: PbaStateExport) => void> = [];
 
   constructor(readonly domain: DomainModule, hooks: EngineHooks = {}) {
     this.level = hooks.level ?? 'FULL';
@@ -125,6 +128,48 @@ export class ParagonEngine {
     if (this.hooks.onEvent) this.hooks.onEvent({ kind, detail });
   }
 
+  onSignal(cb: (sig: PbaSignalExport) => void): () => boolean {
+    this.signalListeners.push(cb);
+    return () => {
+      const idx = this.signalListeners.indexOf(cb);
+      if (idx === -1) return false;
+      this.signalListeners.splice(idx, 1);
+      return true;
+    };
+  }
+
+  onStateChange(cb: (st: PbaStateExport) => void): () => boolean {
+    this.stateListeners.push(cb);
+    return () => {
+      const idx = this.stateListeners.indexOf(cb);
+      if (idx === -1) return false;
+      this.stateListeners.splice(idx, 1);
+      return true;
+    };
+  }
+
+  private emitSignal(sig: PbaSignalExport): void {
+    for (const cb of [...this.signalListeners]) {
+      try { cb(sig); } catch (err) {
+        this.emit('bridge-signal-error', { error: String(err) });
+      }
+    }
+  }
+
+  private emitState(s: SessionState): void {
+    const payload: PbaStateExport = {
+      tier: s.record.tier,
+      escalationCount: s.record.escalationCount,
+      activeFamilies: Object.keys(s.record.counters),
+      lastWarheadBody: s.lastPrimedFamily ?? null,
+    };
+    for (const cb of [...this.stateListeners]) {
+      try { cb(payload); } catch (err) {
+        this.emit('bridge-state-error', { error: String(err) });
+      }
+    }
+  }
+
   // ══ THE CAPTURE ENTRY (every platform text event) ══
 
   /**
@@ -140,6 +185,9 @@ export class ParagonEngine {
     const machineViolations = this.runBehavioralChecks(s);
 
     const all = [...violations, ...machineViolations];
+    for (const v of all) {
+      this.emitSignal({ family: v.family, confidence: v.weight, excerpt: v.excerpt, seq: v.anchor.seq, sessionId: v.anchor.sessionID });
+    }
     if (all.length > 0) {
       this.onSignals(s, all);
     }
@@ -284,6 +332,7 @@ export class ParagonEngine {
         event: type, from: event.triad.state.from,
         to: s.record.state, tier: s.record.tier, seq: this.seq,
       });
+      this.emitState(s);
     } else if (result.kind === 'UNCHANGED' && result.reason) {
       this.emit('machine-unchanged', { event: type, reason: result.reason });
     }
